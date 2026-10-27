@@ -193,3 +193,24 @@ List<String> numberDuplicates(List<String> names) {
   }
   return out;
 }
+
+/// /tempo result: beats of the rhythm stems and what they say about the tempo.
+class TempoInfo {
+  TempoInfo(this.raw);
+  final Map<String, dynamic> raw;
+
+  double get bpm => (raw['bpm'] as num).toDouble(); // steady: the grid's BPM; else the average
+  int get bpmRounded => raw['bpm_rounded'] as int;
+  double get bpmMin => (raw['bpm_min'] as num).toDouble(); // slowest / fastest bar
+  double get bpmMax => (raw['bpm_max'] as num).toDouble();
+  bool get steady => raw['steady'] as bool;
+  String get suggestedMode => raw['suggested_mode'] as String; // constant | variable
+  int? get signatureBeats => raw['signature_beats'] as int?;
+  int get beatCount => raw['beat_count'] as int;
+  double get gridErrorMs => (raw['grid_error_ms'] as num).toDouble();
+  String get sourceKind => raw['source_kind'] as String; // drums | rhythm | all
+  List<String> get sources => [for (final s in raw['sources'] as List) s as String];
+  double get duration => (raw['duration'] as num).toDouble();
+  List<double> get beats => [for (final b in raw['beats'] as List) (b as num).toDouble()];
+  List<double> get downbeats => [for (final b in raw['downbeats'] as List) (b as num).toDouble()];
+}

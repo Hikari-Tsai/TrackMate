@@ -22,6 +22,17 @@
     "scoring.json": {"size": 232, "sha256": "6d3a7617073583a347f4f55933dc63d009538e401c96672d3632eb369751727c"},
     "LICENSE": {"size": 11357, "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"}
    }
+  },
+  "beat_this": {
+   "layer": "T",
+   "repo": "aaatmy/beat-this-onnx",
+   "revision": "e2c0d4376fac8141905a8312c1b327849751d59c",
+   "onnx": "beat-this-final0.onnx",
+   "files": {
+    "beat-this-final0.onnx": {"size": 82098846, "sha256": "e5e37b7d1802895e42559c5a1ced7619b1601d257a5c8e167c9d45de37c1b078"},
+    "frontend.json": {"size": 298186, "sha256": "7b2ba71db92b79cb33f45feb21854161de329b86a7e6ea686c3fec51ce85eb9f"},
+    "LICENSE": {"size": 1113, "sha256": "909ab6549794a18e9bb243aacfadda4a5f308436fc2846f350755c53c4f06ae1"}
+   }
   }
  }
 }

@@ -5,9 +5,10 @@ App 原始碼在 [`app/`](../../app)：介面用 Flutter，拖放和選檔視窗
 ## 自動化測試
 | 測試 | 數量 | 內容 |
 |---|---|---|
-| [`test/app_test.dart`](../../app/test/app_test.dart) | 15 | 兩階段辨識（先文字、後音訊）、Top-5 改選並送回 `/feedback`、手動輸入名稱、搜尋全部樂器、保留原名、大類與顏色連動、百分比顯示、Pro Tools 後綴的保留開關、重複名稱流水號、預覽與套用送出的內容、4 張截圖 |
+| [`test/app_test.dart`](../../app/test/app_test.dart) | 18 | 兩階段辨識（先文字、後音訊）、Top-5 改選並送回 `/feedback`、手動輸入名稱、搜尋全部樂器、保留原名、大類與顏色連動、百分比顯示、Pro Tools 後綴的保留開關、重複名稱流水號、預覽與套用送出的內容、BPM 偵測與速度匯入（固定／速度圖、半速／倍速、取消時的提醒、和 Preview & apply 一起匯入）、5 張截圖 |
 | [`test/errors_test.dart`](../../app/test/errors_test.dart) | 10 | Pro Tools 沒開、沒有 session、沒有回應、套用中斷、檔案遺失、沒有音檔、引擎停止、引擎無法啟動，以及「Try again」的連續流程 |
 | [`integration_test/real_flow_test.dart`](../../app/integration_test/real_flow_test.dart) | 1 | 真實的 macOS App、真實的引擎子程序、真實的 Pro Tools |
+| [`integration_test/real_tempo_test.dart`](../../app/integration_test/real_tempo_test.dart) | 1 | 同上，偵測 85 BPM 分軌的速度、從速度設定匯入，再和分軌一起用 Preview & apply 匯入速度圖，兩次都讀回 Pro Tools 確認（[速度偵測報告](tempo-detection.md)） |
 
 **假引擎的資料：** widget 測試使用假的引擎（[`test/fake_engine.dart`](../../app/test/fake_engine.dart)），資料來自真實引擎的輸出（[`test/fixtures/`](../../app/test/fixtures)），可以模擬各種故障。
 

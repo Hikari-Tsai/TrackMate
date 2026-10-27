@@ -1,4 +1,5 @@
-"""Wires the pieces together: knowledge base, model downloads, lazily loaded C/D layers."""
+"""Wires the pieces together: knowledge base, model downloads, lazily loaded C/D layers and
+the beat tracker."""
 from __future__ import annotations
 
 import threading
@@ -9,6 +10,7 @@ from .embed import EmbeddingIndex, TextEmbedder
 from .kb import KnowledgeBase
 from .models import ModelManager
 from .pipeline import Analyzer
+from .tempo import BeatTracker
 
 
 class Engine:
@@ -19,6 +21,7 @@ class Engine:
         self._lock = threading.Lock()
         self._index: EmbeddingIndex | None = None
         self._audio: AudioClassifier | None = None
+        self._tempo: BeatTracker | None = None
 
     def _load_index(self) -> EmbeddingIndex | None:
         name = "qwen3_embedding"
@@ -36,6 +39,13 @@ class Engine:
                                           settings=self.config.audio)
         return self._audio
 
+    def beat_tracker(self) -> BeatTracker | None:
+        name = "beat_this"
+        with self._lock:
+            if self._tempo is None and self.models.is_ready(name):
+                self._tempo = BeatTracker(self.models.onnx_path(name), self.models.model_dir(name) / "frontend.json")
+            return self._tempo
+
     def analyzer(self) -> Analyzer:
         """Uses whatever layers are available now; C and D join once their models are ready."""
         with self._lock:
@@ -43,7 +53,8 @@ class Engine:
 
     def layers(self) -> dict:
         return {"A": True, "B": True, "C": self._index is not None or self.models.is_ready("qwen3_embedding"),
-                "D": self._audio is not None or self.models.is_ready("peav_audio")}
+                "D": self._audio is not None or self.models.is_ready("peav_audio"),
+                "T": self._tempo is not None or self.models.is_ready("beat_this")}
 
     def add_feedback(self, name: str, instrument: str) -> str:
         key = self.kb.add_user_alias(name, instrument)

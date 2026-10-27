@@ -82,7 +82,7 @@ def test_full_engine_with_models(stems, tmp_path):
     os.environ.pop("STEM_ENGINE_HOME", None)
     cfg = EngineConfig(home=DEV_HOME)
     engine = Engine(cfg)
-    assert engine.layers() == {"A": True, "B": True, "C": True, "D": True}
+    assert engine.layers() == {"A": True, "B": True, "C": True, "D": True, "T": True}
     res = {r["original_name"]: r for r in engine.analyzer().analyze(list(stems.values()), audio="auto")}
     assert res["Kick In_03"]["layers"]["audio"] is None             # settled by text, no audio run
     assert res["Audio 7"]["layers"]["audio"] is not None            # DAW default -> audio layer

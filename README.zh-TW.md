@@ -17,12 +17,13 @@
 
 TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名五花八門、充滿錯字和縮寫，還有本來是單聲道、卻被輸出成立體聲的軌道。
 
-它會自動辨識每一軌是什麼樂器，給出標準名稱、大類和顏色，並判斷要不要還原成 mono；經你確認後，一鍵匯入 Pro Tools，依大類建資料夾、匯入、改名、上色。
+它會自動辨識每一軌是什麼樂器，給出標準名稱、大類和顏色，並判斷要不要還原成 mono，也會從鼓組分軌找出歌曲的速度（BPM）；經你確認後，一鍵匯入 Pro Tools，依大類建資料夾、匯入、改名、上色，並設定速度。
 
 辨識結合規則與 AI 模型：
 - **規則：** 常用軌名字典和拼字校正。
 - **讀名稱：** 用支援多語言的文字嵌入模型 Qwen3-Embedding-0.6B，理解沒看過的軌名。
 - **聽聲音：** 用 Meta 預訓練的音訊–文字模型 PE-AV（與 CLAP 同類，只取音訊端並轉成 ONNX），判斷名稱看不出來的軌。
+- **抓拍子：** 用節拍偵測模型 Beat This!（CPJKU，ISMIR 2024，轉成 ONNX），從鼓組和打擊樂分軌找出每一拍和每小節的第一拍。
 
 在真實軌名的測試中，Top-1 準確率為 96.6%，正確答案出現在前 5 名的比例為 98.9%。
 
@@ -33,6 +34,7 @@ TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名�
 - **四層辨識：** 已知軌名字典 → 拼字校正 → AI 讀名稱 → 聽聲音。中、英、日文名稱都能辨識；名稱看不出來的軌（例如 `Audio 3`），會改用音訊判斷。
 - **有疑問的地方交給你決定：** 每一軌顯示 Top-1 和信心程度；下拉選單列出 Top-5，也可以自己打名稱、搜尋全部樂器、保留原名，或改大類和顏色。
 - **立體聲分析：** 偵測假立體聲、單邊立體聲、極性反相和延遲，需要時自動轉成 mono。
+- **BPM 偵測：** 右上角直接顯示 BPM。可以選固定速度（平均值四捨五入）或逐小節跟著變的速度圖（tempo map），TrackMate 匯入 Pro Tools 後會確認 session 的速度確實改變；速度也會存成 MIDI 檔。
 - **Pro Tools 整合：** 透過 PTSL 操作。名稱自動避開重複，套用後逐軌驗證名稱、資料夾和顏色。
 - **完全在本機執行：** 模型第一次啟動時下載，之後不需要網路。
 
@@ -62,7 +64,7 @@ TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名�
 | macOS | macOS 14（Sonoma）以上，Apple Silicon 和 Intel 都支援（同一個通用版 App） |
 | Windows | Windows 10/11 x64（目前只在 CI 上建置，還沒在實機上驗證，見[已知限制](#已知限制)） |
 | Pro Tools | 支援 PTSL 的版本（2023.3 以上）；測試環境是 Pro Tools 26.4.1。上色需要支援 `SetTrackColor` 的 PTSL |
-| 磁碟空間 | macOS App 約 340 MB（內含兩種 CPU 的引擎），Windows 約 150 MB；第一次啟動會再下載約 1.35 GB 的模型 |
+| 磁碟空間 | macOS App 約 340 MB（內含兩種 CPU 的引擎），Windows 約 150 MB；第一次啟動會再下載約 1.43 GB 的模型 |
 
 ### 安裝
 1. 用上方的按鈕下載最新版本，或到 [Releases](https://github.com/Hikari-Tsai/TrackMate/releases) 選擇版本：
@@ -95,6 +97,14 @@ TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名�
    - 你從 Top-5 改選的樂器會被記住，下次遇到同樣的名稱會直接辨識正確。
 5. **Keep unrecognised words（預設關閉）：** 關閉時，無法辨識的字和 Pro Tools 的後綴（例如 `_04-01`、`-TCEx_01`）會被刪掉；打開後保留。名稱重複時會自動加上流水號，例如 `Lead Vocal 1`、`Lead Vocal 2`。
 6. **按「Preview & apply」：** 先預覽會建立哪些資料夾、每軌的最終名稱和是否轉 mono，確認後才寫入 Pro Tools。完成後，每一軌會顯示驗證結果。
+7. **速度（可選）：** 按右上角的 **Detect BPM**。TrackMate 會聽鼓組和打擊樂分軌（沒有的話改聽貝斯、吉他、鍵盤和合成器），馬上顯示 BPM，接著打開速度設定：
+   - **Import as（匯入方式）：** *Constant tempo* 是整個 session 用同一個 BPM：取平均值四捨五入，可以用 − 和 + 調整。*Tempo map (variable)* 是每小節一個速度，讓每條小節線都對準分軌裡聽到的第一拍。TrackMate 會建議其中一種：每一拍都落在同一條直線網格的 30 ms 內時，建議固定速度。
+   - **Beat（拍子）：** 如果歌曲被聽成半速或倍速，選 *½× half time* 或 *2× double time*。
+   - **Import to Pro Tools：** Pro Tools 會跳出 *MIDI Import Options* 對話框，保持勾選 *Import tempo map from MIDI File* 後按 **OK**。TrackMate 接著讀回 session，確認新的速度；如果速度沒有改變（例如按了取消），也會告訴你。
+   - **Save MIDI：** 把速度檔（`TrackMate Tempo 85 BPM.mid` 或 `TrackMate Tempo Map (avg 85 BPM).mid`）存到分軌旁邊，可以給其他 DAW 使用。
+   - 勾選 *Also import the tempo with Preview & apply*（預設勾選）時，第 6 步會在匯入分軌之後設定速度。新增或移除分軌後，偵測結果會清除，需要重新偵測。
+
+![速度設定](docs/images/tempo_dialog.png)
 
 ![Category 選單](docs/images/category_menu.png)
 
@@ -111,6 +121,8 @@ TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名�
 | 檔案被移走 | Files not found（列出檔案） | 辨識時會自動移除這幾軌 |
 | 拖進來的東西沒有音檔 | No audio files found | — |
 | 引擎停止 | The TrackMate engine stopped | *Restart engine*（清單會保留） |
+| 分軌裡聽不到拍子（靜音、沒有節奏分軌） | No steady beat found | 加入鼓組或節奏分軌，或在 Pro Tools 自己設定速度 |
+| 速度模型還在下載 | The tempo model is still downloading | 等標題列的下載完成 |
 
 ## 演算法邏輯
 <sub>[English](README.md#how-it-works)</sub>
@@ -178,23 +190,35 @@ TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名�
 
 PTSL 目前沒有建立 bus 的指令，所以不自動設定輸出路由，詳見[整合報告](docs/reports/pro-tools-integration.md)。
 
+### 6. 速度（`/tempo`）
+程式：[`engine/stem_engine/tempo.py`](engine/stem_engine/tempo.py)
+
+1. **來源：** 鼓組和打擊樂分軌；沒有的話用貝斯、吉他、鍵盤和合成器；都沒有就用全部分軌。混成 22.05 kHz 的 mono，保留原本的音量（Beat This! 的頻譜和音量有關，把小聲的混音拉到滿刻度會多出假的拍子）。
+2. **拍子：** Beat This! `final0`（ONNX）以每秒 50 格預測拍子和小節第一拍，每次處理 30 秒、前後重疊，前處理和峰值挑選與原版相同；再用拋物線把每個峰值定位到格與格之間，拍子間隔不會被四捨五入到 20 ms。
+3. **整理：** 以拍子間隔的中位數為準，離前一拍不到 0.7 個間隔的拍子會去掉（被聽成倍速的段落），分軌停下來的地方補回缺少的拍子。
+4. **固定或變速：** 對所有拍子擬合一條直線。每一拍都在直線的 30 ms 內就是穩定的速度，BPM 取直線的斜率；否則顯示平均值（總時間 ÷ 拍子間隔數）。
+5. **MIDI：** 只含速度的 MIDI 檔（每個四分音符 480 tick）：一個速度，或在偵測到的小節第一拍之間每小節一個速度（找不到小節時每 4 拍一段）；第一拍之前沿用第一小節的速度，另外寫入拍號。
+6. **Pro Tools：** PTSL 沒有設定速度的指令，但匯入 MIDI 檔時 Pro Tools 會跳出 *MIDI Import Options*，其中的 *Import tempo map from MIDI File* 會取代 session 的速度。按 OK 或取消，PTSL 都回報成功，所以 TrackMate 會讀取最後一拍位置的 Bars|Beats（暫時把時間軸選取移過去再移回來），和自己的速度圖比對。
+
+真實的 85 BPM 分軌結果是 85.00 BPM；把同一組鼓分段加速後，速度圖得到 76.5、85.0、93.6、102.0 BPM（實際為 76.5、85、93.5、102）。詳見[速度偵測報告](docs/reports/tempo-detection.md)。
+
 ## 系統架構
 <sub>[English](README.md#architecture)</sub>
 
 ```
 ┌─────────────── TrackMate（Flutter：macOS / Windows） ───────────────┐
 │ 拖放與選檔（Swift / C++）                                           │
-│ 分軌清單、Top-5、顏色、預覽、提醒                                   │
+│ 分軌清單、Top-5、顏色、BPM、預覽、提醒                              │
 └───────────────┬─────────────────────────────────────────────────────┘
                 │ HTTP，只綁 127.0.0.1，每次啟動產生新 token
 ┌───────────────▼──────────── 本機引擎（Python，PyInstaller 打包） ───┐
 │ 名稱前處理 → A/B/C/D 四層 → 合併                                    │
 │ 立體聲分析、模型下載與校驗、別名學習                                │
-│ onnxruntime：Qwen3-Embedding、PE-AV 音訊編碼器                      │
+│ onnxruntime：Qwen3-Embedding、PE-AV 音訊編碼器、Beat This!          │
 └───────────────┬─────────────────────────────────────────────────────┘
                 │ gRPC（PTSL，localhost:31416）
 ┌───────────────▼─────────────────────────────────────────────────────┐
-│ Pro Tools：讀 session、建資料夾、匯入、改名、上色                   │
+│ Pro Tools：讀 session、建資料夾、匯入、改名、上色、設定速度         │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -214,7 +238,7 @@ PTSL 目前沒有建立 bus 的指令，所以不自動設定輸出路由，詳�
 # 引擎
 cd engine
 uv sync --group dev
-uv run pytest -q                       # 80 個測試（需要模型的整合測試會自動跳過）
+uv run pytest -q                       # 93 個測試（需要模型的整合測試會自動跳過）
 uv run stem-engine                     # 啟動，第一行輸出 {"port", "token"}，並開始下載模型
 
 # 立體聲分析
@@ -262,6 +286,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 | [立體聲／單聲道判斷](docs/reports/stereo-analysis.md) | 14 種合成情境（Pan、單邊、極性反相、延遲、殘響…）全部判斷正確 |
 | [本機引擎評測](docs/reports/engine-evaluation.md) | 真實軌名 Top-1 96.6%、Top-5 98.9%；自動改名精確度 97.0%，非樂器名稱 0 誤改 |
 | [Pro Tools 整合測試](docs/reports/pro-tools-integration.md) | 10 軌匯入、改名、上色 8.2 秒，全部通過驗證 |
+| [速度偵測](docs/reports/tempo-detection.md) | 拍子和 PyTorch 原版相同；85 BPM 分軌測得 85.00；速度圖誤差在 0.15 BPM 內；匯入後確認 Pro Tools 的速度 |
 | [桌面 App 測試](docs/reports/app-testing.md) | 真實 App ＋ 引擎 ＋ Pro Tools 端到端 35–38 秒 |
 
 ## CI/CD
@@ -285,6 +310,7 @@ git push origin v0.1.0
 - **macOS 版：** 目前是 ad-hoc 簽章，沒有經過 Apple 公證。Intel 版引擎使用 onnxruntime 1.23.2（最後一個提供 Intel macOS 版本的 release），評測結果和 Apple Silicon 版相同，但目前只在 Rosetta 2 下測過，還沒在真的 Intel Mac 上測試。
 - **門檻：** 目前的門檻是用小型測試集定出的起始值，還需要用真實 session 再校準。
 - **字典：** 沒收錄的中日文寫法，主要靠擴充字典和你的修正來學習。
+- **速度：** 拍子一律當成四分音符，所以聽成半速或倍速的歌要選 ½× 或 2×；同一首歌裡超過約 30% 的速度變化不會跟著變；x/4 以外的拍號會寫成 x/4。速度圖從偵測到的第一拍開始，不是從小節線開始。每次匯入都需要在 Pro Tools 按一次 *MIDI Import Options* 的 *OK*。
 - **音訊辨識：** 只判斷大類，而且只用獨奏片段驗證過。CPU 處理每 10 秒片段約 2.8 秒，所以只對名稱看不出來的軌執行。
 
 ## 致謝
@@ -297,6 +323,7 @@ TrackMate 使用了下列開源軟體、模型、資料集和字型，感謝各�
 |---|---|---|---|
 | [Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B) | Qwen 團隊（Alibaba） | Apache-2.0 | C 層 AI 讀名稱（ONNX 版：[aaatmy/Qwen3-Embedding-0.6B-ONNX](https://huggingface.co/aaatmy/Qwen3-Embedding-0.6B-ONNX)） |
 | [PE-AV small](https://huggingface.co/facebook/pe-av-small)（Perception Encoder Audio-Visual） | Meta FAIR | Apache-2.0 | D 層聽聲音（ONNX 版：[aaatmy/pe-av-small-audio-ONNX](https://huggingface.co/aaatmy/pe-av-small-audio-ONNX)） |
+| [Beat This!](https://github.com/CPJKU/beat_this)（`final0`） | Foscarin、Schlüter、Widmer（JKU Linz） | MIT | 速度：拍子與小節第一拍（ONNX 版：[aaatmy/beat-this-onnx](https://huggingface.co/aaatmy/beat-this-onnx)） |
 | [multilingual-e5-small](https://huggingface.co/intfloat/multilingual-e5-small) | Microsoft | MIT | 研究比較 |
 | [bge-m3](https://huggingface.co/BAAI/bge-m3) | BAAI | MIT | 研究比較 |
 | [larger_clap_general](https://huggingface.co/laion/larger_clap_general) | LAION | Apache-2.0 | 研究比較 |
@@ -349,6 +376,12 @@ TrackMate 使用了下列開源軟體、模型、資料集和字型，感謝各�
   eprint = {2512.19687},
   archivePrefix = {arXiv}
 }
+@inproceedings{foscarin2024beatthis,
+  title     = {Beat this! Accurate beat tracking without {DBN} postprocessing},
+  author    = {Foscarin, Francesco and Schl{\"u}ter, Jan and Widmer, Gerhard},
+  booktitle = {Proceedings of the 25th International Society for Music Information Retrieval Conference (ISMIR)},
+  year      = {2024}
+}
 @inproceedings{wu2023clap,
   title     = {Large-scale Contrastive Language-Audio Pretraining with Feature Fusion and Keyword-to-Caption Augmentation},
   author    = {Wu, Yusong and Chen, Ke and Zhang, Tianyu and Hui, Yuchen and Berg-Kirkpatrick, Taylor and Dubnov, Shlomo},
@@ -388,4 +421,4 @@ Pro Tools、AudioSuite 和 Avid 是 Avid Technology, Inc. 的商標；TrackMate 
 <sub>[English](README.md#license)</sub>
 TrackMate 的原始碼、文件和命名字典以 [MIT 授權](LICENSE)釋出。
 
-預訓練模型**不**適用 MIT 授權：Qwen3-Embedding-0.6B 和 PE-AV small 採用 Apache License 2.0，TrackMate 下載模型時會一併下載它們的授權檔；由 PE-AV 產生的檔案（`peav_prototypes.npz`、`prototypes.npz`）也採用同一授權。第三方模型、資料集、字型和函式庫的授權，以及對模型做的修改，列在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+預訓練模型**不**適用 MIT 授權：Qwen3-Embedding-0.6B 和 PE-AV small 採用 Apache License 2.0，Beat This! 採用它自己的 MIT 授權（© JKU Linz），TrackMate 下載模型時會一併下載它們的授權檔；由 PE-AV 產生的檔案（`peav_prototypes.npz`、`prototypes.npz`）也採用同一授權。第三方模型、資料集、字型和函式庫的授權，以及對模型做的修改，列在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

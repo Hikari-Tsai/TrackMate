@@ -25,16 +25,20 @@ class FakeEngine implements EngineApi {
   int sessionCalls = 0;
   final feedbacks = <(String, String)>[];
   final applied = <(List<Map<String, dynamic>>, bool)>[];
+  final tempoRequests = <List<Map<String, dynamic>>>[];
+  final tempoApplied = <Map<String, dynamic>>[];
+  bool tempoAccepted = true; // false: the user cancelled Pro Tools' MIDI Import Options
   final Map<String, dynamic> _analysis;
 
   List<String> get files => _analysis.keys.toList();
 
   @override
   Future<Map<String, dynamic>> models() async => {
-        'layers': {'A': true, 'B': true, 'C': true, 'D': true},
+        'layers': {'A': true, 'B': true, 'C': true, 'D': true, 'T': true},
         'models': {
           'qwen3_embedding': {'state': 'ready', 'progress': 1.0},
           'peav_audio': {'state': 'ready', 'progress': 1.0},
+          'beat_this': {'state': 'ready', 'progress': 1.0},
         },
       };
 
@@ -108,6 +112,26 @@ class FakeEngine implements EngineApi {
           {'file': t['file'], 'final_name': t['name'], 'pt_name': t['name'], 'folder': 'ALL',
            'name_ok': true, 'folder_ok': true, 'color_ok': true, 'errors': []},
       ],
+    };
+  }
+
+  /// Real /tempo output (85 BPM, steady) with the sources renamed to the fake's drum stems.
+  @override
+  Future<Map<String, dynamic>> tempo(List<Map<String, dynamic>> tracks) async {
+    tempoRequests.add(tracks);
+    return fixture('tempo.json');
+  }
+
+  @override
+  Future<Map<String, dynamic>> applyTempo(Map<String, dynamic> request) async {
+    tempoApplied.add(request);
+    final constant = request['mode'] == 'constant';
+    final name = constant ? 'TrackMate Tempo ${request['bpm']} BPM.mid' : 'TrackMate Tempo Map (avg 85 BPM).mid';
+    final toPt = request['import_to_pro_tools'] == true;
+    return {
+      'midi_path': '${request['folder']}/$name', 'mode': request['mode'], 'bpm': constant ? request['bpm'] : 85.0,
+      'beats_per_bar': 4, 'tempo_events': constant ? 1 : 88, 'imported': toPt, 'applied': toPt && tempoAccepted,
+      if (toPt) 'pro_tools_position': tempoAccepted ? '   91| 1| 027' : '   73| 2| 400',
     };
   }
 }

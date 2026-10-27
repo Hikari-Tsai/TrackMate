@@ -2,7 +2,8 @@
 
 Usage: python packaging/smoke_test.py dist/stem-engine/stem-engine[.exe]
 Starts it with --no-download in a temporary home, waits for engine.json, then calls
-/health, /instruments and /categories with the token.
+/health, /instruments and /categories with the token, and writes a tempo MIDI through
+/tempo/apply (without Pro Tools).
 """
 from __future__ import annotations
 
@@ -44,7 +45,16 @@ def main() -> int:
             inst = get("/instruments")["instruments"]
             cats = get("/categories")["categories"]
             assert len(inst) > 150 and "drums" in cats, (len(inst), list(cats))
-            print(f"engine OK: {len(inst)} instruments, {len(cats)} categories, port {info['port']}")
+            beats = [0.5 + i * 0.5 for i in range(40)]
+            body = json.dumps({"beats": beats, "downbeats": beats[::4], "duration": 21, "mode": "variable",
+                               "folder": str(pathlib.Path(home) / "tempo"), "import_to_pro_tools": False}).encode()
+            req = urllib.request.Request(base + "/tempo/apply", data=body, method="POST",
+                                         headers={**headers, "Content-Type": "application/json"})
+            tempo = json.load(urllib.request.urlopen(req, timeout=30))
+            midi = pathlib.Path(tempo["midi_path"]).read_bytes()
+            assert tempo["bpm"] == 120 and midi[:4] == b"MThd", tempo
+            print(f"engine OK: {len(inst)} instruments, {len(cats)} categories, tempo MIDI {len(midi)} bytes, "
+                  f"port {info['port']}")
         finally:
             proc.kill()
     return 0

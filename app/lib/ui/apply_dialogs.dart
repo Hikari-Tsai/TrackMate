@@ -39,6 +39,7 @@ Future<void> previewAndApply(BuildContext context, AppState state) async {
   final catalog = state.catalog!;
   final muted = Theme.of(context).colorScheme.onSurfaceVariant;
   final newFolders = folders.where((f) => f['exists'] != true).length;
+  final withTempo = state.tempo != null && state.tempoWithApply;
   final ok = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -50,6 +51,13 @@ Future<void> previewAndApply(BuildContext context, AppState state) async {
           Text('Creates $newFolders folder${newFolders == 1 ? '' : 's'} and imports ${state.tracks.length} '
               'track${state.tracks.length == 1 ? '' : 's'} (converted to the session rate, '
               '${session['sample_rate']} Hz).'),
+          if (withTempo) ...[
+            const SizedBox(height: 8),
+            Text(
+                'Then sets the tempo: ${state.tempoMode == 'constant' ? '${state.tempoLabel}, constant' : 'tempo map, ${state.tempoLabel}'}. '
+                'Pro Tools asks in "MIDI Import Options": keep "Import tempo map from MIDI File" ticked and press OK.',
+                key: const ValueKey('apply-tempo-line')),
+          ],
           const SizedBox(height: 12),
           for (final f in folders) ...[
             Row(children: [
@@ -93,6 +101,19 @@ Future<void> previewAndApply(BuildContext context, AppState state) async {
     }
     return;
   }
+  // The tempo comes after the tracks: the tracks are in the session even if this fails.
+  String tempoText = '';
+  if (withTempo && context.mounted) {
+    try {
+      final t = await state.applyTempo();
+      tempoText = t['applied'] == true
+          ? '\n\nTempo set: ${state.tempoLabel}.'
+          : '\n\nThe tempo was not changed: the MIDI Import Options dialog was cancelled or '
+              '"Import tempo map from MIDI File" was unticked. Use the BPM button to import it again.';
+    } catch (e) {
+      tempoText = '\n\nThe tempo was not imported: ${AppAlert.fromError(e).title}.';
+    }
+  }
   if (!context.mounted) return;
   final results = res['results'] as List;
   final failed = results.where((r) =>
@@ -101,10 +122,11 @@ Future<void> previewAndApply(BuildContext context, AppState state) async {
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(res['ok'] == true ? 'Done' : 'Done, with problems'),
-      content: Text(res['ok'] == true
-          ? '${results.length} tracks imported and verified (name, folder, colour) in ${res['seconds']} s.'
-          : '${failed.length} tracks did not pass verification:\n'
-              '${failed.map((r) => '${r['final_name']}: ${r['errors']}').join('\n')}'),
+      content: Text((res['ok'] == true
+              ? '${results.length} tracks imported and verified (name, folder, colour) in ${res['seconds']} s.'
+              : '${failed.length} tracks did not pass verification:\n'
+                  '${failed.map((r) => '${r['final_name']}: ${r['errors']}').join('\n')}') +
+          tempoText),
       actions: [FilledButton(key: const ValueKey('close-result'), onPressed: () => Navigator.pop(ctx), child: const Text('OK'))],
     ),
   );

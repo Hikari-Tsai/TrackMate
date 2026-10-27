@@ -154,6 +154,7 @@ class AppState extends ChangeNotifier {
     }
     final rows = [for (final f in files) TrackRow(f)..originalName = baseName(f)];
     tracks.addAll(rows);
+    _forgetTempo();
     await _analyse(rows);
   }
 
@@ -308,12 +309,14 @@ class AppState extends ChangeNotifier {
 
   void remove(TrackRow row) {
     tracks.remove(row);
+    _forgetTempo();
     notifyListeners();
   }
 
   void clear() {
     tracks.clear();
     message = null;
+    _forgetTempo();
     notifyListeners();
   }
 
@@ -348,6 +351,108 @@ class AppState extends ChangeNotifier {
       rethrow;
     } finally {
       busy = false;
+      notifyListeners();
+    }
+  }
+
+  // ------------------------------------------------------------------ tempo
+  TempoInfo? tempo; // null until detected, and again when the list changes
+  bool tempoBusy = false;
+  String tempoMode = 'constant'; // constant | variable (tempo map)
+  double tempoFactor = 1; // 0.5 or 2 when the beat was heard in double or half time
+  int tempoBpm = 120; // the constant tempo to set; starts at the rounded average
+  bool tempoWithApply = true; // Preview & apply also imports the tempo
+  Map<String, dynamic>? tempoResult; // last /tempo/apply
+
+  bool get tempoModelReady => layers['T'] ?? false;
+
+  /// Average BPM after half/double time.
+  double get tempoAverage => (tempo?.bpm ?? 0) * tempoFactor;
+
+  /// What the header shows: the constant BPM, or the average of the map.
+  String get tempoLabel => tempo == null
+      ? ''
+      : tempoMode == 'constant'
+          ? '$tempoBpm BPM'
+          : '≈ ${tempoAverage.round()} BPM';
+
+  void _forgetTempo() {
+    tempo = null;
+    tempoResult = null;
+  }
+
+  Future<void> detectTempo() async {
+    if (api == null || tracks.isEmpty || tempoBusy) return;
+    tempoBusy = true;
+    tempoResult = null;
+    notifyListeners();
+    try {
+      final res = await api!.tempo([for (final t in tracks) {'file': t.file, 'category': t.category}]);
+      tempo = TempoInfo(res);
+      tempoFactor = 1;
+      tempoMode = tempo!.suggestedMode;
+      tempoBpm = tempo!.bpmRounded;
+    } catch (e) {
+      alert(AppAlert.fromError(e, doing: 'detect the tempo'));
+    } finally {
+      tempoBusy = false;
+      notifyListeners();
+    }
+  }
+
+  void setTempoMode(String mode) {
+    tempoMode = mode;
+    notifyListeners();
+  }
+
+  /// Half or double time. The constant BPM follows.
+  void setTempoFactor(double factor) {
+    tempoFactor = factor;
+    tempoBpm = tempoAverage.round();
+    notifyListeners();
+  }
+
+  void setTempoBpm(int bpm) {
+    tempoBpm = bpm.clamp(20, 400);
+    notifyListeners();
+  }
+
+  void setTempoWithApply(bool on) {
+    tempoWithApply = on;
+    notifyListeners();
+  }
+
+  /// Writes the tempo MIDI next to the stems and, with [toProTools], imports it: Pro Tools then
+  /// shows its MIDI Import Options dialog and the call returns when the user closes it.
+  Future<Map<String, dynamic>> applyTempo({bool toProTools = true}) async {
+    final t = tempo!;
+    tempoBusy = true;
+    if (toProTools) message = 'Waiting for Pro Tools: press OK in "MIDI Import Options"';
+    notifyListeners();
+    try {
+      final res = await api!.applyTempo({
+        'beats': t.beats,
+        'downbeats': t.downbeats,
+        'duration': t.duration,
+        'signature_beats': t.signatureBeats,
+        'mode': tempoMode,
+        'bpm': tempoMode == 'constant' ? tempoBpm : null,
+        'factor': tempoFactor == 0.5 ? 0.5 : tempoFactor.toInt(),
+        'folder': t.sources.isEmpty ? null : File(t.sources.first).parent.path,
+        'import_to_pro_tools': toProTools,
+      });
+      tempoResult = res;
+      message = !toProTools
+          ? 'Saved ${baseName(res['midi_path'] as String)}'
+          : res['applied'] == true
+              ? 'Pro Tools tempo set: $tempoLabel'
+              : 'Pro Tools did not change its tempo';
+      return res;
+    } catch (e) {
+      message = toProTools ? 'Tempo import stopped' : 'Could not save the tempo MIDI';
+      rethrow;
+    } finally {
+      tempoBusy = false;
       notifyListeners();
     }
   }

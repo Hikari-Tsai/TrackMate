@@ -1,6 +1,6 @@
 [project]
 name = "stem-engine"
-version = "0.99.1"
+version = "0.995.0"
 description = "Local engine: stem name / audio recognition (layers A-D), stereo analysis, model download and HTTP API"
 requires-python = ">=3.12,<3.14"
 dependencies = [

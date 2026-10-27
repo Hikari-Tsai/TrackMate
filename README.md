@@ -15,12 +15,13 @@
 
 TrackMate takes care of the most tedious part of preparing a Pro Tools mix: stem files with inconsistent names full of typos and abbreviations, and tracks that are really mono but were exported as stereo.
 
-It recognises the instrument on every stem, proposes a standard name, a category and a colour, and decides whether the file should be turned back into mono. After you confirm, one click imports everything into Pro Tools: folders per category, import, rename, colour.
+It recognises the instrument on every stem, proposes a standard name, a category and a colour, and decides whether the file should be turned back into mono. It also finds the song's tempo in the drum stems. After you confirm, one click imports everything into Pro Tools: folders per category, import, rename, colour and tempo.
 
 Recognition combines rules and AI models:
 - **Rules:** a dictionary of common track names and a spelling corrector.
 - **Reading the name:** the multilingual text-embedding model Qwen3-Embedding-0.6B understands track names it has never seen.
 - **Listening:** Meta's pretrained audio–text model PE-AV (in the same family as CLAP; only the audio encoder, converted to ONNX) handles tracks whose names say nothing.
+- **Tempo:** the beat-tracking model Beat This! (CPJKU, ISMIR 2024, converted to ONNX) finds every beat and downbeat in the drum and percussion stems.
 
 On a test set of real-world track names, the top-1 accuracy is 96.6 %, and the right answer is among the top 5 in 98.9 % of cases.
 
@@ -31,6 +32,7 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
 - **Four recognition layers:** known track names → spelling → AI name reading → listening. Chinese, English and Japanese names all work; tracks whose names say nothing (for example `Audio 3`) are recognised from their audio.
 - **You decide where it is unsure:** every track shows its top-1 result and a confidence level; a menu lists the top 5, and you can type a name, search all instruments, keep the original name, or change the category and colour.
 - **Stereo analysis:** detects fake stereo, one-sided stereo, inverted polarity and delays, and converts to mono where needed.
+- **BPM detection:** the BPM appears in the top right corner. You choose a constant tempo (the average, rounded) or a tempo map that follows every bar, and TrackMate imports it into Pro Tools and checks that the session tempo changed. The tempo is also saved as a MIDI file.
 - **Pro Tools integration:** works through PTSL; names are kept unique, and after applying, every track's name, folder and colour are verified.
 - **Runs entirely on your computer:** the models are downloaded on first start; after that no network is needed.
 
@@ -59,7 +61,7 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
 | macOS | macOS 14 (Sonoma) or later, Apple Silicon or Intel (one universal app) |
 | Windows | Windows 10/11 x64 (built in CI, not yet verified on a real machine; see [Known limitations](#known-limitations)) |
 | Pro Tools | A version with PTSL (2023.3 or later); tested with Pro Tools 26.4.1. Colouring needs a PTSL with `SetTrackColor` |
-| Disk space | About 340 MB for the macOS app (it carries both engines) or 150 MB on Windows, plus about 1.35 GB of models downloaded on first start |
+| Disk space | About 340 MB for the macOS app (it carries both engines) or 150 MB on Windows, plus about 1.43 GB of models downloaded on first start |
 
 ### Install
 1. Download the latest version with the buttons at the top, or pick a version on [Releases](https://github.com/Hikari-Tsai/TrackMate/releases):
@@ -91,6 +93,14 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
    - Instruments you pick from the top 5 are remembered, so the same name is recognised correctly next time.
 5. **Keep unrecognised words (off by default):** when off, words that could not be recognised and Pro Tools suffixes (such as `_04-01` or `-TCEx_01`) are removed; turn it on to keep them. Duplicate names get running numbers, for example `Lead Vocal 1`, `Lead Vocal 2`.
 6. **Press Preview & apply:** you first see which folders will be created, each track's final name and whether it is converted to mono. Nothing is written to Pro Tools until you confirm. Afterwards, every track shows its verification result.
+7. **Tempo (optional):** press **Detect BPM** in the top right corner. TrackMate listens to the drum and percussion stems (or bass, guitars, keys and synths when there are none) and shows the BPM at once, then opens the tempo settings:
+   - **Import as:** *Constant tempo* sets one BPM for the session: the average, rounded, which you can change with − and +. *Tempo map (variable)* sets one tempo per bar, so every bar line falls on the downbeat heard in the stems. TrackMate suggests one: constant when every beat lies within 30 ms of one straight grid.
+   - **Beat:** if the song was heard in half or double time, pick *½× half time* or *2× double time*.
+   - **Import to Pro Tools:** Pro Tools shows its *MIDI Import Options* dialog; keep *Import tempo map from MIDI File* ticked and press **OK**. TrackMate then reads the session back and confirms the new tempo, or tells you that it did not change (for example when the dialog was cancelled).
+   - **Save MIDI** writes the tempo file (`TrackMate Tempo 85 BPM.mid` or `TrackMate Tempo Map (avg 85 BPM).mid`) next to the stems, for other DAWs.
+   - With *Also import the tempo with Preview & apply* ticked (the default), step 6 sets the tempo after the tracks. Adding or removing stems clears the result, so detect again.
+
+![Tempo settings](docs/images/tempo_dialog.png)
 
 ![Category menu](docs/images/category_menu.png)
 
@@ -107,6 +117,8 @@ When something goes wrong, the app explains what happened and what to do:
 | Files were moved | Files not found (with the list) | During recognition those tracks are removed automatically |
 | Nothing dropped is audio | No audio files found | — |
 | The engine stopped | The TrackMate engine stopped | *Restart engine* (your list is kept) |
+| No beat in the stems (silence, no rhythm stems) | No steady beat found | Add the drum or rhythm stems, or set the tempo in Pro Tools |
+| The tempo model is still downloading | The tempo model is still downloading | Wait until the download in the header finishes |
 
 ## How it works
 
@@ -173,22 +185,34 @@ Code: [`engine/stem_engine/apply.py`](engine/stem_engine/apply.py), [`protools.p
 
 PTSL currently has no command to create buses, so output routing is not set automatically. See the [integration report](docs/reports/pro-tools-integration.md).
 
+### 6. Tempo (`/tempo`)
+Code: [`engine/stem_engine/tempo.py`](engine/stem_engine/tempo.py)
+
+1. **Sources:** the drum and percussion stems; without them bass, guitars, keys and synths; otherwise all stems. They are mixed to mono at 22.05 kHz at their own level (Beat This!'s spectrogram depends on the level, and raising a quiet mix to full scale adds false beats).
+2. **Beats:** Beat This! `final0` (ONNX) predicts beats and downbeats at 50 frames per second, in overlapping 30-second chunks, with the original preprocessing and peak picking; each peak is then placed between frames by a parabola, so beat gaps are not rounded to 20 ms.
+3. **Clean-up:** against the median beat gap, a beat closer than 0.7 gaps to the previous one is dropped (a passage tracked in double time) and missing beats are put back where the stems pause.
+4. **Constant or variable:** a straight line is fitted through all beats. If every beat lies within 30 ms of it, the tempo is steady and its BPM is the slope; otherwise the BPM shown is the average (total time / beat gaps).
+5. **MIDI:** a tempo-only MIDI file (480 ticks per quarter note): one tempo, or one tempo per bar between detected downbeats (every 4 beats when no downbeats were found), with the time before the first beat at the first bar's tempo, plus the time signature.
+6. **Pro Tools:** PTSL has no tempo command, but importing a MIDI file makes Pro Tools show its *MIDI Import Options* dialog, whose *Import tempo map from MIDI File* replaces the session tempo. PTSL reports success for both OK and Cancel, so TrackMate reads a Bars|Beats position at the last beat (moving the timeline selection there and back) and compares it with its own tempo map.
+
+On real stems at 85 BPM the result is 85.00 BPM; on the same drums sped up section by section the map gives 76.5, 85.0, 93.6 and 102.0 BPM (true 76.5, 85, 93.5, 102). Details: [tempo report](docs/reports/tempo-detection.md).
+
 ## Architecture
 
 ```
 ┌──────────────── TrackMate (Flutter: macOS / Windows) ───────────────┐
 │ drop & open dialog (Swift / C++)                                    │
-│ track list, top 5, colours, preview, alerts                         │
+│ track list, top 5, colours, BPM, preview, alerts                    │
 └───────────────┬─────────────────────────────────────────────────────┘
                 │ HTTP, 127.0.0.1 only, new token on every start
 ┌───────────────▼──────────── Local engine (Python, PyInstaller) ─────┐
 │ name preprocessing → layers A/B/C/D → merge                         │
 │ stereo analysis, model download and checks, alias learning          │
-│ onnxruntime: Qwen3-Embedding, PE-AV audio encoder                   │
+│ onnxruntime: Qwen3-Embedding, PE-AV audio encoder, Beat This!       │
 └───────────────┬─────────────────────────────────────────────────────┘
                 │ gRPC (PTSL, localhost:31416)
 ┌───────────────▼─────────────────────────────────────────────────────┐
-│ Pro Tools: read session, create folders, import, rename, colour     │
+│ Pro Tools: read session, folders, import, rename, colour, tempo     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -207,7 +231,7 @@ Tools:
 # Engine
 cd engine
 uv sync --group dev
-uv run pytest -q                       # 80 tests (tests that need the models skip themselves)
+uv run pytest -q                       # 93 tests (tests that need the models skip themselves)
 uv run stem-engine                     # starts; first line {"port", "token"}; downloads the models
 
 # Stereo analysis
@@ -253,6 +277,7 @@ Index: [`docs/reports/`](docs/reports/README.md) (the reports are written in Tra
 | [Stereo/mono analysis](docs/reports/stereo-analysis.md) | All 14 synthetic cases (pan, one-sided, inverted polarity, delay, reverb, …) are classified correctly |
 | [Engine evaluation](docs/reports/engine-evaluation.md) | Real track names: top-1 96.6 %, top-5 98.9 %; automatic renames 97.0 % precise, no non-instrument name renamed |
 | [Pro Tools integration](docs/reports/pro-tools-integration.md) | 10 tracks imported, renamed and coloured in 8.2 s, all verified |
+| [Tempo detection](docs/reports/tempo-detection.md) | Same beats as the PyTorch model; 85 BPM stems read as 85.00; tempo maps within 0.15 BPM; the Pro Tools tempo checked after import |
 | [Desktop app testing](docs/reports/app-testing.md) | Real app + engine + Pro Tools end to end in 35–38 s |
 
 ## CI/CD
@@ -274,6 +299,7 @@ git push origin v0.1.0
 - **macOS:** builds are ad-hoc signed and not notarized by Apple. The Intel engine uses onnxruntime 1.23.2, the last release with an Intel macOS build; it gives the same evaluation results as the Apple Silicon engine, but has so far been tested under Rosetta 2, not on a real Intel Mac.
 - **Thresholds:** current values are starting points from small test sets and still need calibration on real sessions.
 - **Dictionary:** Chinese and Japanese spellings that are not in the dictionary are learnt mainly by extending it and from your corrections.
+- **Tempo:** beats are taken as quarter notes, so a song felt in half or double time needs the ½× or 2× choice; tempo changes of more than about 30 % within one song are not followed; meters other than x/4 are written as x/4. The tempo map starts at the first detected beat, not at a bar line. Pro Tools asks for one click (*OK* in *MIDI Import Options*) for each import.
 - **Audio recognition:** category only, and verified on solo recordings only. A 10-second segment takes about 2.8 s on CPU, so it runs only for tracks whose names say nothing.
 
 ## Acknowledgements
@@ -285,6 +311,7 @@ TrackMate is built on the following open-source software, models, datasets and f
 |---|---|---|---|
 | [Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B) | Qwen team (Alibaba) | Apache-2.0 | Layer C, AI name reading (ONNX: [aaatmy/Qwen3-Embedding-0.6B-ONNX](https://huggingface.co/aaatmy/Qwen3-Embedding-0.6B-ONNX)) |
 | [PE-AV small](https://huggingface.co/facebook/pe-av-small) (Perception Encoder Audio-Visual) | Meta FAIR | Apache-2.0 | Layer D, listening (ONNX: [aaatmy/pe-av-small-audio-ONNX](https://huggingface.co/aaatmy/pe-av-small-audio-ONNX)) |
+| [Beat This!](https://github.com/CPJKU/beat_this) (`final0`) | Foscarin, Schlüter, Widmer (JKU Linz) | MIT | Tempo: beats and downbeats (ONNX: [aaatmy/beat-this-onnx](https://huggingface.co/aaatmy/beat-this-onnx)) |
 | [multilingual-e5-small](https://huggingface.co/intfloat/multilingual-e5-small) | Microsoft | MIT | Research comparison |
 | [bge-m3](https://huggingface.co/BAAI/bge-m3) | BAAI | MIT | Research comparison |
 | [larger_clap_general](https://huggingface.co/laion/larger_clap_general) | LAION | Apache-2.0 | Research comparison |
@@ -337,6 +364,12 @@ Research and model export also used [PyTorch](https://pytorch.org/) (BSD-3-Claus
   eprint = {2512.19687},
   archivePrefix = {arXiv}
 }
+@inproceedings{foscarin2024beatthis,
+  title     = {Beat this! Accurate beat tracking without {DBN} postprocessing},
+  author    = {Foscarin, Francesco and Schl{\"u}ter, Jan and Widmer, Gerhard},
+  booktitle = {Proceedings of the 25th International Society for Music Information Retrieval Conference (ISMIR)},
+  year      = {2024}
+}
 @inproceedings{wu2023clap,
   title     = {Large-scale Contrastive Language-Audio Pretraining with Feature Fusion and Keyword-to-Caption Augmentation},
   author    = {Wu, Yusong and Chen, Ke and Zhang, Tianyu and Hui, Yuchen and Berg-Kirkpatrick, Taylor and Dubnov, Shlomo},
@@ -375,4 +408,4 @@ Pro Tools, AudioSuite and Avid are trademarks of Avid Technology, Inc. TrackMate
 ## License
 TrackMate's source code, documentation and naming dictionary are released under the [MIT License](LICENSE).
 
-The pretrained models are **not** covered by the MIT License. Qwen3-Embedding-0.6B and PE-AV small are under the Apache License 2.0; TrackMate downloads them with a copy of their licence, and the files derived from PE-AV (`peav_prototypes.npz`, `prototypes.npz`) are under the same licence. Third-party models, datasets, fonts and libraries, and the changes made to the models, are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The pretrained models are **not** covered by the MIT License. Qwen3-Embedding-0.6B and PE-AV small are under the Apache License 2.0, and Beat This! under its own MIT License (© JKU Linz); TrackMate downloads them with a copy of their licence, and the files derived from PE-AV (`peav_prototypes.npz`, `prototypes.npz`) are under the same licence. Third-party models, datasets, fonts and libraries, and the changes made to the models, are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

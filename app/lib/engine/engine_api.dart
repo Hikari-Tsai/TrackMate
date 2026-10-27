@@ -26,6 +26,12 @@ abstract class EngineApi {
   Future<Catalog> catalog();
   Future<Map<String, dynamic>> session();
   Future<Map<String, dynamic>> apply(List<Map<String, dynamic>> tracks, {bool dryRun = false});
+
+  /// Beat tracking on the rhythm stems: {bpm, bpm_rounded, suggested_mode, beats, …}.
+  Future<Map<String, dynamic>> tempo(List<Map<String, dynamic>> tracks);
+
+  /// Writes the tempo MIDI and, unless [request] says otherwise, imports it into Pro Tools.
+  Future<Map<String, dynamic>> applyTempo(Map<String, dynamic> request);
 }
 
 class HttpEngineApi implements EngineApi {
@@ -118,4 +124,12 @@ class HttpEngineApi implements EngineApi {
   @override
   Future<Map<String, dynamic>> apply(List<Map<String, dynamic>> tracks, {bool dryRun = false}) async =>
       (await _send('POST', '/apply', {'tracks': tracks, 'dry_run': dryRun})) as Map<String, dynamic>;
+
+  @override
+  Future<Map<String, dynamic>> tempo(List<Map<String, dynamic>> tracks) async =>
+      (await _send('POST', '/tempo', {'tracks': tracks})) as Map<String, dynamic>;
+
+  @override
+  Future<Map<String, dynamic>> applyTempo(Map<String, dynamic> request) async =>
+      (await _send('POST', '/tempo/apply', request)) as Map<String, dynamic>;
 }

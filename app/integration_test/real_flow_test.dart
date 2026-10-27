@@ -6,47 +6,17 @@ import 'package:integration_test/integration_test.dart';
 import 'package:stem_import/app_state.dart';
 import 'package:stem_import/main.dart';
 
+import 'support.dart';
+
 const stemsDir = String.fromEnvironment('STEMS_DIR');
-
-final _clock = Stopwatch()..start();
-
-void mark(String step) => debugPrint('[${(_clock.elapsedMilliseconds / 1000).toStringAsFixed(1)} s] $step');
-
-/// Polls in real time and draws a frame each round. The app under test runs in the
-/// background, where macOS sends it almost no vsync, so frames are driven directly
-/// (frame policy `benchmark` + pumpBenchmark) instead of waiting for vsync.
-/// Frame timestamps continue from the last vsync frame, so running animations never see time
-/// go backwards.
-Duration _base = Duration.zero;
-final _sinceSwitch = Stopwatch();
-
-Future<void> frame(WidgetTester tester) => tester.pumpBenchmark(_base + _sinceSwitch.elapsed);
-
-Future<void> waitFor(WidgetTester tester, bool Function() done, {int seconds = 180}) async {
-  final sw = Stopwatch()..start();
-  while (sw.elapsed.inSeconds < seconds) {
-    await frame(tester);
-    if (done()) return;
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-  }
-  fail('timed out after $seconds s');
-}
-
-Future<void> settle(WidgetTester tester, {int ms = 500}) async {
-  final sw = Stopwatch()..start();
-  while (sw.elapsedMilliseconds < ms) {
-    await frame(tester);
-    await Future<void>.delayed(const Duration(milliseconds: 16));
-  }
-}
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('drop stems, correct one, preview and apply to Pro Tools', (tester) async {
     await tester.pumpWidget(const StemImportApp());
-    _base = binding.currentSystemFrameTimeStamp + const Duration(milliseconds: 16);
-    _sinceSwitch.start();
+    base = binding.currentSystemFrameTimeStamp + const Duration(milliseconds: 16);
+    sinceSwitch.start();
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
     final app = tester.state<StemImportAppState>(find.byType(StemImportApp));
     final state = app.state;
@@ -54,7 +24,7 @@ void main() {
     await waitFor(tester, () => state.engineState != EngineState.starting);
     mark('engine ready');
     expect(state.engineError, isNull);
-    expect(state.layers, {'A': true, 'B': true, 'C': true, 'D': true});
+    expect(state.layers, {'A': true, 'B': true, 'C': true, 'D': true, 'T': true});
     await waitFor(tester, () => state.session != null || state.sessionError != null);
     expect(state.session?['session'], isNotNull, reason: 'open a test session in Pro Tools');
 

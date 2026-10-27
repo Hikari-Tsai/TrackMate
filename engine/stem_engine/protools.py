@@ -7,6 +7,10 @@ docs/reports/pro-tools-integration.md):
 - SetTrackColor / DeleteTracks reject requests carrying both track_ids and track_names, and
   py-ptsl serialises empty lists, so empty fields are dropped before sending
 - a new track is inserted after the selected track (after the folder track = first member)
+- PTSL has no tempo command, but importing a .mid through Import (IType_Audio) opens Pro Tools'
+  MIDI Import Options dialog ("Import tempo map from MIDI File", Session Start); the call
+  returns when the user presses OK, and also on Cancel, so the tempo is verified afterwards by
+  reading a timeline position in Bars|Beats (GetTimelineSelection with time_scale)
 """
 from __future__ import annotations
 
@@ -100,8 +104,15 @@ def _ops():
     class CId_GetColorPalette(Operation):
         pass
 
+    class CId_GetTimelineSelection(Operation):
+        pass
+
+    class CId_SetTimelineSelection(Operation):
+        pass
+
     return {c.__name__: c for c in (CId_Import, CId_SetTrackColor, CId_RenameTargetTrack,
-                                    CId_CreateNewTracks, CId_GetColorPalette)}
+                                    CId_CreateNewTracks, CId_GetColorPalette, CId_GetTimelineSelection,
+                                    CId_SetTimelineSelection)}
 
 
 class ProTools:
@@ -151,6 +162,17 @@ class ProTools:
         out = self._run(self.ops["CId_GetColorPalette"](color_palette_target=self.pt.CPTarget_Tracks))
         return ["#" + c[3:].upper() for c in out.get("color_list", [])]
 
+    def bars_beats_at(self, sample: int) -> str:
+        """The Bars|Beats position ("   25| 2| 000") of a sample position from the session start.
+        Moves the timeline selection there to read it, then puts the selection back."""
+        pt, get, put = self.pt, self.ops["CId_GetTimelineSelection"], self.ops["CId_SetTimelineSelection"]
+        before = self._run(get(time_scale=pt.TOOptions_Samples))
+        try:
+            self._run(put(in_time=str(sample), out_time=str(sample)))
+            return self._run(get(time_scale=pt.TOOptions_BarsBeats))["in_time"]
+        finally:
+            self._run(put(in_time=before["in_time"], out_time=before["out_time"]))
+
     # -------------------------------------------------------------- writing
     def create_folder(self, name: str) -> str:
         """Basic Folder at the end of the session; returns the name Pro Tools gave it."""
@@ -172,6 +194,10 @@ class ProTools:
             location_data=pt.SpotLocationData(location_type=pt.SLType_Start,
                                               location_options=pt.TOOptions_TimeCode, location_value=""))
         self._run(self.ops["CId_Import"](import_type=pt.IType_Audio, audio_data=audio))
+
+    def import_midi(self, path: str, session_path: str) -> None:
+        """Opens Pro Tools' MIDI Import Options dialog and returns once the user closes it."""
+        self.import_audio(path, session_path)
 
     def rename(self, track_id: str, current: str, new: str) -> None:
         self._run(self.ops["CId_RenameTargetTrack"](track_id=track_id, current_name=current, new_name=new))

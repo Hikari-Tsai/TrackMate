@@ -67,3 +67,17 @@ TrackMate 透過 Avid 的 Pro Tools Scripting Library（PTSL，gRPC，`localhost
 | 檔案被移走 | 404 `missing_files`（附檔案清單） | — |
 
 相關測試：[`engine/tests/test_errors.py`](../../engine/tests/test_errors.py)、[`app/test/errors_test.dart`](../../app/test/errors_test.dart)。
+
+## 6. 速度（MIDI 匯入）
+
+PTSL 沒有設定速度的指令，也沒有 MIDI 匯入類型。實測發現用 `Import`（`IType_Audio`）匯入 `.mid` 時，Pro Tools 會跳出 **MIDI Import Options**（預設勾選 *Import tempo map from MIDI File*、位置 *Session Start*），按 OK 後 session 的速度和拍號換成檔案的內容，只含速度的檔案不會多出空的 MIDI 軌。
+
+| 項目 | 結果 |
+|---|---|
+| 按 OK | 指令在對話框關閉後回傳，速度尺換成檔案的速度 |
+| 按 Cancel | 一樣回報成功，必須另外確認 |
+| 確認方式 | `SetTimelineSelection` 移到某個 sample 位置，`GetTimelineSelection`（`time_scale` = Bars|Beats）讀回小節位置，再把選取還原；97 BPM 的第 60 秒讀到 `25| 2| 000` |
+| `Import`（`IType_Session`，`tempo_meter_map`） | 只能從 `.ptx` 匯入，不採用 |
+
+TrackMate 不模擬點擊：對話框由使用者按 OK，TrackMate 先把 Pro Tools 帶到前景，之後讀回位置確認。詳見[速度偵測報告](tempo-detection.md)。
+

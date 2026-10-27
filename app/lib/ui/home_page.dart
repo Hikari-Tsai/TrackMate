@@ -8,6 +8,7 @@ import '../app_state.dart';
 import '../native_bridge.dart';
 import 'alert_dialog.dart';
 import 'apply_dialogs.dart';
+import 'tempo_dialog.dart';
 import 'theme.dart';
 import 'track_table.dart';
 
@@ -111,14 +112,20 @@ class _Header extends StatelessWidget {
         const SizedBox(width: 10),
         if (state.tracks.isNotEmpty)
           Text('${state.tracks.length} track${state.tracks.length == 1 ? '' : 's'}', style: Type.bodyMuted),
-        const Spacer(),
-        if (review > 0) ...[
-          const Icon(LucideIcons.circleAlert, size: 16, color: reviewText),
-          const SizedBox(width: 6),
-          Text('$review to review', style: Type.label.copyWith(color: reviewText)),
-          const SizedBox(width: 16),
-        ],
-        Flexible(child: _EngineStatus(state: state)),
+        // Right-aligned; the tempo control sits in the top right corner.
+        Expanded(
+          child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+            if (review > 0) ...[
+              const Icon(LucideIcons.circleAlert, size: 16, color: reviewText),
+              const SizedBox(width: 6),
+              Text('$review to review', style: Type.label.copyWith(color: reviewText)),
+              const SizedBox(width: 16),
+            ],
+            Flexible(child: _EngineStatus(state: state)),
+            const SizedBox(width: 16),
+            TempoButton(state: state),
+          ]),
+        ),
       ]),
     );
   }

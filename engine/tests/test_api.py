@@ -22,8 +22,8 @@ def test_token_required(client):
     assert client.get("/models").status_code == 401
     assert client.get("/models", headers={"Authorization": "Bearer wrong"}).status_code == 401
     body = client.get("/models", headers=AUTH).json()
-    assert body["layers"] == {"A": True, "B": True, "C": False, "D": False}
-    assert set(body["models"]) == {"qwen3_embedding", "peav_audio"}
+    assert body["layers"] == {"A": True, "B": True, "C": False, "D": False, "T": False}
+    assert set(body["models"]) == {"qwen3_embedding", "peav_audio", "beat_this"}
 
 
 def test_foreign_host_refused(config):

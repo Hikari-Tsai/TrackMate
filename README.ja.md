@@ -17,12 +17,13 @@
 
 TrackMate は、Pro Tools でミックスを始める前のいちばん面倒な整理作業を引き受けます。ステムのファイル名はばらばらで、誤字や略語だらけ。本来はモノラルなのにステレオで書き出されたトラックも混ざっています。
 
-TrackMate は各ステムの楽器を認識し、標準のトラック名・カテゴリ・カラーを提案して、モノラルに戻すべきかどうかも判定します。確認したらワンクリックで Pro Tools に取り込み、カテゴリごとのフォルダ作成、インポート、リネーム、カラー設定まで行います。
+TrackMate は各ステムの楽器を認識し、標準のトラック名・カテゴリ・カラーを提案して、モノラルに戻すべきかどうかも判定します。ドラムのステムから曲のテンポ（BPM）も検出します。確認したらワンクリックで Pro Tools に取り込み、カテゴリごとのフォルダ作成、インポート、リネーム、カラー設定、テンポ設定まで行います。
 
 認識はルールと AI モデルの組み合わせです。
 - **ルール：** よく使われるトラック名の辞書とスペル補正。
 - **名前を読む：** 多言語対応のテキスト埋め込みモデル Qwen3-Embedding-0.6B が、初めて見るトラック名も理解します。
 - **音を聴く：** Meta が事前学習した音声–テキストモデル PE-AV（CLAP と同系統。音声エンコーダーのみを ONNX に変換）が、名前から判断できないトラックを担当します。
+- **拍を取る：** ビートトラッキングモデル Beat This!（CPJKU、ISMIR 2024、ONNX に変換）が、ドラムとパーカッションのステムから各拍と小節の頭（ダウンビート）を検出します。
 
 実際のトラック名を使ったテストでは、Top-1 正解率 96.6 %、正解が上位 5 件に入る割合は 98.9 % でした。
 
@@ -33,6 +34,7 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 - **4 段階の認識：** 既知のトラック名 → スペル補正 → AI による名前の読み取り → 音の聴き取り。中国語・英語・日本語の名前に対応し、名前から判断できないトラック（例：`Audio 3`）は音声で認識します。
 - **迷うところはユーザーが決める：** 各トラックに Top-1 の結果と信頼度を表示します。メニューには上位 5 件が並び、名前の手入力、全楽器の検索、元の名前の維持、カテゴリやカラーの変更もできます。
 - **ステレオ解析：** 疑似ステレオ、片側だけのステレオ、逆相、ディレイを検出し、必要に応じてモノラルに変換します。
+- **BPM 検出：** 右上に BPM をすぐ表示します。固定テンポ（平均値を四捨五入）か、小節ごとに変わるテンポマップかを選ぶと、TrackMate が Pro Tools に取り込み、セッションのテンポが変わったことを確認します。テンポは MIDI ファイルとしても保存されます。
 - **Pro Tools 連携：** PTSL 経由で操作します。名前の重複は自動で避け、適用後は各トラックの名前・フォルダ・カラーを検証します。
 - **すべてローカルで動作：** モデルは初回起動時にダウンロードし、その後はネットワーク不要です。
 
@@ -62,7 +64,7 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 | macOS | macOS 14（Sonoma）以降。Apple Silicon と Intel の両方に対応（1 つのユニバーサルアプリ） |
 | Windows | Windows 10/11 x64（CI でビルド済み。実機での検証はまだです。[既知の制限](#既知の制限)を参照） |
 | Pro Tools | PTSL 対応バージョン（2023.3 以降）。Pro Tools 26.4.1 で検証。カラー設定には `SetTrackColor` に対応した PTSL が必要 |
-| ディスク容量 | macOS アプリ約 340 MB（両方の CPU 用エンジンを同梱）、Windows 約 150 MB。初回起動時に約 1.35 GB のモデルをダウンロード |
+| ディスク容量 | macOS アプリ約 340 MB（両方の CPU 用エンジンを同梱）、Windows 約 150 MB。初回起動時に約 1.43 GB のモデルをダウンロード |
 
 ### インストール
 1. 上部のボタンから最新版をダウンロードするか、[Releases](https://github.com/Hikari-Tsai/TrackMate/releases) でバージョンを選びます。
@@ -95,6 +97,14 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
    - 上位 5 件から選び直した楽器は記憶され、次に同じ名前が来たときは正しく認識されます。
 5. **Keep unrecognised words（既定はオフ）：** オフのときは、認識できなかった語と Pro Tools のサフィックス（`_04-01`、`-TCEx_01` など）を削除します。オンにすると残します。名前が重複した場合は連番が付きます（例：`Lead Vocal 1`、`Lead Vocal 2`）。
 6. **Preview & apply を押す：** 作成されるフォルダ、各トラックの最終的な名前、モノラル変換の有無をまずプレビューで確認します。確定するまで Pro Tools には何も書き込みません。完了後は、各トラックに検証結果が表示されます。
+7. **テンポ（任意）：** 右上の **Detect BPM** を押します。TrackMate はドラムとパーカッションのステム（ない場合はベース、ギター、キーボード、シンセ）を聴いて BPM をすぐ表示し、テンポの設定画面を開きます。
+   - **Import as（取り込み方法）：** *Constant tempo* はセッション全体を 1 つの BPM にします。平均値を四捨五入した値で、− と + で調整できます。*Tempo map (variable)* は小節ごとにテンポを設定し、すべての小節線をステムで聴こえた小節の頭に合わせます。すべての拍が 1 本の直線グリッドから 30 ms 以内なら、固定テンポを提案します。
+   - **Beat（拍）：** 半分または倍のテンポで検出された場合は、*½× half time* か *2× double time* を選びます。
+   - **Import to Pro Tools：** Pro Tools に *MIDI Import Options* ダイアログが表示されます。*Import tempo map from MIDI File* をオンのまま **OK** を押してください。TrackMate はセッションを読み直して新しいテンポを確認し、変わらなかった場合（キャンセルしたときなど）はそれを知らせます。
+   - **Save MIDI：** テンポファイル（`TrackMate Tempo 85 BPM.mid` または `TrackMate Tempo Map (avg 85 BPM).mid`）をステムと同じ場所に保存します。ほかの DAW でも使えます。
+   - *Also import the tempo with Preview & apply*（既定でオン）がオンなら、手順 6 でトラックの取り込み後にテンポも設定します。ステムを追加・削除すると結果は消えるので、もう一度検出してください。
+
+![テンポの設定](docs/images/tempo_dialog.png)
 
 ![Category メニュー](docs/images/category_menu.png)
 
@@ -111,6 +121,8 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 | ファイルが移動された | Files not found（一覧付き） | 認識中なら該当トラックは自動で外れます |
 | ドロップしたものに音声がない | No audio files found | — |
 | エンジンが停止した | The TrackMate engine stopped | *Restart engine*（リストはそのまま） |
+| ステムに拍がない（無音、リズムのステムがない） | No steady beat found | ドラムやリズムのステムを追加するか、Pro Tools でテンポを設定 |
+| テンポのモデルをダウンロード中 | The tempo model is still downloading | ヘッダーのダウンロードが終わるまで待つ |
 
 ## アルゴリズム
 <sub>[English](README.md#how-it-works)</sub>
@@ -178,23 +190,35 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 
 現在の PTSL にはバスを作成するコマンドがないため、出力ルーティングは自動設定しません。詳しくは[連携レポート](docs/reports/pro-tools-integration.md)を参照してください。
 
+### 6. テンポ（`/tempo`）
+コード：[`engine/stem_engine/tempo.py`](engine/stem_engine/tempo.py)
+
+1. **音源：** ドラムとパーカッションのステム。なければベース、ギター、キーボード、シンセ。それもなければ全ステム。元の音量のまま 22.05 kHz のモノラルにミックスします（Beat This! のスペクトログラムは音量に依存し、小さいミックスをフルスケールまで上げると誤った拍が増えるため）。
+2. **拍：** Beat This! `final0`（ONNX）が 1 秒 50 フレームで拍とダウンビートを予測します。30 秒ずつ重ねて処理し、前処理とピーク検出はオリジナルと同じです。各ピークは放物線でフレーム間の位置まで求めるので、拍の間隔が 20 ms 単位に丸められません。
+3. **整理：** 拍間隔の中央値を基準に、前の拍から 0.7 間隔未満の拍（倍のテンポで取られた部分）を除き、ステムが止まっている部分には欠けた拍を補います。
+4. **固定か可変か：** すべての拍に直線を当てはめます。どの拍も直線から 30 ms 以内なら安定したテンポで、BPM は直線の傾きです。そうでなければ平均値（全体の時間 ÷ 拍間隔の数）を表示します。
+5. **MIDI：** テンポだけの MIDI ファイル（4 分音符 = 480 tick）。テンポ 1 つ、または検出したダウンビートの間に小節ごとに 1 つ（ダウンビートがなければ 4 拍ごと）。最初の拍より前は最初の小節のテンポを使い、拍子も書き込みます。
+6. **Pro Tools：** PTSL にはテンポを設定するコマンドがありませんが、MIDI ファイルを取り込むと Pro Tools が *MIDI Import Options* を表示し、*Import tempo map from MIDI File* でセッションのテンポを置き換えます。OK でもキャンセルでも PTSL は成功を返すため、TrackMate は最後の拍の位置の Bars|Beats を読み取り（タイムライン選択を一時的に移動して戻します）、自分のテンポマップと照合します。
+
+実際の 85 BPM のステムでは 85.00 BPM でした。同じドラムを区間ごとに速めると、テンポマップは 76.5、85.0、93.6、102.0 BPM（実際は 76.5、85、93.5、102）になりました。詳しくは[テンポ検出レポート](docs/reports/tempo-detection.md)を参照してください。
+
 ## システム構成
 <sub>[English](README.md#architecture)</sub>
 
 ```
 ┌──────────────── TrackMate (Flutter: macOS / Windows) ───────────────┐
 │ drop & open dialog (Swift / C++)                                    │
-│ track list, top 5, colours, preview, alerts                         │
+│ track list, top 5, colours, BPM, preview, alerts                    │
 └───────────────┬─────────────────────────────────────────────────────┘
                 │ HTTP, 127.0.0.1 only, new token on every start
 ┌───────────────▼──────────── Local engine (Python, PyInstaller) ─────┐
 │ name preprocessing → layers A/B/C/D → merge                         │
 │ stereo analysis, model download and checks, alias learning          │
-│ onnxruntime: Qwen3-Embedding, PE-AV audio encoder                   │
+│ onnxruntime: Qwen3-Embedding, PE-AV audio encoder, Beat This!       │
 └───────────────┬─────────────────────────────────────────────────────┘
                 │ gRPC (PTSL, localhost:31416)
 ┌───────────────▼─────────────────────────────────────────────────────┐
-│ Pro Tools: read session, create folders, import, rename, colour     │
+│ Pro Tools: read session, folders, import, rename, colour, tempo     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -214,7 +238,7 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 # エンジン
 cd engine
 uv sync --group dev
-uv run pytest -q                       # 80 テスト（モデルが必要なテストは自動でスキップ）
+uv run pytest -q                       # 93 テスト（モデルが必要なテストは自動でスキップ）
 uv run stem-engine                     # 起動。最初の行に {"port", "token"}、モデルのダウンロードを開始
 
 # ステレオ解析
@@ -262,6 +286,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 | [ステレオ／モノラル解析](docs/reports/stereo-analysis.md) | 14 の合成ケース（パン、片側、逆相、ディレイ、リバーブ…）をすべて正しく判定 |
 | [エンジンの評価](docs/reports/engine-evaluation.md) | 実際のトラック名で Top-1 96.6 %、Top-5 98.9 %。自動リネームの適合率 97.0 %、楽器以外の名前の誤リネームは 0 |
 | [Pro Tools 連携テスト](docs/reports/pro-tools-integration.md) | 10 トラックの取り込み・リネーム・カラー設定が 8.2 秒、すべて検証に合格 |
+| [テンポ検出](docs/reports/tempo-detection.md) | 拍は PyTorch 版と同じ。85 BPM のステムは 85.00、テンポマップの誤差は 0.15 BPM 以内。取り込み後に Pro Tools のテンポを確認 |
 | [デスクトップアプリのテスト](docs/reports/app-testing.md) | 実アプリ ＋ エンジン ＋ Pro Tools のエンドツーエンドで 35–38 秒 |
 
 ## CI/CD
@@ -286,6 +311,7 @@ git push origin v0.1.0
 - **macOS：** ad-hoc 署名で、Apple の公証は受けていません。Intel 用エンジンは Intel macOS 版が提供される最後のリリースである onnxruntime 1.23.2 を使います。評価結果は Apple Silicon 用と同じですが、テストは Rosetta 2 上のみで、実機の Intel Mac ではまだ試していません。
 - **しきい値：** 現在の値は小さなテストセットから決めた初期値で、実際のセッションでの調整が必要です。
 - **辞書：** 辞書にない中国語・日本語の表記は、主に辞書の拡充とユーザーの修正から学習します。
+- **テンポ：** 拍はすべて 4 分音符として扱うため、半分や倍のテンポで取られた曲は ½× か 2× を選ぶ必要があります。1 曲の中で約 30 % を超えるテンポ変化には追従しません。x/4 以外の拍子は x/4 として書き込みます。テンポマップは小節線ではなく、最初に検出した拍から始まります。取り込みのたびに Pro Tools の *MIDI Import Options* で *OK* を 1 回押す必要があります。
 - **音声認識：** カテゴリのみの判定で、ソロ録音でしか検証していません。CPU では 10 秒の区間に約 2.8 秒かかるため、名前から判断できないトラックにだけ使います。
 
 ## 謝辞
@@ -298,6 +324,7 @@ TrackMate は以下のオープンソースソフトウェア、モデル、デ�
 |---|---|---|---|
 | [Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B) | Qwen チーム（Alibaba） | Apache-2.0 | レイヤー C、名前の読み取り（ONNX 版：[aaatmy/Qwen3-Embedding-0.6B-ONNX](https://huggingface.co/aaatmy/Qwen3-Embedding-0.6B-ONNX)） |
 | [PE-AV small](https://huggingface.co/facebook/pe-av-small)（Perception Encoder Audio-Visual） | Meta FAIR | Apache-2.0 | レイヤー D、音の聴き取り（ONNX 版：[aaatmy/pe-av-small-audio-ONNX](https://huggingface.co/aaatmy/pe-av-small-audio-ONNX)） |
+| [Beat This!](https://github.com/CPJKU/beat_this)（`final0`） | Foscarin、Schlüter、Widmer（JKU Linz） | MIT | テンポ：拍とダウンビート（ONNX 版：[aaatmy/beat-this-onnx](https://huggingface.co/aaatmy/beat-this-onnx)） |
 | [multilingual-e5-small](https://huggingface.co/intfloat/multilingual-e5-small) | Microsoft | MIT | 研究での比較 |
 | [bge-m3](https://huggingface.co/BAAI/bge-m3) | BAAI | MIT | 研究での比較 |
 | [larger_clap_general](https://huggingface.co/laion/larger_clap_general) | LAION | Apache-2.0 | 研究での比較 |
@@ -346,4 +373,4 @@ Pro Tools、AudioSuite、Avid は Avid Technology, Inc. の商標です。TrackM
 
 TrackMate のソースコード、ドキュメント、命名辞書は [MIT ライセンス](LICENSE)で公開しています。
 
-事前学習済みモデルには MIT ライセンスは**適用されません**。Qwen3-Embedding-0.6B と PE-AV small は Apache License 2.0 で提供されており、TrackMate はモデルと一緒にそのライセンスファイルもダウンロードします。PE-AV から生成したファイル（`peav_prototypes.npz`、`prototypes.npz`）も同じライセンスです。サードパーティのモデル、データセット、フォント、ライブラリのライセンスと、モデルに加えた変更は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) にまとめています。
+事前学習済みモデルには MIT ライセンスは**適用されません**。Qwen3-Embedding-0.6B と PE-AV small は Apache License 2.0、Beat This! は独自の MIT ライセンス（© JKU Linz）で提供されており、TrackMate はモデルと一緒にそのライセンスファイルもダウンロードします。PE-AV から生成したファイル（`peav_prototypes.npz`、`prototypes.npz`）も同じライセンスです。サードパーティのモデル、データセット、フォント、ライブラリのライセンスと、モデルに加えた変更は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) にまとめています。

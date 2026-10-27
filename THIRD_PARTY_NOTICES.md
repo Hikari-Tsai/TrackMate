@@ -10,10 +10,12 @@ The models are not stored in this repository. TrackMate downloads them on first 
 |---|---|---|---|---|
 | Qwen3-Embedding-0.6B | [Qwen/Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B) | Alibaba Cloud (Qwen team) | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) | [aaatmy/Qwen3-Embedding-0.6B-ONNX](https://huggingface.co/aaatmy/Qwen3-Embedding-0.6B-ONNX) |
 | PE-AV small (Perception Encoder Audio-Visual) | [facebook/pe-av-small](https://huggingface.co/facebook/pe-av-small) | Meta Platforms, Inc. | [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) | [aaatmy/pe-av-small-audio-ONNX](https://huggingface.co/aaatmy/pe-av-small-audio-ONNX) |
+| Beat This! (checkpoint `final0`) | [CPJKU/beat_this](https://github.com/CPJKU/beat_this) | Institute of Computational Perception, JKU Linz | [MIT License](https://github.com/CPJKU/beat_this/blob/main/LICENSE) | [aaatmy/beat-this-onnx](https://huggingface.co/aaatmy/beat-this-onnx) |
 
 **Changes made to the original models** (Apache License 2.0, section 4b):
 - **Qwen3-Embedding-0.6B:** exported to ONNX (last-token pooling and L2 normalisation built in), and the weights quantised to 8 bits. The weights are otherwise unchanged. The export and quantisation scripts are in [`tools/qwen_onnx`](tools/qwen_onnx), and in the `export/` folder of the downloaded copy.
 - **PE-AV small:** only the audio encoder was exported to ONNX, and its weights quantised to 8 bits. The text and video encoders are not distributed. `scoring.json` holds the model's own logit scale and bias. The scripts are in [`tools/peav_onnx`](tools/peav_onnx), and in the `export/` folder of the downloaded copy.
+- **Beat This!:** the `final0` checkpoint exported to ONNX at full precision (FP32), unchanged otherwise; `frontend.json` holds the mel filters and window of the original preprocessing. The downloaded copy keeps the original MIT licence and copyright notice.
 - The original repositories have no NOTICE file.
 
 ### Data derived from PE-AV

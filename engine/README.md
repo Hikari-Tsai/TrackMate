@@ -30,6 +30,7 @@ State lives in `~/Library/Application Support/TrackMate` (override with `STEM_EN
 | `models.py` | pinned, resumable, SHA-256-checked downloads (`data/model_manifest.json`) |
 | `protools.py` | PTSL access with the M0 workarounds (import, rename, colour, folders) |
 | `apply.py` | `/apply`: plan (unique names, folders) and execution with verification |
+| `tempo.py` | `/tempo`: Beat This! (ONNX) on the rhythm stems, constant BPM or tempo map, tempo-only MIDI, import and check in Pro Tools |
 | `api.py` | FastAPI; 127.0.0.1 only, bearer token, local Host header |
 
 ## API
@@ -45,12 +46,23 @@ All endpoints except `/health` need `Authorization: Bearer <token>`.
 | `GET /instruments`, `GET /categories` | lists for the dropdown search and the settings page |
 | `GET /session` | Pro Tools session and tracks over PTSL |
 | `POST /apply` | `{"tracks": [{file, name, category, color_index?, folder?, mono}], "dry_run": false}` |
+| `POST /tempo` | `{"tracks": [{file, category}]}` → `bpm`, `bpm_rounded`, `bpm_min`/`bpm_max` (per bar), `steady`, `suggested_mode`, `signature_beats`, `beats`, `downbeats`, `sources` |
+| `POST /tempo/apply` | `{beats, downbeats, duration, mode: "constant" \| "variable", bpm?, factor: 0.5 \| 1 \| 2, signature_beats?, folder?, import_to_pro_tools}` → `midi_path`, `imported`, `applied` |
 
 `/apply` creates (or reuses) one Basic Folder per category in the order of `categories.json`,
 imports each file after the previous track (ConvertAudio; mono first when `mono` is true and the
 stereo analysis recommends it), renames each new track by ID to a name made unique beforehand,
 colours folders and tracks, then re-reads the session and reports `name_ok`, `folder_ok` and
 `color_ok` per track. `dry_run` returns the plan for the preview without touching Pro Tools.
+
+`/tempo` mixes the drum and percussion stems (else bass, guitars, keys and synths, else all
+stems) to mono at 22.05 kHz, runs Beat This! and cleans the beats against the median beat gap
+(double-time passages dropped, pauses filled). `steady` means every beat lies within 30 ms of
+one straight grid; the app then suggests a constant tempo. `/tempo/apply` writes a tempo-only
+MIDI file (one tempo, or one tempo per bar so each bar line falls on its detected downbeat),
+imports it through PTSL (Pro Tools shows its MIDI Import Options dialog; the call returns when
+the user closes it) and reads a Bars|Beats position back to check that the tempo changed:
+`applied` is false when the dialog was cancelled.
 
 `audio: "auto"` runs layer D only for tracks the text layers could not settle; the front end
 can first call with `"none"` for an instant result and then with `"auto"`.

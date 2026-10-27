@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 from . import __version__
 from .engine import Engine
 from . import apply as apply_mod
+from . import tempo as tempo_mod
 from .protools import NoSession, ProToolsLost, ProToolsNotResponding, ProToolsUnavailable, session_snapshot
 
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "[::1]"}
@@ -66,6 +67,27 @@ class ApplyTrack(BaseModel):
 class ApplyRequest(BaseModel):
     tracks: list[ApplyTrack] = Field(..., min_length=1, max_length=512)
     dry_run: bool = False
+
+
+class TempoTrack(BaseModel):
+    file: str
+    category: str = "other"
+
+
+class TempoRequest(BaseModel):
+    tracks: list[TempoTrack] = Field(..., min_length=1, max_length=512)
+
+
+class TempoApplyRequest(BaseModel):
+    beats: list[float] = Field(..., min_length=2, max_length=20000)
+    downbeats: list[float] = Field(default_factory=list, max_length=20000)
+    duration: float = Field(..., gt=0)
+    mode: Literal["constant", "variable"]
+    bpm: float | None = Field(default=None, ge=20, le=400)   # constant: the BPM to set
+    factor: Literal[0.5, 1, 2] = 1                           # half / double time
+    signature_beats: int | None = Field(default=None, ge=1, le=16)
+    folder: str | None = None                                # where the .mid goes (else the cache)
+    import_to_pro_tools: bool = True
 
 
 def create_app(engine: Engine, token: str) -> FastAPI:
@@ -153,5 +175,40 @@ def create_app(engine: Engine, token: str) -> FastAPI:
                                    address=engine.config.ptsl_address)
         except (ProToolsUnavailable, NoSession) as exc:
             raise pro_tools_error(exc) from exc
+
+    @app.post("/tempo", dependencies=[Depends(auth)])
+    def tempo(req: TempoRequest) -> dict:
+        missing = [t.file for t in req.tracks if not pathlib.Path(t.file).is_file()]
+        if missing:
+            raise fail(404, "missing_files", "Some files cannot be found.", missing_files=missing)
+        tracker = engine.beat_tracker()
+        if tracker is None:
+            raise fail(503, "tempo_model_not_ready", "The tempo model is still downloading.")
+        try:
+            return tempo_mod.detect(tracker, [t.model_dump() for t in req.tracks]).to_dict()
+        except tempo_mod.NoBeats as exc:
+            raise fail(422, "no_beats", f"No steady beat found: {exc}.") from exc
+
+    @app.post("/tempo/apply", dependencies=[Depends(auth)])
+    def tempo_apply(req: TempoApplyRequest) -> dict:
+        if req.mode == "constant" and req.bpm is None:
+            raise fail(422, "bpm_required", "A constant tempo needs a BPM.")
+        try:
+            events, per_bar, average, check = tempo_mod.make_tempo(
+                req.beats, req.downbeats, req.duration, req.mode, req.bpm, req.factor, req.signature_beats)
+        except (tempo_mod.NoBeats, ValueError) as exc:
+            raise fail(422, "no_beats", str(exc)) from exc
+        folders = ([pathlib.Path(req.folder)] if req.folder else []) + [engine.config.cache_dir / "tempo"]
+        midi = tempo_mod.write_midi(tempo_mod.tempo_midi(events, req.duration, per_bar),
+                                    tempo_mod.midi_name(req.mode, average), folders)
+        out = {"midi_path": str(midi), "mode": req.mode, "bpm": round(average, 2), "beats_per_bar": per_bar,
+               "tempo_events": len(events), "imported": False, "applied": False}
+        if req.import_to_pro_tools:
+            try:
+                out.update(tempo_mod.import_to_pro_tools(midi, events, per_bar, check, engine.config.ptsl_address),
+                           imported=True)
+            except (ProToolsUnavailable, NoSession) as exc:
+                raise pro_tools_error(exc) from exc
+        return out
 
     return app

@@ -46,6 +46,15 @@ class AppAlert {
         return AppAlert('Files not found',
             'These files were moved, renamed or deleted. Remove them from the list or add them again.',
             details: error.files, code: 'missing_files');
+      case 'tempo_model_not_ready':
+        return const AppAlert('The tempo model is still downloading',
+            'BPM detection starts working when the download in the header is finished.',
+            code: 'tempo_model_not_ready');
+      case 'no_beats':
+        return AppAlert('No steady beat found',
+            'TrackMate listens to the drum and percussion stems (or bass, guitars, keys and synths when '
+            'there are none). Add the rhythm stems, or set the tempo in Pro Tools yourself.',
+            details: [error.message], code: 'no_beats');
       case 'engine_unreachable':
         return const AppAlert('The TrackMate engine stopped',
             'Recognition and import need the engine. Restart it to continue; your list stays as it is.',
