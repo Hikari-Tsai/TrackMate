@@ -185,16 +185,68 @@ Code: [`engine/stem_engine/apply.py`](engine/stem_engine/apply.py), [`protools.p
 PTSL currently has no command to create buses, so output routing is not set automatically. See the [integration report](docs/reports/pro-tools-integration.md).
 
 ### 6. Tempo (`/tempo`)
-Code: [`engine/stem_engine/tempo.py`](engine/stem_engine/tempo.py)
+Code: [`engine/stem_engine/tempo.py`](engine/stem_engine/tempo.py) (engine), [`app_state.dart`](app/lib/app_state.dart) and [`tempo_dialog.dart`](app/lib/ui/tempo_dialog.dart) (app)
 
-1. **Sources:** the drum and percussion stems; without them bass, guitars, keys and synths; otherwise all stems. They are mixed to mono at 22.05 kHz at their own level (Beat This!'s spectrogram depends on the level, and raising a quiet mix to full scale adds false beats).
-2. **Beats:** Beat This! `final0` (ONNX) predicts beats and downbeats at 50 frames per second, in overlapping 30-second chunks, with the original preprocessing and peak picking; each peak is then placed between frames by a parabola, so beat gaps are not rounded to 20 ms.
-3. **Clean-up:** against the median beat gap, a beat closer than 0.7 gaps to the previous one is dropped (a passage tracked in double time) and missing beats are put back where the stems pause.
-4. **Constant or variable:** a straight line is fitted through all beats. If every beat lies within 30 ms of it, the tempo is steady and its BPM is the slope; otherwise the BPM shown is the average (total time / beat gaps).
-5. **MIDI:** a tempo-only MIDI file (480 ticks per quarter note): one tempo, or one tempo per bar between detected downbeats (every 4 beats when no downbeats were found), with the time before the first beat at the first bar's tempo, plus the time signature.
-6. **Pro Tools:** PTSL has no tempo command, but importing a MIDI file makes Pro Tools show its *MIDI Import Options* dialog, whose *Import tempo map from MIDI File* replaces the session tempo. PTSL reports success for both OK and Cancel, so TrackMate reads a Bars|Beats position at the last beat (moving the timeline selection there and back) and compares it with its own tempo map.
+**When it runs**
+- The app starts the detection in the background as soon as the stems are recognised, and shows the result in the top right corner.
+- It is detected again when stems are added or removed. A changed category is picked up when you press Preview & apply.
+- A detection that finds no beat, or that waits for the model download, raises no alert. The tempo step of Preview & apply explains it.
 
-On real stems at 85 BPM the result is 85.00 BPM; on the same drums sped up section by section the map gives 76.5, 85.0, 93.6 and 102.0 BPM (true 76.5, 85, 93.5, 102). Details: [tempo report](docs/reports/tempo-detection.md).
+**Which stems are used**
+
+The categories are the ones shown in the list, including your own changes. The first row that applies is used, and all of its stems are mixed together:
+
+| Order | When | Stems used |
+|---|---|---|
+| 1 | There is at least one drum or percussion stem | All **Drums** and **Percussion** stems |
+| 2 | No drums or percussion | All **Bass**, **Guitars**, **Keys** and **Synths** stems |
+| 3 | None of these either | All stems |
+
+**Mixing**
+- Each stem is read as mono at 22.05 kHz, and the stems are added sample by sample from their start, as they are imported at the session start.
+- The level is kept, and only lowered when the sum would clip. Beat This!'s spectrogram depends on the level, and raising a quiet mix to full scale added 8 false beats in a 25-second test.
+- At most 20 minutes are read. Less than 2 seconds, or silence, gives "no steady beat".
+
+**Beat tracking:** Beat This! `final0` (ONNX, FP32), as in the original project:
+1. **Spectrogram:** centred frames with reflect padding, periodic Hann window, n_fft 1024, hop 441 (50 frames per second), magnitude / √1024, 128 Slaney mel bands, then log(1 + 1000·x).
+2. **Model:** chunks of 1500 frames (30 s) overlapping by 12 frames. The 6 frames at each chunk edge are dropped, and where chunks overlap the earlier one wins.
+3. **Peak picking:** a frame is a beat (or downbeat) when its logit is above 0 and the largest within ±3 frames; peaks one frame apart are merged. Each downbeat is moved to the nearest beat.
+4. **Between frames:** each peak is refined with a parabola through it and its two neighbours, so beat times are not multiples of 20 ms. Otherwise, at 120 BPM, the tempo of single beats would jump between 115 and 125 BPM.
+
+**Clean-up:** the main beat gap is the median of all gaps.
+- A beat closer than 0.7 gaps to the previous beat is dropped. This happens when a passage, such as an intro of hi-hats, was tracked in double time.
+- Where the gap to the next beat is several main gaps long, because the stems pause, the missing beats are put back evenly.
+- Downbeats that were dropped move to the nearest remaining beat.
+- Because of this, a tempo change of more than about 30 % within one song is not followed.
+
+**The figures:** with fewer than 5 beats there is no tempo.
+
+| Figure | How it is computed |
+|---|---|
+| Steady? | A straight line is fitted through all beats (beat number → time). Steady when every beat lies within **30 ms** of it |
+| BPM | Steady: 60 / the line's slope. Otherwise the average: 60 × (beats − 1) / (last beat − first beat), so fast passages do not count more than slow ones |
+| Slowest / fastest bar | One tempo per bar, between detected downbeats (every 4 beats when there are none) |
+| Meter | The number of beats per bar, when every bar has the same number; written as x/4 |
+| Suggestion | Steady → constant tempo; otherwise → tempo map |
+
+**The choice before the import** (tempo step of Preview & apply):
+- **Constant tempo:** the BPM rounded to a whole number, which you can change between 20 and 400.
+- **Tempo map:** one tempo per bar, as above.
+- **Keep session tempo:** nothing is imported.
+- **½× half time** keeps every other beat; **2× double time** adds a beat between each pair. The detected meter is then not used, so the file says 4/4.
+
+**MIDI file:** type 0, 480 ticks per quarter note, only tempo and time-signature events.
+- **Constant:** one tempo at tick 0.
+- **Tempo map:** the first tempo starts at tick 0 and also covers the time before the first beat, so the first beat lands at its own time from the session start. After that, one tempo per bar, so every bar line falls on the downbeat heard in the stems.
+- The file is saved next to the stems (`TrackMate Tempo 85 BPM.mid` or `TrackMate Tempo Map (avg 85 BPM).mid`).
+
+**Import into Pro Tools**
+- PTSL has no tempo command. Importing a MIDI file through PTSL makes Pro Tools show its *MIDI Import Options* dialog, where *Import tempo map from MIDI File* replaces the session tempo. On macOS, TrackMate brings Pro Tools to the front for this click. It never clicks for you.
+- The tempo is imported after the tracks.
+- PTSL reports success for OK and for Cancel alike, so TrackMate checks the result. It moves the timeline selection to the last beat, reads that position in Bars|Beats, puts the selection back, and compares the position with its own tempo map (tolerance 0.05 beats).
+- If they differ, the result says the tempo was not changed and offers **Import tempo again**, which imports only the tempo.
+
+**Accuracy:** same beats as the original PyTorch model; 85 BPM stems read as 85.00. The same drums sped up section by section gave a tempo map of 76.5, 85.0, 93.6 and 102.0 BPM (true: 76.5, 85, 93.5, 102). Details: [tempo report](docs/reports/tempo-detection.md).
 
 ## Architecture
 
