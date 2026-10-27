@@ -247,7 +247,7 @@ class _Body extends StatelessWidget {
   }
 }
 
-/// Faint placeholder rows behind a single call to action.
+/// A single call to action on the empty panel.
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.state, this.bridge});
   final AppState state;
@@ -256,33 +256,20 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ready = state.engineState == EngineState.ready && bridge != null;
-    return Stack(children: [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(12, 18, 12, 12),
-        child: Column(children: [
-          for (var i = 0; i < 7; i++)
-            Container(
-              height: 46,
-              margin: const EdgeInsets.only(bottom: 6),
-              decoration: BoxDecoration(color: Palette.surface, borderRadius: BorderRadius.circular(10)),
-            ),
-        ]),
-      ),
-      Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
-                textStyle: const TextStyle(fontFamily: Type.family, fontSize: 16, fontWeight: FontWeight.w600)),
-            icon: const Icon(LucideIcons.folderOpen, size: 18),
-            label: const Text('Add audio files'),
-            onPressed: ready ? () async => state.addFiles(await bridge!.pickFiles()) : null,
-          ),
-          const SizedBox(height: 12),
-          const Text('or drag stems and folders here', style: Type.bodyMuted),
-        ]),
-      ),
-    ]);
+    return Center(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
+              textStyle: const TextStyle(fontFamily: Type.family, fontSize: 16, fontWeight: FontWeight.w600)),
+          icon: const Icon(LucideIcons.folderOpen, size: 18),
+          label: const Text('Add audio files'),
+          onPressed: ready ? () async => state.addFiles(await bridge!.pickFiles()) : null,
+        ),
+        const SizedBox(height: 12),
+        const Text('or drag stems and folders here', style: Type.bodyMuted),
+      ]),
+    );
   }
 }
 
