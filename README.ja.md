@@ -3,8 +3,8 @@
 <p align="center"><a href="README.md">English</a> | <a href="README.zh-TW.md">繁體中文</a> | <b>日本語</b></p>
 
 <p align="center">
-  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg"><img src="https://img.shields.io/badge/Download-macOS%20Universal-5B5BD6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJ2LTQiLz48cG9seWxpbmUgcG9pbnRzPSI3IDEwIDEyIDE1IDE3IDEwIi8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIxNSIgeTI9IjMiLz48L3N2Zz4K" alt="macOS 版（ユニバーサル）をダウンロード"></a>
-  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip"><img src="https://img.shields.io/badge/Download-Windows%20x64-5B5BD6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJ2LTQiLz48cG9seWxpbmUgcG9pbnRzPSI3IDEwIDEyIDE1IDE3IDEwIi8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIxNSIgeTI9IjMiLz48L3N2Zz4K" alt="Windows x64 版をダウンロード"></a>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg"><img src="https://img.shields.io/badge/macOS_Universal-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS 版（ユニバーサル）をダウンロード"></a>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip"><img src="https://img.shields.io/badge/Windows_x64-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0wIDBoMTEuMnYxMS4ySDB6TTEyLjggMEgyNHYxMS4ySDEyLjh6TTAgMTIuOGgxMS4yVjI0SDB6TTEyLjggMTIuOEgyNFYyNEgxMi44eiIvPjwvc3ZnPg==" alt="Windows x64 版をダウンロード"></a>
   <br>
   <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest"><img src="https://img.shields.io/github/v/release/Hikari-Tsai/TrackMate?label=latest%20release" alt="最新リリース"></a>
   <a href="https://github.com/Hikari-Tsai/TrackMate/actions/workflows/ci.yml"><img src="https://github.com/Hikari-Tsai/TrackMate/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
@@ -417,7 +417,7 @@ TrackMate は以下のオープンソースソフトウェア、モデル、デ�
 BibTeX は[英語版](README.md#references)を参照してください。
 
 ### 商標
-Pro Tools、AudioSuite、Avid は Avid Technology, Inc. の商標です。TrackMate は Avid と提携しておらず、Avid の承認も受けていません。Pro Tools Scripting Library（PTSL）は Avid が提供しています。
+Pro Tools、AudioSuite、Avid は Avid Technology, Inc. の商標です。TrackMate は Avid と提携しておらず、Avid の承認も受けていません。Pro Tools Scripting Library（PTSL）は Avid が提供しています。Apple、macOS、Apple ロゴは Apple Inc. の商標、Windows と Windows ロゴは Microsoft Corporation の商標で、どのシステム用のダウンロードかを示すためだけに使っています。
 
 ## ライセンス
 <sub>[English](README.md#license)</sub>
