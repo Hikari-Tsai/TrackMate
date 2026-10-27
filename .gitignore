@@ -1,6 +1,9 @@
 # Local only: planning notes and material that is not part of the project
 internal/
 
+# Local tool settings (launch configurations of the coding assistant)
+.claude/
+
 # Build output, downloaded SDKs and models, test sessions
 build/
 dist/
@@ -14,6 +17,10 @@ experiments/c_layer_embedding/results/details_*.json
 # Run logs written by the Pro Tools probes
 tools/*/results/
 
+# Gradio (tools/peav_space): local run state and flagged samples
+.gradio/
+flagged/
+
 # Python
 .venv/
 __pycache__/
@@ -21,8 +28,16 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 
+# Secrets and logs
+.env
+.env.*
+*.log
+
 # Editors and OS
 .DS_Store
+Thumbs.db
+desktop.ini
 .idea/
 *.iml
 .vscode/
+*.swp
