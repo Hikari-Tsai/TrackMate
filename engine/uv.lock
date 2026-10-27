@@ -814,7 +814,7 @@ wheels = [
 
 [[package]]
 name = "stem-engine"
-version = "0.99.0"
+version = "0.99.1"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
