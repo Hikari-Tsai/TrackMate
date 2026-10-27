@@ -1,0 +1,27 @@
+{
+ "description": "Models downloaded on first run. Revisions are pinned commits; every file is checked against its SHA-256 before use.",
+ "models": {
+  "qwen3_embedding": {
+   "layer": "C",
+   "repo": "aaatmy/Qwen3-Embedding-0.6B-ONNX",
+   "revision": "3d5cc8f4da093282243bee287b122dac6c383608",
+   "onnx": "onnx/model_q8_int8compute.onnx",
+   "files": {
+    "tokenizer.json": {"size": 11423705, "sha256": "def76fb086971c7867b829c23a26261e38d9d74e02139253b38aeb9df8b4b50a"},
+    "onnx/model_q8_int8compute.onnx": {"size": 1118338216, "sha256": "57efc8e87b5ee2c7d662b7e53273b5cdb5d251344358e88493b9667bc8898de0"},
+    "LICENSE": {"size": 11358, "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"}
+   }
+  },
+  "peav_audio": {
+   "layer": "D",
+   "repo": "aaatmy/pe-av-small-audio-ONNX",
+   "revision": "299615edbe5bc29d44d50cacd0e25ad69088f22b",
+   "onnx": "onnx/model_q8.onnx",
+   "files": {
+    "onnx/model_q8.onnx": {"size": 221744170, "sha256": "b3579b7a76d11b35d0feaa231618a53fa2f38d839f246af5d71ebdf9b61235b3"},
+    "scoring.json": {"size": 232, "sha256": "6d3a7617073583a347f4f55933dc63d009538e401c96672d3632eb369751727c"},
+    "LICENSE": {"size": 11357, "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"}
+   }
+  }
+ }
+}

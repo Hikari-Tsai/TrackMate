@@ -1,0 +1,13 @@
+[project]
+name = "stereo-analysis"
+version = "0.1.0"
+description = "Mono / fake-stereo / hard-pan detection for mixing stems (rank-1 covariance residual)"
+requires-python = ">=3.11"
+dependencies = ["numpy", "soundfile"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["stereo_analyzer.py"]

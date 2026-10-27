@@ -1,0 +1,276 @@
+{
+  "pe-av-small": {
+    "native": {
+      "n": 12236,
+      "accuracy": 0.9537,
+      "balanced_accuracy": 0.9307,
+      "macro_f1": 0.9209,
+      "recall_at_3": 0.9928,
+      "per_class": {
+        "clarinet": {
+          "n": 732,
+          "recall": 0.5451,
+          "precision": 0.9591,
+          "f1": 0.6951
+        },
+        "distorted electric guitar": {
+          "n": 955,
+          "recall": 0.9822,
+          "precision": 0.9915,
+          "f1": 0.9868
+        },
+        "female singer": {
+          "n": 1142,
+          "recall": 0.9921,
+          "precision": 1.0,
+          "f1": 0.996
+        },
+        "flute": {
+          "n": 3167,
+          "recall": 0.94,
+          "precision": 0.9297,
+          "f1": 0.9348
+        },
+        "piano": {
+          "n": 2609,
+          "recall": 1.0,
+          "precision": 0.9768,
+          "f1": 0.9883
+        },
+        "tenor saxophone": {
+          "n": 325,
+          "recall": 0.9938,
+          "precision": 0.8198,
+          "f1": 0.8985
+        },
+        "trumpet": {
+          "n": 406,
+          "recall": 0.9975,
+          "precision": 0.7926,
+          "f1": 0.8833
+        },
+        "violin": {
+          "n": 2900,
+          "recall": 0.9948,
+          "precision": 0.9737,
+          "f1": 0.9841
+        }
+      },
+      "by_source": {
+        "test": {
+          "n": 12236,
+          "accuracy": 0.9537
+        }
+      },
+      "top_confusions": [
+        "clarinet->flute: 206",
+        "flute->trumpet: 79",
+        "clarinet->tenor saxophone: 61",
+        "flute->piano: 42",
+        "flute->violin: 41",
+        "clarinet->violin: 36",
+        "clarinet->trumpet: 18",
+        "flute->clarinet: 16"
+      ]
+    },
+    "family10": {
+      "n": 12236,
+      "accuracy": 0.962,
+      "balanced_accuracy": 0.9745,
+      "macro_f1": 0.9605,
+      "recall_at_3": 0.989,
+      "per_class": {
+        "brass": {
+          "n": 406,
+          "recall": 1.0,
+          "precision": 0.8354,
+          "f1": 0.9103
+        },
+        "guitar": {
+          "n": 955,
+          "recall": 0.9508,
+          "precision": 0.9598,
+          "f1": 0.9553
+        },
+        "keys": {
+          "n": 2609,
+          "recall": 0.9992,
+          "precision": 0.9613,
+          "f1": 0.9799
+        },
+        "strings": {
+          "n": 2900,
+          "recall": 0.989,
+          "precision": 0.9686,
+          "f1": 0.9787
+        },
+        "vocal": {
+          "n": 1142,
+          "recall": 0.9982,
+          "precision": 0.9811,
+          "f1": 0.9896
+        },
+        "woodwinds": {
+          "n": 4224,
+          "recall": 0.9096,
+          "precision": 0.9928,
+          "f1": 0.9493
+        }
+      },
+      "by_source": {
+        "test": {
+          "n": 12236,
+          "accuracy": 0.962
+        }
+      },
+      "top_confusions": [
+        "woodwinds->keys: 101",
+        "woodwinds->strings: 92",
+        "woodwinds->brass: 77",
+        "woodwinds->synth: 41",
+        "woodwinds->guitar: 35",
+        "guitar->bass: 27",
+        "woodwinds->vocal: 21",
+        "strings->woodwinds: 21"
+      ]
+    },
+    "seconds": 2945.5
+  },
+  "laion-clap": {
+    "native": {
+      "n": 12236,
+      "accuracy": 0.9545,
+      "balanced_accuracy": 0.9485,
+      "macro_f1": 0.9239,
+      "recall_at_3": 0.995,
+      "per_class": {
+        "clarinet": {
+          "n": 732,
+          "recall": 0.918,
+          "precision": 0.7525,
+          "f1": 0.8271
+        },
+        "distorted electric guitar": {
+          "n": 955,
+          "recall": 0.978,
+          "precision": 0.9936,
+          "f1": 0.9858
+        },
+        "female singer": {
+          "n": 1142,
+          "recall": 0.993,
+          "precision": 0.9947,
+          "f1": 0.9939
+        },
+        "flute": {
+          "n": 3167,
+          "recall": 0.9009,
+          "precision": 0.9828,
+          "f1": 0.94
+        },
+        "piano": {
+          "n": 2609,
+          "recall": 0.9697,
+          "precision": 0.9879,
+          "f1": 0.9787
+        },
+        "tenor saxophone": {
+          "n": 325,
+          "recall": 0.8523,
+          "precision": 0.8445,
+          "f1": 0.8484
+        },
+        "trumpet": {
+          "n": 406,
+          "recall": 0.9828,
+          "precision": 0.7125,
+          "f1": 0.8261
+        },
+        "violin": {
+          "n": 2900,
+          "recall": 0.9931,
+          "precision": 0.9894,
+          "f1": 0.9912
+        }
+      },
+      "by_source": {
+        "test": {
+          "n": 12236,
+          "accuracy": 0.9545
+        }
+      },
+      "top_confusions": [
+        "flute->clarinet: 160",
+        "flute->trumpet: 113",
+        "clarinet->flute: 45",
+        "piano->tenor saxophone: 42",
+        "tenor saxophone->clarinet: 37",
+        "piano->trumpet: 27",
+        "flute->piano: 26",
+        "distorted electric guitar->violin: 11"
+      ]
+    },
+    "family10": {
+      "n": 12236,
+      "accuracy": 0.9163,
+      "balanced_accuracy": 0.8873,
+      "macro_f1": 0.8663,
+      "recall_at_3": 0.99,
+      "per_class": {
+        "brass": {
+          "n": 406,
+          "recall": 0.9729,
+          "precision": 0.5316,
+          "f1": 0.6876
+        },
+        "guitar": {
+          "n": 955,
+          "recall": 0.5414,
+          "precision": 0.9792,
+          "f1": 0.6972
+        },
+        "keys": {
+          "n": 2609,
+          "recall": 0.898,
+          "precision": 0.9861,
+          "f1": 0.94
+        },
+        "strings": {
+          "n": 2900,
+          "recall": 0.99,
+          "precision": 0.9285,
+          "f1": 0.9583
+        },
+        "vocal": {
+          "n": 1142,
+          "recall": 0.9834,
+          "precision": 0.9382,
+          "f1": 0.9602
+        },
+        "woodwinds": {
+          "n": 4224,
+          "recall": 0.9382,
+          "precision": 0.9711,
+          "f1": 0.9544
+        }
+      },
+      "by_source": {
+        "test": {
+          "n": 12236,
+          "accuracy": 0.9163
+        }
+      },
+      "top_confusions": [
+        "guitar->strings: 177",
+        "woodwinds->brass: 175",
+        "keys->brass: 165",
+        "guitar->bass: 163",
+        "keys->woodwinds: 70",
+        "guitar->vocal: 67",
+        "woodwinds->strings: 34",
+        "woodwinds->keys: 30"
+      ]
+    },
+    "seconds": 535.1
+  }
+}

@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    name: Engine and stereo analysis tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: libsndfile (used by soundfile)
+        run: sudo apt-get update && sudo apt-get install -y libsndfile1
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Engine tests
+        working-directory: engine
+        run: |
+          uv sync --group dev
+          uv run pytest -q
+      - name: Stereo analysis tests
+        working-directory: stereo_analysis
+        run: ../engine/.venv/bin/python -m pytest -q
+
+  app:
+    name: App analysis and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.8"
+          channel: stable
+          cache: true
+      - name: Analyze and test
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test --exclude-tags golden

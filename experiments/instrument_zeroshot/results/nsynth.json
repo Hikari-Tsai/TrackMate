@@ -1,0 +1,344 @@
+{
+  "pe-av-small": {
+    "native": {
+      "n": 4096,
+      "accuracy": 0.7515,
+      "balanced_accuracy": 0.7759,
+      "macro_f1": 0.7609,
+      "recall_at_3": 0.9204,
+      "per_class": {
+        "bass": {
+          "n": 843,
+          "recall": 0.6512,
+          "precision": 0.6914,
+          "f1": 0.6707
+        },
+        "brass": {
+          "n": 269,
+          "recall": 0.9294,
+          "precision": 0.8013,
+          "f1": 0.8606
+        },
+        "flute": {
+          "n": 180,
+          "recall": 0.6389,
+          "precision": 0.7372,
+          "f1": 0.6845
+        },
+        "guitar": {
+          "n": 652,
+          "recall": 0.7009,
+          "precision": 0.8175,
+          "f1": 0.7547
+        },
+        "keyboard": {
+          "n": 766,
+          "recall": 0.8159,
+          "precision": 0.7135,
+          "f1": 0.7613
+        },
+        "mallet": {
+          "n": 202,
+          "recall": 0.9158,
+          "precision": 0.5987,
+          "f1": 0.7241
+        },
+        "organ": {
+          "n": 502,
+          "recall": 0.6135,
+          "precision": 0.7797,
+          "f1": 0.6867
+        },
+        "reed": {
+          "n": 235,
+          "recall": 0.7872,
+          "precision": 0.8447,
+          "f1": 0.815
+        },
+        "string": {
+          "n": 306,
+          "recall": 0.9902,
+          "precision": 0.9352,
+          "f1": 0.9619
+        },
+        "vocal": {
+          "n": 141,
+          "recall": 0.7163,
+          "precision": 0.6645,
+          "f1": 0.6894
+        }
+      },
+      "by_source": {
+        "acoustic": {
+          "n": 1689,
+          "accuracy": 0.9082
+        },
+        "electronic": {
+          "n": 1372,
+          "accuracy": 0.7398
+        },
+        "synthetic": {
+          "n": 1035,
+          "accuracy": 0.5111
+        }
+      },
+      "top_confusions": [
+        "guitar->keyboard: 133",
+        "bass->mallet: 102",
+        "keyboard->bass: 93",
+        "bass->guitar: 87",
+        "bass->keyboard: 79",
+        "guitar->bass: 58",
+        "reed->brass: 45",
+        "flute->organ: 43"
+      ]
+    },
+    "family10": {
+      "n": 3894,
+      "accuracy": 0.5568,
+      "balanced_accuracy": 0.6261,
+      "macro_f1": 0.6671,
+      "recall_at_3": 0.8105,
+      "per_class": {
+        "bass": {
+          "n": 843,
+          "recall": 0.2539,
+          "precision": 0.7456,
+          "f1": 0.3788
+        },
+        "brass": {
+          "n": 269,
+          "recall": 0.7844,
+          "precision": 0.7276,
+          "f1": 0.7549
+        },
+        "guitar": {
+          "n": 652,
+          "recall": 0.6656,
+          "precision": 0.868,
+          "f1": 0.7535
+        },
+        "keys": {
+          "n": 1268,
+          "recall": 0.5355,
+          "precision": 0.883,
+          "f1": 0.6667
+        },
+        "strings": {
+          "n": 306,
+          "recall": 0.9902,
+          "precision": 0.9439,
+          "f1": 0.9665
+        },
+        "vocal": {
+          "n": 141,
+          "recall": 0.5532,
+          "precision": 0.3628,
+          "f1": 0.4382
+        },
+        "woodwinds": {
+          "n": 415,
+          "recall": 0.6,
+          "precision": 0.8737,
+          "f1": 0.7114
+        }
+      },
+      "by_source": {
+        "acoustic": {
+          "n": 1487,
+          "accuracy": 0.8447
+        },
+        "electronic": {
+          "n": 1372,
+          "accuracy": 0.5649
+        },
+        "synthetic": {
+          "n": 1035,
+          "accuracy": 0.1324
+        }
+      },
+      "top_confusions": [
+        "bass->sfx: 435",
+        "keys->sfx: 286",
+        "keys->synth: 126",
+        "keys->vocal: 106",
+        "bass->drums: 105",
+        "guitar->keys: 81",
+        "guitar->sfx: 65",
+        "woodwinds->brass: 64"
+      ]
+    },
+    "seconds": 18.1
+  },
+  "laion-clap": {
+    "native": {
+      "n": 4096,
+      "accuracy": 0.397,
+      "balanced_accuracy": 0.4067,
+      "macro_f1": 0.3611,
+      "recall_at_3": 0.7629,
+      "per_class": {
+        "bass": {
+          "n": 843,
+          "recall": 0.6441,
+          "precision": 0.3906,
+          "f1": 0.4863
+        },
+        "brass": {
+          "n": 269,
+          "recall": 0.7212,
+          "precision": 0.2939,
+          "f1": 0.4177
+        },
+        "flute": {
+          "n": 180,
+          "recall": 0.2944,
+          "precision": 0.4953,
+          "f1": 0.3693
+        },
+        "guitar": {
+          "n": 652,
+          "recall": 0.181,
+          "precision": 0.4338,
+          "f1": 0.2554
+        },
+        "keyboard": {
+          "n": 766,
+          "recall": 0.1044,
+          "precision": 0.7477,
+          "f1": 0.1833
+        },
+        "mallet": {
+          "n": 202,
+          "recall": 0.8614,
+          "precision": 0.2125,
+          "f1": 0.3408
+        },
+        "organ": {
+          "n": 502,
+          "recall": 0.5139,
+          "precision": 0.5233,
+          "f1": 0.5186
+        },
+        "reed": {
+          "n": 235,
+          "recall": 0.217,
+          "precision": 0.7183,
+          "f1": 0.3333
+        },
+        "string": {
+          "n": 306,
+          "recall": 0.4869,
+          "precision": 0.8713,
+          "f1": 0.6247
+        },
+        "vocal": {
+          "n": 141,
+          "recall": 0.0426,
+          "precision": 1.0,
+          "f1": 0.0816
+        }
+      },
+      "by_source": {
+        "acoustic": {
+          "n": 1689,
+          "accuracy": 0.444
+        },
+        "electronic": {
+          "n": 1372,
+          "accuracy": 0.3069
+        },
+        "synthetic": {
+          "n": 1035,
+          "accuracy": 0.4396
+        }
+      },
+      "top_confusions": [
+        "keyboard->bass: 278",
+        "guitar->bass: 262",
+        "keyboard->mallet: 256",
+        "guitar->mallet: 253",
+        "reed->brass: 146",
+        "bass->mallet: 128",
+        "organ->bass: 113",
+        "keyboard->guitar: 109"
+      ]
+    },
+    "family10": {
+      "n": 3894,
+      "accuracy": 0.3333,
+      "balanced_accuracy": 0.369,
+      "macro_f1": 0.3401,
+      "recall_at_3": 0.6328,
+      "per_class": {
+        "bass": {
+          "n": 843,
+          "recall": 0.6429,
+          "precision": 0.3407,
+          "f1": 0.4454
+        },
+        "brass": {
+          "n": 269,
+          "recall": 0.803,
+          "precision": 0.2538,
+          "f1": 0.3857
+        },
+        "guitar": {
+          "n": 652,
+          "recall": 0.2193,
+          "precision": 0.4028,
+          "f1": 0.284
+        },
+        "keys": {
+          "n": 1268,
+          "recall": 0.086,
+          "precision": 0.916,
+          "f1": 0.1572
+        },
+        "strings": {
+          "n": 306,
+          "recall": 0.4902,
+          "precision": 0.9375,
+          "f1": 0.6438
+        },
+        "vocal": {
+          "n": 141,
+          "recall": 0.0142,
+          "precision": 1.0,
+          "f1": 0.028
+        },
+        "woodwinds": {
+          "n": 415,
+          "recall": 0.3277,
+          "precision": 0.6538,
+          "f1": 0.4366
+        }
+      },
+      "by_source": {
+        "acoustic": {
+          "n": 1487,
+          "accuracy": 0.4035
+        },
+        "electronic": {
+          "n": 1372,
+          "accuracy": 0.1552
+        },
+        "synthetic": {
+          "n": 1035,
+          "accuracy": 0.4686
+        }
+      },
+      "top_confusions": [
+        "keys->bass: 535",
+        "guitar->bass: 359",
+        "keys->brass: 247",
+        "woodwinds->brass: 201",
+        "keys->guitar: 155",
+        "guitar->sfx: 120",
+        "keys->sfx: 119",
+        "strings->bass: 94"
+      ]
+    },
+    "seconds": 190.4
+  }
+}

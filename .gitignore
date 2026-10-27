@@ -1,0 +1,28 @@
+# Local only: planning notes and material that is not part of the project
+internal/
+
+# Build output, downloaded SDKs and models, test sessions
+build/
+dist/
+*.spec
+
+# Datasets and caches (download them again, see docs/reports/)
+experiments/datasets/
+experiments/*/cache/
+experiments/c_layer_embedding/results/details_*.json
+
+# Run logs written by the Pro Tools probes
+tools/*/results/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Editors and OS
+.DS_Store
+.idea/
+*.iml
+.vscode/

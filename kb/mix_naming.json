@@ -1,0 +1,6256 @@
+{
+  "schema_version": "1.0.0",
+  "name": "Mix session track naming conventions",
+  "description": "Conventional track names used in mixing sessions, grouped by instrument family, for filename/track-name matching. Instruments and modifiers are kept in separate tables so a name like 'Snare Top 2' resolves to instrument=snare_top plus modifiers.",
+  "fields": {
+    "category.id": "Stable identifier for the family; categories are listed in conventional session order.",
+    "category.model_label": "Closest label of a common 10-class instrument-family set (sfx, woodwinds, brass, bass, strings, synth, drums, vocal, guitar, keys) for fallback agreement checks.",
+    "instrument.id": "Stable identifier, unique across the file.",
+    "instrument.canonical": "Preferred display name used when renaming.",
+    "instrument.parent": "Optional id of a broader instrument (kick_in -> kick) so results can be rolled up.",
+    "instrument.generic": "true for family-level words (Drums, Guitar, Keys); a specific match in the same category wins over a generic one.",
+    "instrument.aliases": "Full words or phrases. Match as whole tokens / token sequences, case-insensitive.",
+    "instrument.abbreviations": "Short codes. Match ONLY as a complete token, never as a substring.",
+    "instrument.zh": "Traditional Chinese aliases (matched as substrings after normalisation; longest first).",
+    "instrument.ja": "Japanese aliases (matched as substrings; longest first).",
+    "instrument.notes": "Free-text hints for humans."
+  },
+  "matching_rules": {
+    "normalize": [
+      "Unicode NFKC (full-width letters/digits/brackets -> half-width), keep CJK characters",
+      "Remove the file extension",
+      "Replace _ - . , + ( ) [ ] { } 【 】 「 」 / \\ with spaces",
+      "Split camelCase and letter-digit boundaries: 'SnareTop2' -> 'snare top 2', 'Gtr1' -> 'gtr 1'",
+      "Lower-case Latin text",
+      "Drop tempo/key/date noise before matching: '\\d{2,3}\\s?bpm', '\\b[a-g](#|b)?\\s?(maj|min|m)\\b', 8-digit dates"
+    ],
+    "match_order": [
+      "Longest phrase first (so 'bass drum' -> kick before 'bass', 'kick in' before 'kick', '古箏' before '箏')",
+      "aliases: whole-token phrases; abbreviations: exact single token only",
+      "zh / ja: substring match on the normalised string, longest first",
+      "A token consumed by an instrument match cannot be reused by another match"
+    ],
+    "resolution": [
+      "instrument > modifier",
+      "non-generic > generic within the same category",
+      "If two different categories remain, return both and mark the result ambiguous (do not guess; fall back to audio classification)",
+      "Words not found in any table are kept verbatim when renaming (never silently dropped)"
+    ],
+    "numbering": "Trailing numbers (1, 01, #1, (2)) are kept as the instance number: 'Tom 2', 'BV 03'."
+  },
+  "categories": [
+    {
+      "id": "drums",
+      "name": "Drums",
+      "zh": "鼓組",
+      "ja": "ドラム",
+      "model_label": "drums",
+      "instruments": [
+        {
+          "id": "drums",
+          "canonical": "Drums",
+          "generic": true,
+          "aliases": [
+            "drums",
+            "drum",
+            "drum kit",
+            "drumkit",
+            "kit",
+            "drum set",
+            "drumset",
+            "drms"
+          ],
+          "abbreviations": [
+            "dr",
+            "drm",
+            "dms"
+          ],
+          "zh": [
+            "鼓組",
+            "爵士鼓",
+            "套鼓",
+            "鼓"
+          ],
+          "ja": [
+            "ドラム",
+            "ドラムス",
+            "ドラムセット"
+          ]
+        },
+        {
+          "id": "kick",
+          "canonical": "Kick",
+          "aliases": [
+            "kick",
+            "kick drum",
+            "bass drum",
+            "kik"
+          ],
+          "abbreviations": [
+            "kd",
+            "bd",
+            "k"
+          ],
+          "zh": [
+            "大鼓",
+            "低音大鼓",
+            "大鼓收音"
+          ],
+          "ja": [
+            "キック",
+            "バスドラム",
+            "バスドラ"
+          ]
+        },
+        {
+          "id": "kick_in",
+          "canonical": "Kick In",
+          "parent": "kick",
+          "aliases": [
+            "kick in",
+            "kick inside",
+            "kickin",
+            "bd in",
+            "kd in",
+            "kick beater"
+          ],
+          "abbreviations": [
+            "kin"
+          ],
+          "zh": [
+            "大鼓內"
+          ],
+          "ja": [
+            "キックイン"
+          ]
+        },
+        {
+          "id": "kick_out",
+          "canonical": "Kick Out",
+          "parent": "kick",
+          "aliases": [
+            "kick out",
+            "kick outside",
+            "kickout",
+            "bd out",
+            "kd out",
+            "kick front"
+          ],
+          "abbreviations": [
+            "kout"
+          ],
+          "zh": [
+            "大鼓外"
+          ],
+          "ja": [
+            "キックアウト"
+          ]
+        },
+        {
+          "id": "kick_sub",
+          "canonical": "Kick Sub",
+          "parent": "kick",
+          "aliases": [
+            "kick sub",
+            "subkick",
+            "sub kick",
+            "kick sub mic"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "大鼓低頻"
+          ],
+          "ja": [
+            "サブキック"
+          ]
+        },
+        {
+          "id": "snare",
+          "canonical": "Snare",
+          "aliases": [
+            "snare",
+            "snare drum",
+            "snr",
+            "snar"
+          ],
+          "abbreviations": [
+            "sn",
+            "sd",
+            "s"
+          ],
+          "zh": [
+            "小鼓",
+            "軍鼓"
+          ],
+          "ja": [
+            "スネア",
+            "スネアドラム"
+          ]
+        },
+        {
+          "id": "snare_top",
+          "canonical": "Snare Top",
+          "parent": "snare",
+          "aliases": [
+            "snare top",
+            "snare up",
+            "snare upper",
+            "sn top",
+            "sd top",
+            "snr top",
+            "snareup",
+            "snaretop"
+          ],
+          "abbreviations": [
+            "snt"
+          ],
+          "zh": [
+            "小鼓上"
+          ],
+          "ja": [
+            "スネアトップ",
+            "スネア表"
+          ]
+        },
+        {
+          "id": "snare_bottom",
+          "canonical": "Snare Bottom",
+          "parent": "snare",
+          "aliases": [
+            "snare bottom",
+            "snare bot",
+            "snare btm",
+            "snare down",
+            "snare under",
+            "sn bot",
+            "sd bot",
+            "snr bot",
+            "snaredown",
+            "snarebottom",
+            "snare wires"
+          ],
+          "abbreviations": [
+            "snb"
+          ],
+          "zh": [
+            "小鼓下"
+          ],
+          "ja": [
+            "スネアボトム",
+            "スネア裏"
+          ]
+        },
+        {
+          "id": "rimshot",
+          "canonical": "Rimshot",
+          "parent": "snare",
+          "aliases": [
+            "rimshot",
+            "rim shot",
+            "rim",
+            "sidestick",
+            "side stick",
+            "cross stick"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "鼓邊",
+            "敲邊"
+          ],
+          "ja": [
+            "リムショット",
+            "サイドスティック"
+          ]
+        },
+        {
+          "id": "hihat",
+          "canonical": "Hi-Hat",
+          "aliases": [
+            "hihat",
+            "hi hat",
+            "hi-hat",
+            "hihats",
+            "hi hats",
+            "hat",
+            "hats"
+          ],
+          "abbreviations": [
+            "hh",
+            "hht"
+          ],
+          "zh": [
+            "腳踏鈸",
+            "開合鈸",
+            "踩鑔"
+          ],
+          "ja": [
+            "ハイハット",
+            "ハット"
+          ]
+        },
+        {
+          "id": "tom",
+          "canonical": "Tom",
+          "generic": true,
+          "aliases": [
+            "tom",
+            "toms",
+            "tom tom",
+            "tomtom"
+          ],
+          "abbreviations": [
+            "tm"
+          ],
+          "zh": [
+            "嗵鼓",
+            "通鼓"
+          ],
+          "ja": [
+            "タム"
+          ]
+        },
+        {
+          "id": "tom_rack",
+          "canonical": "Rack Tom",
+          "parent": "tom",
+          "aliases": [
+            "rack tom",
+            "racktom",
+            "rack",
+            "hi tom",
+            "high tom",
+            "mid tom",
+            "tom 1",
+            "tom 2",
+            "tom1",
+            "tom2"
+          ],
+          "abbreviations": [
+            "rt",
+            "t1",
+            "t2"
+          ],
+          "zh": [
+            "中鼓",
+            "高音嗵鼓"
+          ],
+          "ja": [
+            "ハイタム",
+            "ロータム",
+            "ラックタム"
+          ]
+        },
+        {
+          "id": "tom_floor",
+          "canonical": "Floor Tom",
+          "parent": "tom",
+          "aliases": [
+            "floor tom",
+            "floortom",
+            "floor",
+            "lo tom",
+            "low tom",
+            "tom 3",
+            "tom3"
+          ],
+          "abbreviations": [
+            "ft",
+            "t3"
+          ],
+          "zh": [
+            "落地鼓",
+            "落地嗵鼓"
+          ],
+          "ja": [
+            "フロアタム",
+            "フロア"
+          ]
+        },
+        {
+          "id": "cymbals",
+          "canonical": "Cymbals",
+          "generic": true,
+          "aliases": [
+            "cymbal",
+            "cymbals",
+            "cym",
+            "cyms"
+          ],
+          "abbreviations": [
+            "cy"
+          ],
+          "zh": [
+            "銅鈸",
+            "鈸"
+          ],
+          "ja": [
+            "シンバル"
+          ]
+        },
+        {
+          "id": "ride",
+          "canonical": "Ride",
+          "parent": "cymbals",
+          "aliases": [
+            "ride",
+            "ride cymbal",
+            "ride cym",
+            "ride bell"
+          ],
+          "abbreviations": [
+            "rd"
+          ],
+          "zh": [
+            "疊音鈸",
+            "叮叮鈸",
+            "節奏鈸"
+          ],
+          "ja": [
+            "ライド",
+            "ライドシンバル"
+          ]
+        },
+        {
+          "id": "crash",
+          "canonical": "Crash",
+          "parent": "cymbals",
+          "aliases": [
+            "crash",
+            "crash cymbal",
+            "crashes"
+          ],
+          "abbreviations": [
+            "cr"
+          ],
+          "zh": [
+            "碎音鈸"
+          ],
+          "ja": [
+            "クラッシュ",
+            "クラッシュシンバル"
+          ]
+        },
+        {
+          "id": "china",
+          "canonical": "China",
+          "parent": "cymbals",
+          "aliases": [
+            "china",
+            "china cymbal"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "中國鈸"
+          ],
+          "ja": [
+            "チャイナ",
+            "チャイナシンバル"
+          ]
+        },
+        {
+          "id": "splash",
+          "canonical": "Splash",
+          "parent": "cymbals",
+          "aliases": [
+            "splash",
+            "splash cymbal"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "水鈸"
+          ],
+          "ja": [
+            "スプラッシュ"
+          ]
+        },
+        {
+          "id": "overhead",
+          "canonical": "Overheads",
+          "aliases": [
+            "overhead",
+            "overheads",
+            "over head",
+            "ovhd",
+            "ohs",
+            "ohl",
+            "ohr",
+            "cymbal mics"
+          ],
+          "abbreviations": [
+            "oh"
+          ],
+          "zh": [
+            "頂部收音",
+            "頂麥"
+          ],
+          "ja": [
+            "オーバーヘッド",
+            "トップ"
+          ]
+        },
+        {
+          "id": "drum_room",
+          "canonical": "Drum Room",
+          "aliases": [
+            "room",
+            "rooms",
+            "drum room",
+            "drum rooms",
+            "kit room",
+            "room mono",
+            "mono room",
+            "trash",
+            "trash mic",
+            "crush",
+            "drum amb",
+            "drum ambience",
+            "far room",
+            "near room"
+          ],
+          "abbreviations": [
+            "rm",
+            "rms"
+          ],
+          "zh": [
+            "房間收音",
+            "鼓房間"
+          ],
+          "ja": [
+            "ルーム",
+            "アンビ",
+            "ドラムアンビ"
+          ],
+          "notes": "'room' alone is ambiguous with reverb returns; see ambiguous_terms."
+        },
+        {
+          "id": "drum_loop",
+          "canonical": "Drum Loop",
+          "aliases": [
+            "drum loop",
+            "drumloop",
+            "loop",
+            "loops",
+            "top loop",
+            "break",
+            "breakbeat",
+            "beat"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "鼓循環",
+            "鼓Loop"
+          ],
+          "ja": [
+            "ドラムループ",
+            "ループ"
+          ]
+        },
+        {
+          "id": "drum_machine",
+          "canonical": "Drum Machine",
+          "aliases": [
+            "drum machine",
+            "drummachine",
+            "808 kit",
+            "909",
+            "tr 808",
+            "tr 909",
+            "707",
+            "linndrum",
+            "programmed drums",
+            "prog drums",
+            "drum prog"
+          ],
+          "abbreviations": [
+            "dm"
+          ],
+          "zh": [
+            "鼓機",
+            "節奏機"
+          ],
+          "ja": [
+            "ドラムマシン",
+            "打ち込みドラム"
+          ]
+        },
+        {
+          "id": "clap",
+          "canonical": "Clap",
+          "aliases": [
+            "clap",
+            "claps",
+            "handclap",
+            "handclaps",
+            "hand clap"
+          ],
+          "abbreviations": [
+            "clp"
+          ],
+          "zh": [
+            "拍手"
+          ],
+          "ja": [
+            "クラップ",
+            "ハンドクラップ"
+          ]
+        },
+        {
+          "id": "snap",
+          "canonical": "Snap",
+          "aliases": [
+            "snap",
+            "snaps",
+            "finger snap",
+            "fingersnap"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "彈指",
+            "響指"
+          ],
+          "ja": [
+            "スナップ",
+            "フィンガースナップ"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "percussion",
+      "name": "Percussion",
+      "zh": "打擊樂",
+      "ja": "パーカッション",
+      "model_label": "drums",
+      "instruments": [
+        {
+          "id": "percussion",
+          "canonical": "Percussion",
+          "generic": true,
+          "aliases": [
+            "percussion",
+            "percussions",
+            "perc",
+            "percs",
+            "perx"
+          ],
+          "abbreviations": [
+            "pc",
+            "prc"
+          ],
+          "zh": [
+            "打擊樂",
+            "打擊"
+          ],
+          "ja": [
+            "パーカッション",
+            "パーカス"
+          ]
+        },
+        {
+          "id": "shaker",
+          "canonical": "Shaker",
+          "aliases": [
+            "shaker",
+            "shakers",
+            "egg",
+            "egg shaker"
+          ],
+          "abbreviations": [
+            "shk"
+          ],
+          "zh": [
+            "沙鈴",
+            "沙蛋"
+          ],
+          "ja": [
+            "シェイカー",
+            "シェーカー"
+          ]
+        },
+        {
+          "id": "tambourine",
+          "canonical": "Tambourine",
+          "aliases": [
+            "tambourine",
+            "tamb",
+            "tambo",
+            "tamborine",
+            "pandeiro",
+            "pandero"
+          ],
+          "abbreviations": [
+            "tam"
+          ],
+          "zh": [
+            "鈴鼓"
+          ],
+          "ja": [
+            "タンバリン",
+            "タンバ"
+          ]
+        },
+        {
+          "id": "maracas",
+          "canonical": "Maracas",
+          "aliases": [
+            "maracas",
+            "maraca"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "沙槌"
+          ],
+          "ja": [
+            "マラカス"
+          ]
+        },
+        {
+          "id": "conga",
+          "canonical": "Conga",
+          "aliases": [
+            "conga",
+            "congas",
+            "tumba",
+            "quinto"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "康加鼓"
+          ],
+          "ja": [
+            "コンガ"
+          ]
+        },
+        {
+          "id": "bongo",
+          "canonical": "Bongo",
+          "aliases": [
+            "bongo",
+            "bongos"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "邦哥鼓",
+            "邦戈鼓"
+          ],
+          "ja": [
+            "ボンゴ"
+          ]
+        },
+        {
+          "id": "cajon",
+          "canonical": "Cajon",
+          "aliases": [
+            "cajon",
+            "cajón",
+            "cajons"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "木箱鼓"
+          ],
+          "ja": [
+            "カホン"
+          ]
+        },
+        {
+          "id": "djembe",
+          "canonical": "Djembe",
+          "aliases": [
+            "djembe",
+            "djembes",
+            "jembe"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "非洲鼓",
+            "金貝鼓"
+          ],
+          "ja": [
+            "ジャンベ"
+          ]
+        },
+        {
+          "id": "timbales",
+          "canonical": "Timbales",
+          "aliases": [
+            "timbales",
+            "timbale",
+            "timbal"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "天巴鼓"
+          ],
+          "ja": [
+            "ティンバレス"
+          ]
+        },
+        {
+          "id": "cowbell",
+          "canonical": "Cowbell",
+          "aliases": [
+            "cowbell",
+            "cow bell",
+            "cowbells"
+          ],
+          "abbreviations": [
+            "cb"
+          ],
+          "zh": [
+            "牛鈴"
+          ],
+          "ja": [
+            "カウベル"
+          ]
+        },
+        {
+          "id": "agogo",
+          "canonical": "Agogo",
+          "aliases": [
+            "agogo",
+            "agogo bells",
+            "agogô"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "阿哥哥鈴"
+          ],
+          "ja": [
+            "アゴゴ"
+          ]
+        },
+        {
+          "id": "clave",
+          "canonical": "Clave",
+          "aliases": [
+            "clave",
+            "claves"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "響棒"
+          ],
+          "ja": [
+            "クラベス"
+          ]
+        },
+        {
+          "id": "guiro",
+          "canonical": "Guiro",
+          "aliases": [
+            "guiro",
+            "güiro",
+            "guira"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "刮瓜"
+          ],
+          "ja": [
+            "ギロ"
+          ]
+        },
+        {
+          "id": "cabasa",
+          "canonical": "Cabasa",
+          "aliases": [
+            "cabasa",
+            "afoxe",
+            "afuche"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "卡巴薩"
+          ],
+          "ja": [
+            "カバサ"
+          ]
+        },
+        {
+          "id": "woodblock",
+          "canonical": "Woodblock",
+          "aliases": [
+            "woodblock",
+            "wood block",
+            "woodblocks",
+            "temple block",
+            "temple blocks"
+          ],
+          "abbreviations": [
+            "wb"
+          ],
+          "zh": [
+            "木魚",
+            "木塊"
+          ],
+          "ja": [
+            "ウッドブロック",
+            "テンプルブロック"
+          ]
+        },
+        {
+          "id": "triangle",
+          "canonical": "Triangle",
+          "aliases": [
+            "triangle",
+            "triangles",
+            "triangolo",
+            "triangulo"
+          ],
+          "abbreviations": [
+            "tri"
+          ],
+          "zh": [
+            "三角鐵"
+          ],
+          "ja": [
+            "トライアングル"
+          ]
+        },
+        {
+          "id": "chimes",
+          "canonical": "Chimes",
+          "aliases": [
+            "chimes",
+            "wind chimes",
+            "windchimes",
+            "mark tree",
+            "bar chimes",
+            "bell tree"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "風鈴",
+            "音樹"
+          ],
+          "ja": [
+            "ウィンドチャイム",
+            "ツリーチャイム",
+            "チャイム"
+          ]
+        },
+        {
+          "id": "tubular_bells",
+          "canonical": "Tubular Bells",
+          "aliases": [
+            "tubular bells",
+            "tubularbells",
+            "orchestral chimes",
+            "tubes"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "管鐘"
+          ],
+          "ja": [
+            "チューブラーベル"
+          ]
+        },
+        {
+          "id": "timpani",
+          "canonical": "Timpani",
+          "aliases": [
+            "timpani",
+            "timp",
+            "timps",
+            "kettle drum",
+            "kettledrum"
+          ],
+          "abbreviations": [
+            "tmp"
+          ],
+          "zh": [
+            "定音鼓"
+          ],
+          "ja": [
+            "ティンパニ",
+            "ティンパニー"
+          ]
+        },
+        {
+          "id": "orchestral_perc",
+          "canonical": "Orchestral Percussion",
+          "aliases": [
+            "gran cassa",
+            "bass drum orch",
+            "concert bass drum",
+            "piatti",
+            "concert cymbals",
+            "suspended cymbal",
+            "sus cym",
+            "tam tam",
+            "tamtam",
+            "gong"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "大鑼",
+            "鑼"
+          ],
+          "ja": [
+            "グランカッサ",
+            "銅鑼",
+            "ゴング"
+          ]
+        },
+        {
+          "id": "glockenspiel",
+          "canonical": "Glockenspiel",
+          "aliases": [
+            "glockenspiel",
+            "glock",
+            "bells",
+            "orchestra bells"
+          ],
+          "abbreviations": [
+            "glk"
+          ],
+          "zh": [
+            "鐵琴",
+            "鐘琴"
+          ],
+          "ja": [
+            "グロッケン",
+            "グロッケンシュピール",
+            "鉄琴"
+          ]
+        },
+        {
+          "id": "marimba",
+          "canonical": "Marimba",
+          "aliases": [
+            "marimba",
+            "marimbas"
+          ],
+          "abbreviations": [
+            "mar",
+            "mrb"
+          ],
+          "zh": [
+            "馬林巴",
+            "馬林巴琴"
+          ],
+          "ja": [
+            "マリンバ"
+          ]
+        },
+        {
+          "id": "vibraphone",
+          "canonical": "Vibraphone",
+          "aliases": [
+            "vibraphone",
+            "vibes",
+            "vibe",
+            "vibraharp"
+          ],
+          "abbreviations": [
+            "vib",
+            "vibr"
+          ],
+          "zh": [
+            "顫音琴",
+            "電顫琴"
+          ],
+          "ja": [
+            "ビブラフォン",
+            "ヴィブラフォン"
+          ]
+        },
+        {
+          "id": "xylophone",
+          "canonical": "Xylophone",
+          "aliases": [
+            "xylophone",
+            "xylo"
+          ],
+          "abbreviations": [
+            "xyl"
+          ],
+          "zh": [
+            "木琴"
+          ],
+          "ja": [
+            "シロフォン",
+            "木琴"
+          ]
+        },
+        {
+          "id": "mallets",
+          "canonical": "Mallets",
+          "generic": true,
+          "aliases": [
+            "mallet",
+            "mallets",
+            "mallet perc",
+            "keyboard percussion"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "鍵盤打擊樂"
+          ],
+          "ja": [
+            "マレット",
+            "鍵盤打楽器"
+          ]
+        },
+        {
+          "id": "body_perc",
+          "canonical": "Body Percussion",
+          "aliases": [
+            "stomp",
+            "stomps",
+            "foot stomp",
+            "body perc",
+            "body percussion",
+            "slaps",
+            "thigh slap"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "跺腳",
+            "身體打擊"
+          ],
+          "ja": [
+            "ストンプ",
+            "ボディパーカッション"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bass",
+      "name": "Bass",
+      "zh": "貝斯",
+      "ja": "ベース",
+      "model_label": "bass",
+      "instruments": [
+        {
+          "id": "bass",
+          "canonical": "Bass",
+          "generic": true,
+          "aliases": [
+            "bass",
+            "bass guitar",
+            "bassguitar",
+            "bass gtr",
+            "e bass",
+            "electric bass",
+            "fender bass"
+          ],
+          "abbreviations": [
+            "bs",
+            "bss",
+            "ba",
+            "b"
+          ],
+          "zh": [
+            "貝斯",
+            "電貝斯",
+            "低音吉他"
+          ],
+          "ja": [
+            "ベース",
+            "エレキベース",
+            "エレベ"
+          ]
+        },
+        {
+          "id": "bass_di",
+          "canonical": "Bass DI",
+          "parent": "bass",
+          "aliases": [
+            "bass di",
+            "bassdi",
+            "bass direct",
+            "bass line",
+            "bass d i",
+            "bass clean"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "貝斯直錄",
+            "貝斯DI"
+          ],
+          "ja": [
+            "ベースDI",
+            "ベースライン"
+          ]
+        },
+        {
+          "id": "bass_amp",
+          "canonical": "Bass Amp",
+          "parent": "bass",
+          "aliases": [
+            "bass amp",
+            "bass mic",
+            "bass cab",
+            "bass cabinet",
+            "bass amp mic",
+            "bass svt",
+            "bass dirty",
+            "bass drive"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "貝斯音箱",
+            "貝斯麥克風"
+          ],
+          "ja": [
+            "ベースアンプ",
+            "ベースマイク"
+          ]
+        },
+        {
+          "id": "synth_bass",
+          "canonical": "Synth Bass",
+          "parent": "bass",
+          "aliases": [
+            "synth bass",
+            "synthbass",
+            "syn bass",
+            "bass synth",
+            "basssynth",
+            "moog bass",
+            "acid bass",
+            "reese",
+            "reese bass"
+          ],
+          "abbreviations": [
+            "sb",
+            "synb"
+          ],
+          "zh": [
+            "合成器貝斯",
+            "合成貝斯"
+          ],
+          "ja": [
+            "シンセベース",
+            "シンベ"
+          ]
+        },
+        {
+          "id": "sub_bass",
+          "canonical": "Sub Bass",
+          "parent": "bass",
+          "aliases": [
+            "sub bass",
+            "subbass",
+            "sub",
+            "subs",
+            "sine bass"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "超低音",
+            "次低音"
+          ],
+          "ja": [
+            "サブベース"
+          ]
+        },
+        {
+          "id": "bass_808",
+          "canonical": "808",
+          "parent": "bass",
+          "aliases": [
+            "808",
+            "808s",
+            "808 bass",
+            "tr808",
+            "808 sub"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "808貝斯"
+          ],
+          "ja": [
+            "808ベース"
+          ],
+          "notes": "In hip-hop/trap '808' is the bass line; a separate '808 kit' means the drum machine."
+        },
+        {
+          "id": "upright_bass",
+          "canonical": "Upright Bass",
+          "parent": "bass",
+          "aliases": [
+            "upright bass",
+            "uprightbass",
+            "upright",
+            "double bass",
+            "doublebass",
+            "acoustic bass",
+            "stand up bass",
+            "standup bass",
+            "string bass",
+            "jazz bass upright"
+          ],
+          "abbreviations": [
+            "ub",
+            "db"
+          ],
+          "zh": [
+            "低音大提琴",
+            "直立貝斯",
+            "大貝斯"
+          ],
+          "ja": [
+            "ウッドベース",
+            "アップライトベース"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "guitars",
+      "name": "Guitars",
+      "zh": "吉他",
+      "ja": "ギター",
+      "model_label": "guitar",
+      "instruments": [
+        {
+          "id": "guitar",
+          "canonical": "Guitar",
+          "generic": true,
+          "aliases": [
+            "guitar",
+            "guitars",
+            "gtr",
+            "gtrs",
+            "guit",
+            "guitr",
+            "gitarre",
+            "chitarra",
+            "guitarra"
+          ],
+          "abbreviations": [
+            "gt",
+            "g"
+          ],
+          "zh": [
+            "吉他",
+            "吉它"
+          ],
+          "ja": [
+            "ギター"
+          ]
+        },
+        {
+          "id": "electric_guitar",
+          "canonical": "Electric Guitar",
+          "parent": "guitar",
+          "aliases": [
+            "electric guitar",
+            "elec guitar",
+            "elec gtr",
+            "el gtr",
+            "e gtr",
+            "e guitar",
+            "egtr",
+            "elecgtr",
+            "elgtr",
+            "dist gtr",
+            "distorted guitar",
+            "crunch gtr",
+            "overdrive gtr",
+            "clean gtr",
+            "gtr amp",
+            "guitar amp",
+            "gtr cab"
+          ],
+          "abbreviations": [
+            "eg",
+            "egt",
+            "eg1",
+            "eg2"
+          ],
+          "zh": [
+            "電吉他",
+            "電吉它"
+          ],
+          "ja": [
+            "エレキギター",
+            "エレキ",
+            "エレギ",
+            "Eギター"
+          ]
+        },
+        {
+          "id": "acoustic_guitar",
+          "canonical": "Acoustic Guitar",
+          "parent": "guitar",
+          "aliases": [
+            "acoustic guitar",
+            "acoustic",
+            "ac gtr",
+            "acgtr",
+            "acou gtr",
+            "a gtr",
+            "agtr",
+            "acc gtr",
+            "steel string",
+            "steel guitar acoustic",
+            "12 string",
+            "12string",
+            "twelve string"
+          ],
+          "abbreviations": [
+            "ag",
+            "agt",
+            "ag1",
+            "ag2"
+          ],
+          "zh": [
+            "木吉他",
+            "民謠吉他",
+            "原聲吉他"
+          ],
+          "ja": [
+            "アコースティックギター",
+            "アコギ",
+            "フォークギター"
+          ]
+        },
+        {
+          "id": "nylon_guitar",
+          "canonical": "Nylon Guitar",
+          "parent": "guitar",
+          "aliases": [
+            "nylon",
+            "nylon guitar",
+            "nylon gtr",
+            "classical guitar",
+            "classical gtr",
+            "spanish guitar",
+            "flamenco guitar",
+            "gut guitar"
+          ],
+          "abbreviations": [
+            "ng",
+            "cg"
+          ],
+          "zh": [
+            "古典吉他",
+            "尼龍弦吉他"
+          ],
+          "ja": [
+            "ガットギター",
+            "クラシックギター",
+            "ナイロンギター"
+          ]
+        },
+        {
+          "id": "guitar_di",
+          "canonical": "Guitar DI",
+          "parent": "guitar",
+          "aliases": [
+            "guitar di",
+            "gtr di",
+            "eg di",
+            "guitar direct",
+            "gtr direct",
+            "reamp",
+            "re amp"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "吉他直錄",
+            "吉他DI"
+          ],
+          "ja": [
+            "ギターDI"
+          ]
+        },
+        {
+          "id": "rhythm_guitar",
+          "canonical": "Rhythm Guitar",
+          "parent": "guitar",
+          "aliases": [
+            "rhythm guitar",
+            "rhythm gtr",
+            "rhy gtr",
+            "rhy guitar",
+            "rythm gtr",
+            "strum",
+            "strums",
+            "strumming",
+            "chords gtr"
+          ],
+          "abbreviations": [
+            "rg",
+            "rgt"
+          ],
+          "zh": [
+            "節奏吉他",
+            "刷扣吉他"
+          ],
+          "ja": [
+            "リズムギター",
+            "バッキングギター",
+            "バッキング"
+          ]
+        },
+        {
+          "id": "lead_guitar",
+          "canonical": "Lead Guitar",
+          "parent": "guitar",
+          "aliases": [
+            "lead guitar",
+            "lead gtr",
+            "ld gtr",
+            "gtr lead",
+            "guitar solo",
+            "gtr solo",
+            "solo gtr",
+            "guitar riff",
+            "gtr riff",
+            "gtr melody"
+          ],
+          "abbreviations": [
+            "lg",
+            "lgt"
+          ],
+          "zh": [
+            "主奏吉他",
+            "吉他獨奏",
+            "吉他solo"
+          ],
+          "ja": [
+            "リードギター",
+            "ギターソロ"
+          ]
+        },
+        {
+          "id": "slide_guitar",
+          "canonical": "Slide Guitar",
+          "parent": "guitar",
+          "aliases": [
+            "slide guitar",
+            "slide gtr",
+            "bottleneck"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "滑棒吉他"
+          ],
+          "ja": [
+            "スライドギター"
+          ]
+        },
+        {
+          "id": "pedal_steel",
+          "canonical": "Pedal Steel",
+          "aliases": [
+            "pedal steel",
+            "pedalsteel",
+            "steel guitar",
+            "lap steel",
+            "lapsteel",
+            "steel"
+          ],
+          "abbreviations": [
+            "ps"
+          ],
+          "zh": [
+            "夏威夷吉他",
+            "踏板滑音吉他"
+          ],
+          "ja": [
+            "ペダルスチール",
+            "スチールギター"
+          ]
+        },
+        {
+          "id": "dobro",
+          "canonical": "Dobro",
+          "aliases": [
+            "dobro",
+            "resonator",
+            "resonator guitar",
+            "resophonic"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "共鳴吉他"
+          ],
+          "ja": [
+            "ドブロ",
+            "リゾネーター"
+          ]
+        },
+        {
+          "id": "ukulele",
+          "canonical": "Ukulele",
+          "aliases": [
+            "ukulele",
+            "uke",
+            "ukelele"
+          ],
+          "abbreviations": [
+            "uk"
+          ],
+          "zh": [
+            "烏克麗麗",
+            "夏威夷小吉他"
+          ],
+          "ja": [
+            "ウクレレ"
+          ]
+        },
+        {
+          "id": "banjo",
+          "canonical": "Banjo",
+          "aliases": [
+            "banjo",
+            "banjos"
+          ],
+          "abbreviations": [
+            "bjo"
+          ],
+          "zh": [
+            "斑鳩琴",
+            "班卓琴"
+          ],
+          "ja": [
+            "バンジョー"
+          ]
+        },
+        {
+          "id": "mandolin",
+          "canonical": "Mandolin",
+          "aliases": [
+            "mandolin",
+            "mando",
+            "mandoline",
+            "mandola"
+          ],
+          "abbreviations": [
+            "mnd"
+          ],
+          "zh": [
+            "曼陀林"
+          ],
+          "ja": [
+            "マンドリン"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "keys",
+      "name": "Keys",
+      "zh": "鍵盤",
+      "ja": "キーボード",
+      "model_label": "keys",
+      "instruments": [
+        {
+          "id": "keys",
+          "canonical": "Keys",
+          "generic": true,
+          "aliases": [
+            "keys",
+            "keyboard",
+            "keyboards",
+            "kbd",
+            "kbds",
+            "key"
+          ],
+          "abbreviations": [
+            "kb",
+            "kys",
+            "kbs"
+          ],
+          "zh": [
+            "鍵盤",
+            "電子琴"
+          ],
+          "ja": [
+            "キーボード",
+            "鍵盤"
+          ]
+        },
+        {
+          "id": "piano",
+          "canonical": "Piano",
+          "aliases": [
+            "piano",
+            "pianos",
+            "pno",
+            "pnos",
+            "acoustic piano",
+            "ac piano",
+            "pianoforte"
+          ],
+          "abbreviations": [
+            "pf",
+            "pn",
+            "p"
+          ],
+          "zh": [
+            "鋼琴"
+          ],
+          "ja": [
+            "ピアノ"
+          ]
+        },
+        {
+          "id": "grand_piano",
+          "canonical": "Grand Piano",
+          "parent": "piano",
+          "aliases": [
+            "grand piano",
+            "grandpiano",
+            "grand",
+            "concert grand",
+            "steinway",
+            "yamaha c7"
+          ],
+          "abbreviations": [
+            "gp"
+          ],
+          "zh": [
+            "平台鋼琴",
+            "演奏鋼琴"
+          ],
+          "ja": [
+            "グランドピアノ"
+          ]
+        },
+        {
+          "id": "upright_piano",
+          "canonical": "Upright Piano",
+          "parent": "piano",
+          "aliases": [
+            "upright piano",
+            "uprightpiano",
+            "honky tonk",
+            "honkytonk",
+            "felt piano",
+            "tack piano"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "直立鋼琴"
+          ],
+          "ja": [
+            "アップライトピアノ"
+          ]
+        },
+        {
+          "id": "electric_piano",
+          "canonical": "Electric Piano",
+          "aliases": [
+            "electric piano",
+            "elec piano",
+            "e piano",
+            "epiano",
+            "e pno",
+            "ep",
+            "dx ep",
+            "dx7 ep"
+          ],
+          "abbreviations": [
+            "ep",
+            "epno"
+          ],
+          "zh": [
+            "電鋼琴"
+          ],
+          "ja": [
+            "エレクトリックピアノ",
+            "エレピ"
+          ]
+        },
+        {
+          "id": "rhodes",
+          "canonical": "Rhodes",
+          "parent": "electric_piano",
+          "aliases": [
+            "rhodes",
+            "fender rhodes",
+            "rhodes piano"
+          ],
+          "abbreviations": [
+            "rhd"
+          ],
+          "zh": [
+            "羅德斯",
+            "羅茲鋼琴"
+          ],
+          "ja": [
+            "ローズ",
+            "ローズピアノ"
+          ]
+        },
+        {
+          "id": "wurlitzer",
+          "canonical": "Wurlitzer",
+          "parent": "electric_piano",
+          "aliases": [
+            "wurlitzer",
+            "wurli",
+            "wurly",
+            "wurlie"
+          ],
+          "abbreviations": [
+            "wur"
+          ],
+          "zh": [
+            "沃利策"
+          ],
+          "ja": [
+            "ウーリッツァー",
+            "ウーリー"
+          ]
+        },
+        {
+          "id": "organ",
+          "canonical": "Organ",
+          "aliases": [
+            "organ",
+            "organs",
+            "org",
+            "church organ",
+            "pipe organ",
+            "combo organ",
+            "farfisa",
+            "vox continental"
+          ],
+          "abbreviations": [
+            "og"
+          ],
+          "zh": [
+            "風琴",
+            "管風琴"
+          ],
+          "ja": [
+            "オルガン",
+            "パイプオルガン"
+          ]
+        },
+        {
+          "id": "hammond",
+          "canonical": "Hammond",
+          "parent": "organ",
+          "aliases": [
+            "hammond",
+            "hammond organ",
+            "b3",
+            "b 3",
+            "c3",
+            "leslie",
+            "leslie l",
+            "leslie r",
+            "leslie top",
+            "leslie bottom"
+          ],
+          "abbreviations": [
+            "hmd",
+            "ham"
+          ],
+          "zh": [
+            "哈蒙德",
+            "哈蒙德風琴"
+          ],
+          "ja": [
+            "ハモンド",
+            "ハモンドオルガン",
+            "レスリー"
+          ]
+        },
+        {
+          "id": "clavinet",
+          "canonical": "Clavinet",
+          "aliases": [
+            "clavinet",
+            "clav",
+            "clavi"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "克拉維奈琴"
+          ],
+          "ja": [
+            "クラビネット",
+            "クラビ"
+          ]
+        },
+        {
+          "id": "harpsichord",
+          "canonical": "Harpsichord",
+          "aliases": [
+            "harpsichord",
+            "harpsi",
+            "cembalo",
+            "clavecin"
+          ],
+          "abbreviations": [
+            "hpsd"
+          ],
+          "zh": [
+            "大鍵琴"
+          ],
+          "ja": [
+            "チェンバロ",
+            "ハープシコード"
+          ]
+        },
+        {
+          "id": "celesta",
+          "canonical": "Celesta",
+          "aliases": [
+            "celesta",
+            "celeste",
+            "celest"
+          ],
+          "abbreviations": [
+            "cel"
+          ],
+          "zh": [
+            "鋼片琴",
+            "鋼片鐘琴"
+          ],
+          "ja": [
+            "チェレスタ"
+          ]
+        },
+        {
+          "id": "mellotron",
+          "canonical": "Mellotron",
+          "aliases": [
+            "mellotron",
+            "tron",
+            "chamberlin"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "美樂特朗"
+          ],
+          "ja": [
+            "メロトロン"
+          ]
+        },
+        {
+          "id": "accordion",
+          "canonical": "Accordion",
+          "aliases": [
+            "accordion",
+            "accordian",
+            "bandoneon",
+            "concertina",
+            "squeezebox"
+          ],
+          "abbreviations": [
+            "acc",
+            "accd"
+          ],
+          "zh": [
+            "手風琴",
+            "班多鈕手風琴"
+          ],
+          "ja": [
+            "アコーディオン",
+            "バンドネオン"
+          ]
+        },
+        {
+          "id": "melodica",
+          "canonical": "Melodica",
+          "aliases": [
+            "melodica",
+            "pianica",
+            "melodion"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "口風琴"
+          ],
+          "ja": [
+            "鍵盤ハーモニカ",
+            "ピアニカ",
+            "メロディオン"
+          ]
+        },
+        {
+          "id": "toy_piano",
+          "canonical": "Toy Piano",
+          "aliases": [
+            "toy piano",
+            "music box",
+            "musicbox"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "玩具鋼琴",
+            "音樂盒"
+          ],
+          "ja": [
+            "トイピアノ",
+            "オルゴール"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "synths",
+      "name": "Synths",
+      "zh": "合成器",
+      "ja": "シンセ",
+      "model_label": "synth",
+      "instruments": [
+        {
+          "id": "synth",
+          "canonical": "Synth",
+          "generic": true,
+          "aliases": [
+            "synth",
+            "synths",
+            "synthesizer",
+            "synthesiser",
+            "syn",
+            "synthesizers",
+            "analog synth",
+            "poly synth",
+            "polysynth",
+            "mono synth",
+            "monosynth"
+          ],
+          "abbreviations": [
+            "syn",
+            "sy",
+            "syth"
+          ],
+          "zh": [
+            "合成器",
+            "電子合成"
+          ],
+          "ja": [
+            "シンセ",
+            "シンセサイザー"
+          ]
+        },
+        {
+          "id": "synth_pad",
+          "canonical": "Pad",
+          "parent": "synth",
+          "aliases": [
+            "pad",
+            "pads",
+            "synth pad",
+            "synthpad",
+            "warm pad",
+            "string pad",
+            "choir pad",
+            "atmos pad",
+            "ambient pad"
+          ],
+          "abbreviations": [
+            "pd"
+          ],
+          "zh": [
+            "鋪底",
+            "襯底音色"
+          ],
+          "ja": [
+            "パッド",
+            "シンセパッド"
+          ]
+        },
+        {
+          "id": "synth_lead",
+          "canonical": "Synth Lead",
+          "parent": "synth",
+          "aliases": [
+            "synth lead",
+            "lead synth",
+            "syn lead",
+            "saw lead",
+            "square lead",
+            "supersaw",
+            "super saw",
+            "topline synth"
+          ],
+          "abbreviations": [
+            "sl",
+            "sld"
+          ],
+          "zh": [
+            "主旋律合成器",
+            "合成器主旋律"
+          ],
+          "ja": [
+            "シンセリード",
+            "リードシンセ"
+          ]
+        },
+        {
+          "id": "arp",
+          "canonical": "Arp",
+          "parent": "synth",
+          "aliases": [
+            "arp",
+            "arps",
+            "arpeggio",
+            "arpeggiator",
+            "arpegio",
+            "synth arp"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "琶音",
+            "分解和弦"
+          ],
+          "ja": [
+            "アルペジオ",
+            "アルペジエーター"
+          ]
+        },
+        {
+          "id": "pluck",
+          "canonical": "Pluck",
+          "parent": "synth",
+          "aliases": [
+            "pluck",
+            "plucks",
+            "synth pluck",
+            "pluck synth"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "撥音合成器"
+          ],
+          "ja": [
+            "プラック"
+          ]
+        },
+        {
+          "id": "sequence",
+          "canonical": "Sequence",
+          "parent": "synth",
+          "aliases": [
+            "sequence",
+            "seq",
+            "sequencer",
+            "synth seq",
+            "ostinato synth"
+          ],
+          "abbreviations": [
+            "sq"
+          ],
+          "zh": [
+            "音序",
+            "序列"
+          ],
+          "ja": [
+            "シーケンス",
+            "シーケンサー"
+          ]
+        },
+        {
+          "id": "synth_brass",
+          "canonical": "Synth Brass",
+          "parent": "synth",
+          "aliases": [
+            "synth brass",
+            "brass synth",
+            "synbrass",
+            "jump brass"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "合成銅管"
+          ],
+          "ja": [
+            "シンセブラス"
+          ]
+        },
+        {
+          "id": "synth_strings",
+          "canonical": "Synth Strings",
+          "parent": "synth",
+          "aliases": [
+            "synth strings",
+            "string machine",
+            "solina",
+            "string ensemble synth"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "合成弦樂"
+          ],
+          "ja": [
+            "シンセストリングス",
+            "ストリングマシン"
+          ]
+        },
+        {
+          "id": "synth_bell",
+          "canonical": "Synth Bell",
+          "parent": "synth",
+          "aliases": [
+            "synth bell",
+            "synth bells",
+            "bell synth",
+            "fm bell",
+            "dx bell"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "鐘聲合成器"
+          ],
+          "ja": [
+            "シンセベル",
+            "ベル"
+          ]
+        },
+        {
+          "id": "drone",
+          "canonical": "Drone",
+          "parent": "synth",
+          "aliases": [
+            "drone",
+            "drones",
+            "texture",
+            "textures",
+            "atmos",
+            "atmosphere",
+            "soundscape"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "持續音",
+            "氛圍音"
+          ],
+          "ja": [
+            "ドローン",
+            "テクスチャー"
+          ]
+        },
+        {
+          "id": "chord_stab",
+          "canonical": "Chord Stab",
+          "parent": "synth",
+          "aliases": [
+            "stab",
+            "stabs",
+            "chord stab",
+            "chord stabs",
+            "chords",
+            "chord"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "和弦重音"
+          ],
+          "ja": [
+            "スタブ",
+            "コードスタブ"
+          ]
+        },
+        {
+          "id": "vocoder_synth",
+          "canonical": "Vocoder",
+          "parent": "synth",
+          "aliases": [
+            "vocoder",
+            "vocoders"
+          ],
+          "abbreviations": [
+            "voc"
+          ],
+          "zh": [
+            "聲碼器"
+          ],
+          "ja": [
+            "ボコーダー"
+          ],
+          "notes": "'voc' is also used for vocal; see ambiguous_terms."
+        }
+      ]
+    },
+    {
+      "id": "strings",
+      "name": "Strings",
+      "zh": "弦樂",
+      "ja": "ストリングス",
+      "model_label": "strings",
+      "instruments": [
+        {
+          "id": "strings",
+          "canonical": "Strings",
+          "generic": true,
+          "aliases": [
+            "strings",
+            "string",
+            "str",
+            "strs",
+            "string section",
+            "string ensemble",
+            "orchestral strings",
+            "strings section",
+            "orchestra",
+            "orch",
+            "ensemble",
+            "tutti"
+          ],
+          "abbreviations": [
+            "st",
+            "stg"
+          ],
+          "zh": [
+            "弦樂",
+            "弦樂團",
+            "管弦樂",
+            "樂團"
+          ],
+          "ja": [
+            "ストリングス",
+            "弦",
+            "オーケストラ",
+            "弦楽"
+          ]
+        },
+        {
+          "id": "violin",
+          "canonical": "Violin",
+          "aliases": [
+            "violin",
+            "violins",
+            "vln",
+            "vlns",
+            "violin 1",
+            "violin 2",
+            "violin i",
+            "violin ii",
+            "fiddle",
+            "violino"
+          ],
+          "abbreviations": [
+            "vn",
+            "vl",
+            "v1",
+            "v2",
+            "vni",
+            "vnii"
+          ],
+          "zh": [
+            "小提琴",
+            "第一小提琴",
+            "第二小提琴"
+          ],
+          "ja": [
+            "バイオリン",
+            "ヴァイオリン",
+            "1st バイオリン",
+            "2nd バイオリン"
+          ]
+        },
+        {
+          "id": "viola",
+          "canonical": "Viola",
+          "aliases": [
+            "viola",
+            "violas",
+            "vla",
+            "vlas"
+          ],
+          "abbreviations": [
+            "va"
+          ],
+          "zh": [
+            "中提琴"
+          ],
+          "ja": [
+            "ビオラ",
+            "ヴィオラ"
+          ]
+        },
+        {
+          "id": "cello",
+          "canonical": "Cello",
+          "aliases": [
+            "cello",
+            "cellos",
+            "celli",
+            "violoncello",
+            "vlc"
+          ],
+          "abbreviations": [
+            "vc"
+          ],
+          "zh": [
+            "大提琴"
+          ],
+          "ja": [
+            "チェロ"
+          ]
+        },
+        {
+          "id": "contrabass",
+          "canonical": "Contrabass",
+          "aliases": [
+            "contrabass",
+            "contrabasses",
+            "basses",
+            "orchestral bass",
+            "strings bass",
+            "kontrabass",
+            "contrabasso"
+          ],
+          "abbreviations": [
+            "cb",
+            "kb"
+          ],
+          "zh": [
+            "倍大提琴",
+            "低音提琴"
+          ],
+          "ja": [
+            "コントラバス",
+            "コンバス"
+          ],
+          "notes": "Orchestral section bass. A jazz/pop 'upright bass' belongs to bass.upright_bass."
+        },
+        {
+          "id": "harp",
+          "canonical": "Harp",
+          "aliases": [
+            "harp",
+            "harps",
+            "concert harp",
+            "arpa",
+            "celtic harp"
+          ],
+          "abbreviations": [
+            "hp",
+            "hrp"
+          ],
+          "zh": [
+            "豎琴"
+          ],
+          "ja": [
+            "ハープ"
+          ],
+          "notes": "In blues 'harp' means harmonica; see ambiguous_terms."
+        },
+        {
+          "id": "solo_strings",
+          "canonical": "Solo Strings",
+          "parent": "strings",
+          "aliases": [
+            "solo strings",
+            "string quartet",
+            "quartet",
+            "chamber strings",
+            "solo violin",
+            "solo cello"
+          ],
+          "abbreviations": [
+            "sq4"
+          ],
+          "zh": [
+            "弦樂四重奏",
+            "獨奏弦樂"
+          ],
+          "ja": [
+            "弦楽四重奏",
+            "ソロストリングス"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brass",
+      "name": "Brass",
+      "zh": "銅管",
+      "ja": "ブラス",
+      "model_label": "brass",
+      "instruments": [
+        {
+          "id": "brass",
+          "canonical": "Brass",
+          "generic": true,
+          "aliases": [
+            "brass",
+            "brass section",
+            "brass ensemble",
+            "horn section",
+            "horns section",
+            "brs"
+          ],
+          "abbreviations": [
+            "brs"
+          ],
+          "zh": [
+            "銅管",
+            "銅管樂",
+            "銅管組"
+          ],
+          "ja": [
+            "ブラス",
+            "ブラスセクション",
+            "金管"
+          ]
+        },
+        {
+          "id": "trumpet",
+          "canonical": "Trumpet",
+          "aliases": [
+            "trumpet",
+            "trumpets",
+            "tpt",
+            "tpts",
+            "trp",
+            "trpt",
+            "piccolo trumpet"
+          ],
+          "abbreviations": [
+            "tp",
+            "tr"
+          ],
+          "zh": [
+            "小號",
+            "小喇叭"
+          ],
+          "ja": [
+            "トランペット",
+            "ラッパ"
+          ]
+        },
+        {
+          "id": "flugelhorn",
+          "canonical": "Flugelhorn",
+          "aliases": [
+            "flugelhorn",
+            "flugel",
+            "flügelhorn",
+            "flugelhorns"
+          ],
+          "abbreviations": [
+            "flg",
+            "flgh"
+          ],
+          "zh": [
+            "富魯格號",
+            "柔音號"
+          ],
+          "ja": [
+            "フリューゲルホルン",
+            "フリューゲル"
+          ]
+        },
+        {
+          "id": "cornet",
+          "canonical": "Cornet",
+          "aliases": [
+            "cornet",
+            "cornets"
+          ],
+          "abbreviations": [
+            "cnt",
+            "crt"
+          ],
+          "zh": [
+            "短號"
+          ],
+          "ja": [
+            "コルネット"
+          ]
+        },
+        {
+          "id": "trombone",
+          "canonical": "Trombone",
+          "aliases": [
+            "trombone",
+            "trombones",
+            "tbn",
+            "tbns",
+            "trb",
+            "bone",
+            "bones",
+            "bass trombone",
+            "bass bone"
+          ],
+          "abbreviations": [
+            "tb",
+            "btb"
+          ],
+          "zh": [
+            "長號",
+            "伸縮號"
+          ],
+          "ja": [
+            "トロンボーン",
+            "ボントロ"
+          ]
+        },
+        {
+          "id": "french_horn",
+          "canonical": "French Horn",
+          "aliases": [
+            "french horn",
+            "french horns",
+            "frenchhorn",
+            "frenchhorns",
+            "f horn",
+            "horn in f",
+            "corno"
+          ],
+          "abbreviations": [
+            "hn",
+            "hr",
+            "fhn"
+          ],
+          "zh": [
+            "法國號"
+          ],
+          "ja": [
+            "ホルン",
+            "フレンチホルン"
+          ]
+        },
+        {
+          "id": "tuba",
+          "canonical": "Tuba",
+          "aliases": [
+            "tuba",
+            "tubas",
+            "bass tuba",
+            "sousaphone",
+            "sousa"
+          ],
+          "abbreviations": [
+            "tu",
+            "tba"
+          ],
+          "zh": [
+            "低音號",
+            "大號"
+          ],
+          "ja": [
+            "チューバ",
+            "スーザフォン"
+          ]
+        },
+        {
+          "id": "euphonium",
+          "canonical": "Euphonium",
+          "aliases": [
+            "euphonium",
+            "euph",
+            "baritone horn",
+            "tenor horn"
+          ],
+          "abbreviations": [
+            "euph"
+          ],
+          "zh": [
+            "上低音號"
+          ],
+          "ja": [
+            "ユーフォニアム",
+            "ユーフォ"
+          ]
+        },
+        {
+          "id": "horns_pop",
+          "canonical": "Horns",
+          "aliases": [
+            "horns",
+            "horn",
+            "horn stab",
+            "horn stabs",
+            "horn line",
+            "horn riff"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "管樂組"
+          ],
+          "ja": [
+            "ホーン",
+            "ホーンセクション"
+          ],
+          "notes": "In pop/funk 'Horns' usually means a mixed trumpet/sax/trombone section, not French horn."
+        }
+      ]
+    },
+    {
+      "id": "woodwinds",
+      "name": "Woodwinds",
+      "zh": "木管",
+      "ja": "木管",
+      "model_label": "woodwinds",
+      "instruments": [
+        {
+          "id": "woodwinds",
+          "canonical": "Woodwinds",
+          "generic": true,
+          "aliases": [
+            "woodwind",
+            "woodwinds",
+            "winds",
+            "wind section",
+            "reeds"
+          ],
+          "abbreviations": [
+            "ww",
+            "wwd"
+          ],
+          "zh": [
+            "木管",
+            "木管樂"
+          ],
+          "ja": [
+            "木管",
+            "ウッドウィンド"
+          ]
+        },
+        {
+          "id": "flute",
+          "canonical": "Flute",
+          "aliases": [
+            "flute",
+            "flutes",
+            "flt",
+            "alto flute",
+            "bass flute",
+            "concert flute",
+            "flauto"
+          ],
+          "abbreviations": [
+            "fl"
+          ],
+          "zh": [
+            "長笛"
+          ],
+          "ja": [
+            "フルート"
+          ]
+        },
+        {
+          "id": "piccolo",
+          "canonical": "Piccolo",
+          "aliases": [
+            "piccolo",
+            "piccolos",
+            "picc"
+          ],
+          "abbreviations": [
+            "pic"
+          ],
+          "zh": [
+            "短笛"
+          ],
+          "ja": [
+            "ピッコロ"
+          ]
+        },
+        {
+          "id": "clarinet",
+          "canonical": "Clarinet",
+          "aliases": [
+            "clarinet",
+            "clarinets",
+            "clar",
+            "clt",
+            "bass clarinet",
+            "bass clar"
+          ],
+          "abbreviations": [
+            "cl",
+            "bcl"
+          ],
+          "zh": [
+            "單簧管",
+            "豎笛",
+            "黑管"
+          ],
+          "ja": [
+            "クラリネット",
+            "クラ"
+          ]
+        },
+        {
+          "id": "oboe",
+          "canonical": "Oboe",
+          "aliases": [
+            "oboe",
+            "oboes",
+            "english horn",
+            "cor anglais"
+          ],
+          "abbreviations": [
+            "ob",
+            "eh"
+          ],
+          "zh": [
+            "雙簧管",
+            "英國管"
+          ],
+          "ja": [
+            "オーボエ",
+            "イングリッシュホルン"
+          ]
+        },
+        {
+          "id": "bassoon",
+          "canonical": "Bassoon",
+          "aliases": [
+            "bassoon",
+            "bassoons",
+            "bsn",
+            "contrabassoon",
+            "fagotto",
+            "fagott"
+          ],
+          "abbreviations": [
+            "fg",
+            "bn"
+          ],
+          "zh": [
+            "低音管",
+            "巴松管"
+          ],
+          "ja": [
+            "ファゴット",
+            "バスーン"
+          ]
+        },
+        {
+          "id": "sax",
+          "canonical": "Sax",
+          "generic": true,
+          "aliases": [
+            "sax",
+            "saxes",
+            "saxophone",
+            "saxophones",
+            "saxs",
+            "sax section"
+          ],
+          "abbreviations": [
+            "sx"
+          ],
+          "zh": [
+            "薩克斯風",
+            "薩克斯"
+          ],
+          "ja": [
+            "サックス",
+            "サキソフォン"
+          ]
+        },
+        {
+          "id": "alto_sax",
+          "canonical": "Alto Sax",
+          "parent": "sax",
+          "aliases": [
+            "alto sax",
+            "altosax",
+            "alto saxophone",
+            "a sax",
+            "asax",
+            "alto"
+          ],
+          "abbreviations": [
+            "as",
+            "asx"
+          ],
+          "zh": [
+            "中音薩克斯風"
+          ],
+          "ja": [
+            "アルトサックス",
+            "アルト"
+          ]
+        },
+        {
+          "id": "tenor_sax",
+          "canonical": "Tenor Sax",
+          "parent": "sax",
+          "aliases": [
+            "tenor sax",
+            "tenorsax",
+            "tenor saxophone",
+            "t sax",
+            "tsax",
+            "tenor"
+          ],
+          "abbreviations": [
+            "ts",
+            "tsx"
+          ],
+          "zh": [
+            "次中音薩克斯風"
+          ],
+          "ja": [
+            "テナーサックス",
+            "テナー"
+          ]
+        },
+        {
+          "id": "baritone_sax",
+          "canonical": "Baritone Sax",
+          "parent": "sax",
+          "aliases": [
+            "baritone sax",
+            "bari sax",
+            "barisax",
+            "bari",
+            "b sax",
+            "bsax",
+            "baritone saxophone"
+          ],
+          "abbreviations": [
+            "bs",
+            "bsx"
+          ],
+          "zh": [
+            "上低音薩克斯風"
+          ],
+          "ja": [
+            "バリトンサックス",
+            "バリサク"
+          ]
+        },
+        {
+          "id": "soprano_sax",
+          "canonical": "Soprano Sax",
+          "parent": "sax",
+          "aliases": [
+            "soprano sax",
+            "sopranosax",
+            "soprano saxophone",
+            "s sax",
+            "ssax"
+          ],
+          "abbreviations": [
+            "ss",
+            "ssx"
+          ],
+          "zh": [
+            "高音薩克斯風"
+          ],
+          "ja": [
+            "ソプラノサックス",
+            "ソプラノ"
+          ]
+        },
+        {
+          "id": "recorder",
+          "canonical": "Recorder",
+          "aliases": [
+            "recorder",
+            "recorders",
+            "tin whistle",
+            "penny whistle",
+            "irish whistle"
+          ],
+          "abbreviations": [
+          ],
+          "zh": [
+            "直笛",
+            "錫笛"
+          ],
+          "ja": [
+            "リコーダー",
+            "ティンホイッスル"
+          ]
+        },
+        {
+          "id": "pan_flute",
+          "canonical": "Pan Flute",
+          "aliases": [
+            "pan flute",
+            "panflute",
+            "pan pipes",
+            "panpipes",
+            "zampona"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "排笛",
+            "排簫"
+          ],
+          "ja": [
+            "パンフルート"
+          ]
+        },
+        {
+          "id": "harmonica",
+          "canonical": "Harmonica",
+          "aliases": [
+            "harmonica",
+            "harmonicas",
+            "blues harp",
+            "mouth organ"
+          ],
+          "abbreviations": [
+            "hca",
+            "hmc"
+          ],
+          "zh": [
+            "口琴"
+          ],
+          "ja": [
+            "ハーモニカ",
+            "ブルースハープ"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "world",
+      "name": "World / Ethnic",
+      "zh": "民族樂器",
+      "ja": "民族楽器",
+      "model_label": "strings",
+      "instruments": [
+        {
+          "id": "erhu",
+          "canonical": "Erhu",
+          "aliases": [
+            "erhu",
+            "er hu",
+            "huqin"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "二胡",
+            "胡琴"
+          ],
+          "ja": [
+            "二胡"
+          ]
+        },
+        {
+          "id": "guzheng",
+          "canonical": "Guzheng",
+          "aliases": [
+            "guzheng",
+            "gu zheng",
+            "zheng"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "古箏"
+          ],
+          "ja": [
+            "古箏",
+            "グーチェン"
+          ]
+        },
+        {
+          "id": "pipa",
+          "canonical": "Pipa",
+          "aliases": [
+            "pipa",
+            "pi pa"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "琵琶"
+          ],
+          "ja": [
+            "琵琶",
+            "ピーパー"
+          ]
+        },
+        {
+          "id": "yangqin",
+          "canonical": "Yangqin",
+          "aliases": [
+            "yangqin",
+            "yang qin",
+            "hammered dulcimer",
+            "dulcimer",
+            "santur",
+            "cimbalom"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "揚琴"
+          ],
+          "ja": [
+            "揚琴",
+            "ダルシマー",
+            "ツィンバロム"
+          ]
+        },
+        {
+          "id": "dizi",
+          "canonical": "Dizi",
+          "aliases": [
+            "dizi",
+            "di zi",
+            "chinese flute",
+            "bamboo flute"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "笛子",
+            "竹笛"
+          ],
+          "ja": [
+            "笛子",
+            "竹笛"
+          ]
+        },
+        {
+          "id": "xiao",
+          "canonical": "Xiao",
+          "aliases": [
+            "xiao",
+            "dongxiao"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "洞簫",
+            "簫"
+          ],
+          "ja": [
+            "洞簫"
+          ]
+        },
+        {
+          "id": "suona",
+          "canonical": "Suona",
+          "aliases": [
+            "suona",
+            "chinese shawm",
+            "shawm"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "嗩吶"
+          ],
+          "ja": [
+            "チャルメラ",
+            "スオナ"
+          ]
+        },
+        {
+          "id": "koto",
+          "canonical": "Koto",
+          "aliases": [
+            "koto",
+            "kotos"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "日本箏"
+          ],
+          "ja": [
+            "箏",
+            "お琴"
+          ],
+          "notes": "Match 'koto' only as a whole token: 'Kotoba' (言葉) must NOT match."
+        },
+        {
+          "id": "shamisen",
+          "canonical": "Shamisen",
+          "aliases": [
+            "shamisen",
+            "samisen",
+            "sanshin",
+            "tsugaru"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "三味線",
+            "三線"
+          ],
+          "ja": [
+            "三味線",
+            "三線",
+            "しゃみせん"
+          ]
+        },
+        {
+          "id": "shakuhachi",
+          "canonical": "Shakuhachi",
+          "aliases": [
+            "shakuhachi",
+            "shinobue",
+            "ryuteki"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "尺八",
+            "日本笛"
+          ],
+          "ja": [
+            "尺八",
+            "篠笛",
+            "龍笛"
+          ]
+        },
+        {
+          "id": "taiko",
+          "canonical": "Taiko",
+          "aliases": [
+            "taiko",
+            "wadaiko",
+            "odaiko",
+            "chu daiko",
+            "shime daiko"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "日本太鼓"
+          ],
+          "ja": [
+            "和太鼓",
+            "大太鼓",
+            "締太鼓"
+          ],
+          "notes": "Plain '太鼓' in Japanese can mean any drum; it is listed in ambiguous_terms."
+        },
+        {
+          "id": "sitar",
+          "canonical": "Sitar",
+          "aliases": [
+            "sitar",
+            "sitars",
+            "tanpura",
+            "tambura"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "西塔琴"
+          ],
+          "ja": [
+            "シタール",
+            "タンプーラ"
+          ]
+        },
+        {
+          "id": "tabla",
+          "canonical": "Tabla",
+          "aliases": [
+            "tabla",
+            "tablas",
+            "dhol",
+            "dholak",
+            "mridangam"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "塔布拉鼓"
+          ],
+          "ja": [
+            "タブラ"
+          ]
+        },
+        {
+          "id": "oud",
+          "canonical": "Oud",
+          "aliases": [
+            "oud",
+            "ud",
+            "saz",
+            "baglama",
+            "bouzouki",
+            "buzuki"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "烏德琴",
+            "布祖基琴"
+          ],
+          "ja": [
+            "ウード",
+            "ブズーキ"
+          ]
+        },
+        {
+          "id": "darbuka",
+          "canonical": "Darbuka",
+          "aliases": [
+            "darbuka",
+            "darbouka",
+            "doumbek",
+            "goblet drum",
+            "riq",
+            "frame drum",
+            "bodhran",
+            "tar"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "中東鼓",
+            "框鼓"
+          ],
+          "ja": [
+            "ダラブッカ",
+            "フレームドラム"
+          ]
+        },
+        {
+          "id": "balalaika",
+          "canonical": "Balalaika",
+          "aliases": [
+            "balalaika",
+            "domra"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "巴拉萊卡琴"
+          ],
+          "ja": [
+            "バラライカ"
+          ]
+        },
+        {
+          "id": "kalimba",
+          "canonical": "Kalimba",
+          "aliases": [
+            "kalimba",
+            "mbira",
+            "thumb piano"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "卡林巴",
+            "拇指琴"
+          ],
+          "ja": [
+            "カリンバ",
+            "親指ピアノ"
+          ]
+        },
+        {
+          "id": "steel_drum",
+          "canonical": "Steel Drum",
+          "aliases": [
+            "steel drum",
+            "steel drums",
+            "steelpan",
+            "steel pan",
+            "handpan",
+            "hang drum",
+            "tongue drum"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "鋼鼓",
+            "手碟"
+          ],
+          "ja": [
+            "スティールパン",
+            "ハンドパン"
+          ]
+        },
+        {
+          "id": "bagpipes",
+          "canonical": "Bagpipes",
+          "aliases": [
+            "bagpipes",
+            "bagpipe",
+            "uilleann pipes",
+            "pipes"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "風笛"
+          ],
+          "ja": [
+            "バグパイプ"
+          ]
+        },
+        {
+          "id": "hurdy_gurdy",
+          "canonical": "Hurdy Gurdy",
+          "aliases": [
+            "hurdy gurdy",
+            "hurdygurdy",
+            "nyckelharpa"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "手搖琴",
+            "古提琴"
+          ],
+          "ja": [
+            "ハーディガーディ"
+          ]
+        },
+        {
+          "id": "didgeridoo",
+          "canonical": "Didgeridoo",
+          "aliases": [
+            "didgeridoo",
+            "didge",
+            "jaw harp",
+            "jews harp",
+            "mouth harp"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "迪吉里杜管",
+            "口簧琴"
+          ],
+          "ja": [
+            "ディジュリドゥ",
+            "口琴(くちごと)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lead_vocals",
+      "name": "Lead Vocals",
+      "zh": "主唱",
+      "ja": "ボーカル",
+      "model_label": "vocal",
+      "instruments": [
+        {
+          "id": "vocal",
+          "canonical": "Vocal",
+          "generic": true,
+          "aliases": [
+            "vocal",
+            "vocals",
+            "vox",
+            "voxs",
+            "voice",
+            "voices",
+            "voc",
+            "vocs",
+            "singer",
+            "sing",
+            "acapella",
+            "a cappella",
+            "acappella"
+          ],
+          "abbreviations": [
+            "vo",
+            "vx",
+            "v"
+          ],
+          "zh": [
+            "人聲",
+            "歌聲",
+            "唱"
+          ],
+          "ja": [
+            "ボーカル",
+            "ヴォーカル",
+            "歌",
+            "うた",
+            "歌唱"
+          ]
+        },
+        {
+          "id": "lead_vocal",
+          "canonical": "Lead Vocal",
+          "parent": "vocal",
+          "aliases": [
+            "lead vocal",
+            "lead vocals",
+            "lead vox",
+            "ld vox",
+            "ld vocal",
+            "main vocal",
+            "main vox",
+            "lead voice",
+            "lead singer",
+            "leadvox",
+            "mainvox",
+            "vox main",
+            "vocal main",
+            "vocal lead"
+          ],
+          "abbreviations": [
+            "lv",
+            "lvx",
+            "mv"
+          ],
+          "zh": [
+            "主唱",
+            "主旋律人聲"
+          ],
+          "ja": [
+            "メインボーカル",
+            "リードボーカル",
+            "メイン"
+          ]
+        },
+        {
+          "id": "vocal_double",
+          "canonical": "Vocal Double",
+          "parent": "vocal",
+          "aliases": [
+            "vocal double",
+            "vox double",
+            "vox dbl",
+            "lv dbl",
+            "lead dbl",
+            "double",
+            "doubles",
+            "dbl",
+            "dub",
+            "vox dub",
+            "triple",
+            "quad"
+          ],
+          "abbreviations": [
+            "dbl",
+            "vd"
+          ],
+          "zh": [
+            "疊唱",
+            "人聲疊錄"
+          ],
+          "ja": [
+            "ダブル",
+            "ボーカルダブル",
+            "重ね"
+          ]
+        },
+        {
+          "id": "vocal_harmony",
+          "canonical": "Vocal Harmony",
+          "parent": "vocal",
+          "aliases": [
+            "harmony",
+            "harmonies",
+            "harm",
+            "harms",
+            "vox harm",
+            "lead harmony",
+            "harmony high",
+            "harmony low",
+            "hi harm",
+            "lo harm",
+            "3rd above",
+            "3rd below",
+            "5th"
+          ],
+          "abbreviations": [
+            "hv",
+            "hrm"
+          ],
+          "zh": [
+            "高音和聲",
+            "低音和聲",
+            "主唱和聲"
+          ],
+          "ja": [
+            "ハモリ",
+            "ハーモニー",
+            "上ハモ",
+            "下ハモ"
+          ]
+        },
+        {
+          "id": "adlib",
+          "canonical": "Ad-lib",
+          "parent": "vocal",
+          "aliases": [
+            "adlib",
+            "adlibs",
+            "ad lib",
+            "ad libs",
+            "ad-lib",
+            "ad-libs",
+            "vox adlib",
+            "fills vox",
+            "shouts",
+            "hype",
+            "hypes"
+          ],
+          "abbreviations": [
+            "adl"
+          ],
+          "zh": [
+            "即興人聲",
+            "即興"
+          ],
+          "ja": [
+            "アドリブ",
+            "フェイク"
+          ]
+        },
+        {
+          "id": "rap_vocal",
+          "canonical": "Rap Vocal",
+          "parent": "vocal",
+          "aliases": [
+            "rap",
+            "raps",
+            "rap vox",
+            "rap vocal",
+            "verse vox",
+            "mc",
+            "emcee",
+            "spit"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "饒舌",
+            "說唱"
+          ],
+          "ja": [
+            "ラップ"
+          ]
+        },
+        {
+          "id": "spoken_word",
+          "canonical": "Spoken Word",
+          "parent": "vocal",
+          "aliases": [
+            "spoken",
+            "spoken word",
+            "speech",
+            "talk",
+            "narration",
+            "narrator",
+            "voiceover",
+            "voice over",
+            "vo talk",
+            "dialogue",
+            "dialog",
+            "intro talk"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "口白",
+            "旁白",
+            "說話",
+            "對白"
+          ],
+          "ja": [
+            "セリフ",
+            "台詞",
+            "ナレーション",
+            "語り"
+          ]
+        },
+        {
+          "id": "whisper",
+          "canonical": "Whisper",
+          "parent": "vocal",
+          "aliases": [
+            "whisper",
+            "whispers",
+            "whispered",
+            "breath vox",
+            "breaths"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "耳語",
+            "氣音"
+          ],
+          "ja": [
+            "ささやき",
+            "ウィスパー",
+            "ブレス"
+          ]
+        },
+        {
+          "id": "scratch_vocal",
+          "canonical": "Scratch Vocal",
+          "parent": "vocal",
+          "aliases": [
+            "scratch vocal",
+            "scratch vox",
+            "guide vocal",
+            "guide vox",
+            "demo vox",
+            "ref vox",
+            "reference vocal",
+            "temp vox"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "導唱",
+            "示範人聲",
+            "Demo人聲"
+          ],
+          "ja": [
+            "仮歌",
+            "ガイドボーカル",
+            "ガイドメロ"
+          ]
+        },
+        {
+          "id": "talkbox",
+          "canonical": "Talkbox",
+          "parent": "vocal",
+          "aliases": [
+            "talkbox",
+            "talk box",
+            "autotune vox",
+            "tuned vox",
+            "vocal chop",
+            "vocal chops",
+            "vox chop",
+            "vox chops",
+            "vocal fx",
+            "vox fx"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "對講盒",
+            "人聲切片",
+            "人聲效果"
+          ],
+          "ja": [
+            "トークボックス",
+            "ボイスチョップ",
+            "ボーカルチョップ"
+          ]
+        },
+        {
+          "id": "falsetto",
+          "canonical": "Falsetto",
+          "parent": "vocal",
+          "aliases": [
+            "falsetto",
+            "head voice",
+            "growl",
+            "scream",
+            "screams",
+            "fry",
+            "belt"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "假音",
+            "嘶吼"
+          ],
+          "ja": [
+            "ファルセット",
+            "裏声",
+            "シャウト",
+            "グロウル"
+          ]
+        },
+        {
+          "id": "whistle",
+          "canonical": "Whistle",
+          "aliases": [
+            "whistle",
+            "whistles",
+            "whistling",
+            "humming",
+            "hum",
+            "hums"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "口哨",
+            "哼唱"
+          ],
+          "ja": [
+            "口笛",
+            "ハミング"
+          ]
+        },
+        {
+          "id": "beatbox",
+          "canonical": "Beatbox",
+          "aliases": [
+            "beatbox",
+            "beat box",
+            "beatboxing",
+            "mouth perc",
+            "vocal perc",
+            "vocal percussion"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "節奏口技",
+            "Beatbox"
+          ],
+          "ja": [
+            "ビートボックス",
+            "ボイパ",
+            "ボイスパーカッション"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "backing_vocals",
+      "name": "Backing Vocals",
+      "zh": "和聲",
+      "ja": "コーラス",
+      "model_label": "vocal",
+      "instruments": [
+        {
+          "id": "backing_vocal",
+          "canonical": "Backing Vocals",
+          "generic": true,
+          "aliases": [
+            "backing vocal",
+            "backing vocals",
+            "backing vox",
+            "backingvox",
+            "backing voice",
+            "background vocal",
+            "background vocals",
+            "bg vox",
+            "bgv",
+            "bgvs",
+            "bv",
+            "bvs",
+            "bkv",
+            "bkg vox",
+            "bkgd vox",
+            "bck vox",
+            "bvox",
+            "bk vox",
+            "chorus vocal",
+            "chorus vox"
+          ],
+          "abbreviations": [
+            "bv",
+            "bvs",
+            "bgv",
+            "bgvs",
+            "bkv",
+            "bvx",
+            "cho",
+            "cho1",
+            "cho2",
+            "cho3"
+          ],
+          "zh": [
+            "和聲",
+            "合音",
+            "背景和聲",
+            "伴唱"
+          ],
+          "ja": [
+            "コーラス",
+            "バックコーラス",
+            "バッキングボーカル",
+            "コーラスワーク"
+          ],
+          "notes": "Japanese sessions use 'cho' / 'Cho' / 'コーラス' for backing vocals (e.g. 'song(cho)_Track1')."
+        },
+        {
+          "id": "choir",
+          "canonical": "Choir",
+          "parent": "backing_vocal",
+          "aliases": [
+            "choir",
+            "choirs",
+            "chorale",
+            "choral",
+            "gospel choir",
+            "kids choir",
+            "children choir",
+            "satb",
+            "soprano",
+            "altos",
+            "tenors",
+            "basses choir"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "合唱",
+            "合唱團",
+            "詩班"
+          ],
+          "ja": [
+            "合唱",
+            "クワイア",
+            "聖歌隊",
+            "混声合唱"
+          ]
+        },
+        {
+          "id": "gang_vocals",
+          "canonical": "Gang Vocals",
+          "parent": "backing_vocal",
+          "aliases": [
+            "gang vocals",
+            "gang vox",
+            "gang",
+            "crowd vox",
+            "group vocals",
+            "group vox",
+            "chant",
+            "chants",
+            "shout vox",
+            "hey",
+            "heys"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "群唱",
+            "團唱",
+            "吶喊"
+          ],
+          "ja": [
+            "ギャングボーカル",
+            "掛け声",
+            "シャウトコーラス"
+          ]
+        },
+        {
+          "id": "oohs_aahs",
+          "canonical": "Oohs & Aahs",
+          "parent": "backing_vocal",
+          "aliases": [
+            "oohs",
+            "ooh",
+            "oohhs",
+            "ooohhh",
+            "aahs",
+            "aah",
+            "aahhs",
+            "aaahhh",
+            "uuhs",
+            "las",
+            "la la",
+            "na na",
+            "pads vox",
+            "vocal pad",
+            "vox pad"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "哼鳴和聲",
+            "Ooh和聲"
+          ],
+          "ja": [
+            "ウー",
+            "アー",
+            "スキャット"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fx",
+      "name": "FX / Sound Design",
+      "zh": "音效",
+      "ja": "効果音",
+      "model_label": "sfx",
+      "instruments": [
+        {
+          "id": "sfx",
+          "canonical": "SFX",
+          "generic": true,
+          "aliases": [
+            "sfx",
+            "fx",
+            "fxs",
+            "sfxs",
+            "sound fx",
+            "sound effect",
+            "sound effects",
+            "sound design",
+            "efx",
+            "effects"
+          ],
+          "abbreviations": [
+            "se",
+            "sx"
+          ],
+          "zh": [
+            "音效",
+            "效果音",
+            "特效"
+          ],
+          "ja": [
+            "効果音",
+            "SE",
+            "サウンドエフェクト"
+          ]
+        },
+        {
+          "id": "riser",
+          "canonical": "Riser",
+          "parent": "sfx",
+          "aliases": [
+            "riser",
+            "risers",
+            "uplifter",
+            "uplifters",
+            "build up",
+            "buildup",
+            "sweep up",
+            "sweepup",
+            "noise riser",
+            "tension"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "上升音效",
+            "漸強音效"
+          ],
+          "ja": [
+            "ライザー",
+            "アップリフター"
+          ]
+        },
+        {
+          "id": "downlifter",
+          "canonical": "Downlifter",
+          "parent": "sfx",
+          "aliases": [
+            "downlifter",
+            "downlifters",
+            "sweep down",
+            "sweepdown",
+            "falldown",
+            "fall",
+            "drop fx",
+            "down sweep"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "下降音效"
+          ],
+          "ja": [
+            "ダウンリフター"
+          ]
+        },
+        {
+          "id": "impact",
+          "canonical": "Impact",
+          "parent": "sfx",
+          "aliases": [
+            "impact",
+            "impacts",
+            "hit",
+            "hits",
+            "boom",
+            "booms",
+            "sub drop",
+            "subdrop",
+            "slam",
+            "crash fx",
+            "braam",
+            "brahm"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "衝擊音效",
+            "重擊"
+          ],
+          "ja": [
+            "インパクト",
+            "ヒット",
+            "サブドロップ"
+          ]
+        },
+        {
+          "id": "whoosh",
+          "canonical": "Whoosh",
+          "parent": "sfx",
+          "aliases": [
+            "whoosh",
+            "whooshes",
+            "swoosh",
+            "swish",
+            "sweep",
+            "sweeps",
+            "transition",
+            "transitions",
+            "trans fx"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "呼嘯音效",
+            "轉場音效"
+          ],
+          "ja": [
+            "ウーッシュ",
+            "トランジション",
+            "スウィープ"
+          ]
+        },
+        {
+          "id": "reverse",
+          "canonical": "Reverse",
+          "parent": "sfx",
+          "aliases": [
+            "reverse",
+            "reversed",
+            "rev crash",
+            "reverse cymbal",
+            "rev cym",
+            "reverse fx",
+            "suck back"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "反轉音效",
+            "倒放"
+          ],
+          "ja": [
+            "リバース",
+            "逆再生"
+          ]
+        },
+        {
+          "id": "noise",
+          "canonical": "Noise",
+          "parent": "sfx",
+          "aliases": [
+            "noise",
+            "white noise",
+            "pink noise",
+            "vinyl",
+            "vinyl crackle",
+            "crackle",
+            "tape hiss",
+            "static",
+            "glitch",
+            "glitches",
+            "stutter",
+            "bitcrush"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "噪音",
+            "白噪音",
+            "黑膠噪音"
+          ],
+          "ja": [
+            "ノイズ",
+            "ホワイトノイズ",
+            "グリッチ"
+          ]
+        },
+        {
+          "id": "ambience",
+          "canonical": "Ambience",
+          "parent": "sfx",
+          "aliases": [
+            "ambience",
+            "ambiance",
+            "ambient",
+            "amb fx",
+            "field recording",
+            "field rec",
+            "nature",
+            "rain",
+            "wind",
+            "birds",
+            "city",
+            "crowd",
+            "applause",
+            "room tone",
+            "roomtone"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "環境音",
+            "現場收音",
+            "掌聲"
+          ],
+          "ja": [
+            "環境音",
+            "アンビエンス",
+            "フィールドレコーディング",
+            "歓声"
+          ]
+        },
+        {
+          "id": "foley",
+          "canonical": "Foley",
+          "parent": "sfx",
+          "aliases": [
+            "foley",
+            "footsteps",
+            "door",
+            "phone",
+            "alarm",
+            "siren",
+            "gun",
+            "explosion",
+            "car",
+            "vehicle",
+            "cartoon",
+            "laser",
+            "sci fi"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "擬音",
+            "擬音效果"
+          ],
+          "ja": [
+            "フォーリー",
+            "生音効果"
+          ]
+        },
+        {
+          "id": "sample",
+          "canonical": "Sample",
+          "parent": "sfx",
+          "aliases": [
+            "sample",
+            "samples",
+            "smp",
+            "chop",
+            "chops",
+            "one shot",
+            "oneshot",
+            "vox sample",
+            "loop sample"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "取樣",
+            "採樣"
+          ],
+          "ja": [
+            "サンプル",
+            "ネタ"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "utility",
+      "name": "Bus",
+      "zh": "匯流排與工具軌",
+      "ja": "バス・リターン・ユーティリティ",
+      "model_label": null,
+      "instruments": [
+        {
+          "id": "reverb_return",
+          "canonical": "Reverb",
+          "aliases": [
+            "reverb",
+            "verb",
+            "rvb",
+            "plate",
+            "hall",
+            "chamber",
+            "room verb",
+            "spring",
+            "verb return",
+            "reverb return",
+            "aux verb"
+          ],
+          "abbreviations": [
+            "rv",
+            "rvb"
+          ],
+          "zh": [
+            "殘響",
+            "混響",
+            "迴響"
+          ],
+          "ja": [
+            "リバーブ",
+            "リバーブリターン"
+          ]
+        },
+        {
+          "id": "delay_return",
+          "canonical": "Delay",
+          "aliases": [
+            "delay",
+            "dly",
+            "echo",
+            "slap",
+            "slapback",
+            "tape delay",
+            "ping pong",
+            "delay return",
+            "1/4 delay",
+            "1/8 delay"
+          ],
+          "abbreviations": [
+            "dl"
+          ],
+          "zh": [
+            "延遲",
+            "回音"
+          ],
+          "ja": [
+            "ディレイ",
+            "エコー"
+          ]
+        },
+        {
+          "id": "fx_return",
+          "canonical": "FX Return",
+          "aliases": [
+            "fx return",
+            "return",
+            "rtn",
+            "aux",
+            "aux return",
+            "chorus fx",
+            "flanger",
+            "phaser",
+            "doubler",
+            "widener",
+            "parallel",
+            "para comp",
+            "ny comp",
+            "crush bus"
+          ],
+          "abbreviations": [
+            "rtn",
+            "ret"
+          ],
+          "zh": [
+            "效果返回"
+          ],
+          "ja": [
+            "リターン",
+            "AUX"
+          ]
+        },
+        {
+          "id": "bus",
+          "canonical": "Bus",
+          "aliases": [
+            "bus",
+            "buss",
+            "group",
+            "grp",
+            "sub mix",
+            "submix",
+            "subgroup",
+            "vca",
+            "drum bus",
+            "vocal bus",
+            "music bus",
+            "inst bus",
+            "mix bus",
+            "2 bus",
+            "2bus",
+            "stem bus"
+          ],
+          "abbreviations": [
+            "bs"
+          ],
+          "zh": [
+            "匯流排",
+            "群組",
+            "子混音"
+          ],
+          "ja": [
+            "バス",
+            "グループ",
+            "サブミックス"
+          ]
+        },
+        {
+          "id": "mix_print",
+          "canonical": "Mix",
+          "aliases": [
+            "mix",
+            "mixdown",
+            "master",
+            "mastered",
+            "print",
+            "stereo mix",
+            "full mix",
+            "rough mix",
+            "rough",
+            "final mix",
+            "bounce",
+            "2mix",
+            "2 mix",
+            "mix print"
+          ],
+          "abbreviations": [
+            "mx",
+            "mst"
+          ],
+          "zh": [
+            "混音",
+            "母帶",
+            "完整混音"
+          ],
+          "ja": [
+            "ミックス",
+            "2ミックス",
+            "マスター",
+            "ラフミックス"
+          ]
+        },
+        {
+          "id": "instrumental",
+          "canonical": "Instrumental",
+          "aliases": [
+            "instrumental",
+            "inst",
+            "instr",
+            "karaoke",
+            "off vocal",
+            "offvocal",
+            "minus one",
+            "minusone",
+            "backing track",
+            "music only",
+            "tv mix",
+            "tv track"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "伴奏",
+            "純音樂",
+            "卡拉OK"
+          ],
+          "ja": [
+            "インスト",
+            "オフボーカル",
+            "カラオケ",
+            "オケ"
+          ]
+        },
+        {
+          "id": "mma",
+          "canonical": "MMA",
+          "parent": "instrumental",
+          "aliases": [
+            "mma"
+          ],
+          "abbreviations": [],
+          "zh": [],
+          "ja": [],
+          "notes": "Minus-one deliverable (the mix without one part). Which part is missing depends on the studio; the name is kept as written."
+        },
+        {
+          "id": "mmo",
+          "canonical": "MMO",
+          "parent": "instrumental",
+          "aliases": [
+            "mmo"
+          ],
+          "abbreviations": [],
+          "zh": [],
+          "ja": [],
+          "notes": "Minus-one deliverable (the mix without one part). Which part is missing depends on the studio; the name is kept as written."
+        },
+        {
+          "id": "mmm",
+          "canonical": "MMM",
+          "parent": "instrumental",
+          "aliases": [
+            "mmm"
+          ],
+          "abbreviations": [],
+          "zh": [],
+          "ja": [],
+          "notes": "Minus-one deliverable (the mix without one part). Which part is missing depends on the studio; the name is kept as written."
+        },
+        {
+          "id": "stem",
+          "canonical": "Stem",
+          "aliases": [
+            "stem",
+            "stems",
+            "stem mix",
+            "multitrack",
+            "multis"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "分軌",
+            "分軌檔"
+          ],
+          "ja": [
+            "ステム",
+            "パラデータ",
+            "パラ"
+          ]
+        },
+        {
+          "id": "click",
+          "canonical": "Click",
+          "aliases": [
+            "click",
+            "click track",
+            "clicktrack",
+            "metronome",
+            "met",
+            "count in",
+            "countin",
+            "count off",
+            "cue click"
+          ],
+          "abbreviations": [
+            "clk"
+          ],
+          "zh": [
+            "節拍器",
+            "拍點"
+          ],
+          "ja": [
+            "クリック",
+            "メトロノーム",
+            "カウント"
+          ]
+        },
+        {
+          "id": "guide",
+          "canonical": "Guide",
+          "aliases": [
+            "guide",
+            "guide track",
+            "reference",
+            "ref",
+            "ref track",
+            "demo",
+            "scratch",
+            "cue",
+            "cues",
+            "talkback",
+            "tb"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "參考",
+            "導引",
+            "Demo"
+          ],
+          "ja": [
+            "ガイド",
+            "リファレンス",
+            "デモ",
+            "トークバック"
+          ]
+        },
+        {
+          "id": "timecode",
+          "canonical": "Timecode",
+          "aliases": [
+            "timecode",
+            "time code",
+            "smpte",
+            "ltc",
+            "sync",
+            "sync track"
+          ],
+          "abbreviations": [
+            "tc"
+          ],
+          "zh": [
+            "時間碼"
+          ],
+          "ja": [
+            "タイムコード"
+          ]
+        },
+        {
+          "id": "video",
+          "canonical": "Video Guide",
+          "aliases": [
+            "video",
+            "picture",
+            "pix",
+            "guide audio",
+            "production audio",
+            "dialog guide"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "影片參考音"
+          ],
+          "ja": [
+            "映像",
+            "ガイド音声"
+          ]
+        },
+        {
+          "id": "midi",
+          "canonical": "MIDI",
+          "aliases": [
+            "midi",
+            "midi track",
+            "inst track",
+            "instrument track",
+            "vi",
+            "virtual instrument"
+          ],
+          "abbreviations": [],
+          "zh": [
+            "MIDI軌"
+          ],
+          "ja": [
+            "MIDIトラック",
+            "打ち込み"
+          ]
+        }
+      ]
+    }
+  ],
+  "modifiers": {
+    "position_channel": {
+      "description": "Left/right/stereo placement or channel of a multi-mic or split source.",
+      "terms": [
+        {
+          "canonical": "L",
+          "aliases": [
+            "l",
+            "left",
+            "lft",
+            "lt",
+            "lf"
+          ],
+          "zh": [
+            "左"
+          ],
+          "ja": [
+            "左"
+          ]
+        },
+        {
+          "canonical": "R",
+          "aliases": [
+            "r",
+            "right",
+            "rt",
+            "rgt",
+            "rf"
+          ],
+          "zh": [
+            "右"
+          ],
+          "ja": [
+            "右"
+          ]
+        },
+        {
+          "canonical": "C",
+          "aliases": [
+            "c",
+            "center",
+            "centre",
+            "ctr",
+            "mid",
+            "middle"
+          ],
+          "zh": [
+            "中"
+          ],
+          "ja": [
+            "センター",
+            "中央"
+          ]
+        },
+        {
+          "canonical": "Stereo",
+          "aliases": [
+            "stereo",
+            "st",
+            "str",
+            "stereo pair",
+            "lr",
+            "l r"
+          ],
+          "zh": [
+            "立體聲"
+          ],
+          "ja": [
+            "ステレオ"
+          ]
+        },
+        {
+          "canonical": "Mono",
+          "aliases": [
+            "mono",
+            "mn",
+            "m"
+          ],
+          "zh": [
+            "單聲道"
+          ],
+          "ja": [
+            "モノ",
+            "モノラル"
+          ]
+        },
+        {
+          "canonical": "Side",
+          "aliases": [
+            "side",
+            "s",
+            "ms",
+            "m s",
+            "mid side"
+          ],
+          "zh": [
+            "側邊"
+          ],
+          "ja": [
+            "サイド"
+          ]
+        },
+        {
+          "canonical": "Wide",
+          "aliases": [
+            "wide",
+            "width",
+            "spread"
+          ],
+          "zh": [
+            "寬"
+          ],
+          "ja": [
+            "ワイド"
+          ]
+        }
+      ]
+    },
+    "mic_position": {
+      "description": "Where the microphone or signal was taken from.",
+      "terms": [
+        {
+          "canonical": "In",
+          "aliases": [
+            "in",
+            "inside",
+            "inner"
+          ],
+          "zh": [
+            "內"
+          ],
+          "ja": [
+            "イン"
+          ]
+        },
+        {
+          "canonical": "Out",
+          "aliases": [
+            "out",
+            "outside",
+            "outer",
+            "front"
+          ],
+          "zh": [
+            "外"
+          ],
+          "ja": [
+            "アウト"
+          ]
+        },
+        {
+          "canonical": "Top",
+          "aliases": [
+            "top",
+            "up",
+            "upper",
+            "over",
+            "above"
+          ],
+          "zh": [
+            "上"
+          ],
+          "ja": [
+            "トップ",
+            "表"
+          ]
+        },
+        {
+          "canonical": "Bottom",
+          "aliases": [
+            "bottom",
+            "bot",
+            "btm",
+            "down",
+            "under",
+            "below",
+            "lower",
+            "wires"
+          ],
+          "zh": [
+            "下"
+          ],
+          "ja": [
+            "ボトム",
+            "裏"
+          ]
+        },
+        {
+          "canonical": "Close",
+          "aliases": [
+            "close",
+            "cl",
+            "near",
+            "spot",
+            "direct",
+            "dry mic"
+          ],
+          "zh": [
+            "近"
+          ],
+          "ja": [
+            "オン",
+            "近"
+          ]
+        },
+        {
+          "canonical": "Far",
+          "aliases": [
+            "far",
+            "distant",
+            "ambient",
+            "amb",
+            "ambience"
+          ],
+          "zh": [
+            "遠"
+          ],
+          "ja": [
+            "オフ",
+            "遠"
+          ]
+        },
+        {
+          "canonical": "Room",
+          "aliases": [
+            "room",
+            "rm",
+            "hall mic",
+            "space"
+          ],
+          "zh": [
+            "房間"
+          ],
+          "ja": [
+            "ルーム"
+          ]
+        },
+        {
+          "canonical": "DI",
+          "aliases": [
+            "di",
+            "d i",
+            "direct",
+            "line",
+            "dry"
+          ],
+          "zh": [
+            "直錄"
+          ],
+          "ja": [
+            "ライン",
+            "DI"
+          ]
+        },
+        {
+          "canonical": "Amp",
+          "aliases": [
+            "amp",
+            "cab",
+            "cabinet",
+            "mic",
+            "mic'd",
+            "miked",
+            "reamp"
+          ],
+          "zh": [
+            "音箱"
+          ],
+          "ja": [
+            "アンプ",
+            "マイク"
+          ]
+        },
+        {
+          "canonical": "Back",
+          "aliases": [
+            "back",
+            "rear",
+            "behind"
+          ],
+          "zh": [
+            "後"
+          ],
+          "ja": [
+            "バック",
+            "後ろ"
+          ]
+        },
+        {
+          "canonical": "Stereo Array",
+          "aliases": [
+            "xy",
+            "ortf",
+            "nos",
+            "ab",
+            "spaced pair",
+            "decca",
+            "tree",
+            "decca tree",
+            "blumlein",
+            "binaural"
+          ],
+          "zh": [
+            "立體聲陣列"
+          ],
+          "ja": [
+            "ステレオ配置"
+          ]
+        },
+        {
+          "canonical": "Contact",
+          "aliases": [
+            "contact",
+            "pickup",
+            "piezo",
+            "pu",
+            "internal mic"
+          ],
+          "zh": [
+            "拾音器"
+          ],
+          "ja": [
+            "ピックアップ"
+          ]
+        }
+      ]
+    },
+    "part_role": {
+      "description": "Musical role of the part within the arrangement.",
+      "terms": [
+        {
+          "canonical": "Lead",
+          "aliases": [
+            "lead",
+            "ld",
+            "main",
+            "melody",
+            "mel",
+            "topline",
+            "top line",
+            "hook"
+          ],
+          "zh": [
+            "主旋律",
+            "主"
+          ],
+          "ja": [
+            "リード",
+            "メイン",
+            "メロ"
+          ]
+        },
+        {
+          "canonical": "Rhythm",
+          "aliases": [
+            "rhythm",
+            "rhy",
+            "rythm",
+            "comp",
+            "comping",
+            "backing",
+            "chords"
+          ],
+          "zh": [
+            "節奏"
+          ],
+          "ja": [
+            "リズム",
+            "バッキング"
+          ]
+        },
+        {
+          "canonical": "Solo",
+          "aliases": [
+            "solo",
+            "sol",
+            "break solo"
+          ],
+          "zh": [
+            "獨奏"
+          ],
+          "ja": [
+            "ソロ"
+          ]
+        },
+        {
+          "canonical": "Double",
+          "aliases": [
+            "double",
+            "dbl",
+            "dub",
+            "doubled",
+            "dt"
+          ],
+          "zh": [
+            "疊"
+          ],
+          "ja": [
+            "ダブル"
+          ]
+        },
+        {
+          "canonical": "Harmony",
+          "aliases": [
+            "harmony",
+            "harm",
+            "hrm",
+            "3rd",
+            "5th",
+            "octave",
+            "oct",
+            "8va",
+            "8vb",
+            "unison"
+          ],
+          "zh": [
+            "和聲",
+            "八度"
+          ],
+          "ja": [
+            "ハモ",
+            "オクターブ"
+          ]
+        },
+        {
+          "canonical": "High",
+          "aliases": [
+            "high",
+            "hi",
+            "hgh",
+            "upper",
+            "top"
+          ],
+          "zh": [
+            "高"
+          ],
+          "ja": [
+            "ハイ",
+            "上"
+          ]
+        },
+        {
+          "canonical": "Low",
+          "aliases": [
+            "low",
+            "lo",
+            "lw",
+            "lower",
+            "bottom"
+          ],
+          "zh": [
+            "低"
+          ],
+          "ja": [
+            "ロー",
+            "下"
+          ]
+        },
+        {
+          "canonical": "Counter",
+          "aliases": [
+            "counter",
+            "counter melody",
+            "countermelody",
+            "response",
+            "answer"
+          ],
+          "zh": [
+            "對位旋律"
+          ],
+          "ja": [
+            "カウンター",
+            "オブリ"
+          ]
+        },
+        {
+          "canonical": "Fill",
+          "aliases": [
+            "fill",
+            "fills",
+            "lick",
+            "licks",
+            "riff",
+            "riffs",
+            "line"
+          ],
+          "zh": [
+            "過門",
+            "樂句"
+          ],
+          "ja": [
+            "フィル",
+            "リフ"
+          ]
+        },
+        {
+          "canonical": "Layer",
+          "aliases": [
+            "layer",
+            "layers",
+            "lyr",
+            "stack",
+            "stacked"
+          ],
+          "zh": [
+            "疊層"
+          ],
+          "ja": [
+            "レイヤー"
+          ]
+        },
+        {
+          "canonical": "Texture",
+          "aliases": [
+            "texture",
+            "bed",
+            "atmos",
+            "ambient"
+          ],
+          "zh": [
+            "氛圍"
+          ],
+          "ja": [
+            "テクスチャー"
+          ]
+        }
+      ]
+    },
+    "articulation": {
+      "description": "Playing technique or articulation.",
+      "terms": [
+        {
+          "canonical": "Open",
+          "aliases": [
+            "open",
+            "opn"
+          ],
+          "zh": [
+            "開"
+          ],
+          "ja": [
+            "オープン"
+          ]
+        },
+        {
+          "canonical": "Closed",
+          "aliases": [
+            "closed",
+            "clsd",
+            "tight"
+          ],
+          "zh": [
+            "閉"
+          ],
+          "ja": [
+            "クローズ"
+          ]
+        },
+        {
+          "canonical": "Pedal",
+          "aliases": [
+            "pedal",
+            "foot",
+            "ped"
+          ],
+          "zh": [
+            "踏"
+          ],
+          "ja": [
+            "ペダル"
+          ]
+        },
+        {
+          "canonical": "Pizzicato",
+          "aliases": [
+            "pizzicato",
+            "pizz",
+            "pizzi"
+          ],
+          "zh": [
+            "撥奏"
+          ],
+          "ja": [
+            "ピチカート"
+          ]
+        },
+        {
+          "canonical": "Arco",
+          "aliases": [
+            "arco",
+            "bowed",
+            "sustain",
+            "sus",
+            "long",
+            "longs"
+          ],
+          "zh": [
+            "弓奏",
+            "長音"
+          ],
+          "ja": [
+            "アルコ",
+            "ロング"
+          ]
+        },
+        {
+          "canonical": "Staccato",
+          "aliases": [
+            "staccato",
+            "stacc",
+            "spiccato",
+            "short",
+            "shorts"
+          ],
+          "zh": [
+            "斷奏",
+            "短音"
+          ],
+          "ja": [
+            "スタッカート"
+          ]
+        },
+        {
+          "canonical": "Legato",
+          "aliases": [
+            "legato",
+            "leg",
+            "slur"
+          ],
+          "zh": [
+            "圓滑奏"
+          ],
+          "ja": [
+            "レガート"
+          ]
+        },
+        {
+          "canonical": "Tremolo",
+          "aliases": [
+            "tremolo",
+            "trem",
+            "trill",
+            "trills"
+          ],
+          "zh": [
+            "震音",
+            "顫音"
+          ],
+          "ja": [
+            "トレモロ",
+            "トリル"
+          ]
+        },
+        {
+          "canonical": "Muted",
+          "aliases": [
+            "muted",
+            "mute",
+            "mutes",
+            "palm mute",
+            "pm",
+            "harmon",
+            "cup mute",
+            "straight mute",
+            "con sord",
+            "sordino"
+          ],
+          "zh": [
+            "弱音",
+            "悶音"
+          ],
+          "ja": [
+            "ミュート",
+            "ブリッジミュート"
+          ]
+        },
+        {
+          "canonical": "Strum",
+          "aliases": [
+            "strum",
+            "strums",
+            "strumming",
+            "picked",
+            "pick",
+            "fingerstyle",
+            "finger",
+            "fingerpicked",
+            "arpeggiated"
+          ],
+          "zh": [
+            "刷弦",
+            "指彈"
+          ],
+          "ja": [
+            "ストローク",
+            "アルペジオ",
+            "指弾き"
+          ]
+        },
+        {
+          "canonical": "Slide",
+          "aliases": [
+            "slide",
+            "gliss",
+            "glissando",
+            "bend"
+          ],
+          "zh": [
+            "滑音"
+          ],
+          "ja": [
+            "スライド",
+            "グリス"
+          ]
+        },
+        {
+          "canonical": "Brush",
+          "aliases": [
+            "brush",
+            "brushes",
+            "rods",
+            "hotrods",
+            "mallets",
+            "sticks"
+          ],
+          "zh": [
+            "鼓刷"
+          ],
+          "ja": [
+            "ブラシ",
+            "ロッド"
+          ]
+        },
+        {
+          "canonical": "Ghost",
+          "aliases": [
+            "ghost",
+            "ghosts",
+            "ghost notes"
+          ],
+          "zh": [
+            "幽靈音"
+          ],
+          "ja": [
+            "ゴースト"
+          ]
+        },
+        {
+          "canonical": "Roll",
+          "aliases": [
+            "roll",
+            "rolls",
+            "drumroll",
+            "buzz roll",
+            "swell",
+            "swells",
+            "cresc"
+          ],
+          "zh": [
+            "滾奏",
+            "漸強"
+          ],
+          "ja": [
+            "ロール",
+            "クレッシェンド"
+          ]
+        },
+        {
+          "canonical": "Hit",
+          "aliases": [
+            "hit",
+            "hits",
+            "accent",
+            "accents",
+            "stab",
+            "stabs"
+          ],
+          "zh": [
+            "重音"
+          ],
+          "ja": [
+            "キメ",
+            "アクセント"
+          ]
+        }
+      ]
+    },
+    "tone_type": {
+      "description": "Instrument type or sound character qualifiers.",
+      "terms": [
+        {
+          "canonical": "Acoustic",
+          "aliases": [
+            "acoustic",
+            "ac",
+            "acou",
+            "acst",
+            "acc",
+            "unplugged"
+          ],
+          "zh": [
+            "原聲",
+            "木"
+          ],
+          "ja": [
+            "アコースティック",
+            "アコ"
+          ]
+        },
+        {
+          "canonical": "Electric",
+          "aliases": [
+            "electric",
+            "elec",
+            "el",
+            "ele",
+            "e"
+          ],
+          "zh": [
+            "電"
+          ],
+          "ja": [
+            "エレキ",
+            "エレクトリック"
+          ]
+        },
+        {
+          "canonical": "Clean",
+          "aliases": [
+            "clean",
+            "cln",
+            "clear"
+          ],
+          "zh": [
+            "乾淨音色"
+          ],
+          "ja": [
+            "クリーン"
+          ]
+        },
+        {
+          "canonical": "Distorted",
+          "aliases": [
+            "distorted",
+            "dist",
+            "distortion",
+            "drive",
+            "overdrive",
+            "od",
+            "fuzz",
+            "crunch",
+            "dirty",
+            "heavy"
+          ],
+          "zh": [
+            "破音",
+            "失真"
+          ],
+          "ja": [
+            "ディストーション",
+            "歪み",
+            "クランチ"
+          ]
+        },
+        {
+          "canonical": "Synth",
+          "aliases": [
+            "synth",
+            "syn",
+            "analog",
+            "analogue",
+            "digital",
+            "fm",
+            "wavetable"
+          ],
+          "zh": [
+            "合成"
+          ],
+          "ja": [
+            "シンセ"
+          ]
+        },
+        {
+          "canonical": "Vintage",
+          "aliases": [
+            "vintage",
+            "lofi",
+            "lo fi",
+            "lo-fi",
+            "old",
+            "retro",
+            "tape"
+          ],
+          "zh": [
+            "復古",
+            "低傳真"
+          ],
+          "ja": [
+            "ヴィンテージ",
+            "ローファイ"
+          ]
+        },
+        {
+          "canonical": "Sub",
+          "aliases": [
+            "sub",
+            "subs",
+            "sub bass",
+            "low end"
+          ],
+          "zh": [
+            "超低頻"
+          ],
+          "ja": [
+            "サブ"
+          ]
+        },
+        {
+          "canonical": "Air",
+          "aliases": [
+            "air",
+            "bright",
+            "shimmer",
+            "sparkle"
+          ],
+          "zh": [
+            "空氣感",
+            "明亮"
+          ],
+          "ja": [
+            "エア",
+            "ブライト"
+          ]
+        }
+      ]
+    },
+    "song_section": {
+      "description": "Song-form section the clip/track belongs to.",
+      "terms": [
+        {
+          "canonical": "Intro",
+          "aliases": [
+            "intro",
+            "int",
+            "opening"
+          ],
+          "zh": [
+            "前奏"
+          ],
+          "ja": [
+            "イントロ"
+          ]
+        },
+        {
+          "canonical": "Verse",
+          "aliases": [
+            "verse",
+            "vs",
+            "vrs",
+            "v1",
+            "v2",
+            "v3",
+            "verse 1",
+            "verse 2"
+          ],
+          "zh": [
+            "主歌"
+          ],
+          "ja": [
+            "Aメロ",
+            "Bメロ",
+            "バース"
+          ]
+        },
+        {
+          "canonical": "Pre-Chorus",
+          "aliases": [
+            "pre chorus",
+            "prechorus",
+            "pre",
+            "pc",
+            "pre ch",
+            "lift",
+            "build"
+          ],
+          "zh": [
+            "導歌",
+            "預副歌"
+          ],
+          "ja": [
+            "Bメロ",
+            "プレコーラス"
+          ]
+        },
+        {
+          "canonical": "Chorus",
+          "aliases": [
+            "chorus",
+            "ch",
+            "chr",
+            "cho",
+            "hook",
+            "refrain"
+          ],
+          "zh": [
+            "副歌"
+          ],
+          "ja": [
+            "サビ"
+          ]
+        },
+        {
+          "canonical": "Post-Chorus",
+          "aliases": [
+            "post chorus",
+            "postchorus",
+            "post",
+            "pch"
+          ],
+          "zh": [
+            "後副歌"
+          ],
+          "ja": [
+            "ポストコーラス",
+            "後サビ"
+          ]
+        },
+        {
+          "canonical": "Bridge",
+          "aliases": [
+            "bridge",
+            "br",
+            "brdg",
+            "middle 8",
+            "middle eight",
+            "m8"
+          ],
+          "zh": [
+            "橋段"
+          ],
+          "ja": [
+            "Cメロ",
+            "ブリッジ"
+          ]
+        },
+        {
+          "canonical": "Breakdown",
+          "aliases": [
+            "breakdown",
+            "bd",
+            "break",
+            "brk",
+            "interlude",
+            "inter"
+          ],
+          "zh": [
+            "間奏",
+            "中斷段"
+          ],
+          "ja": [
+            "間奏",
+            "ブレイク"
+          ]
+        },
+        {
+          "canonical": "Drop",
+          "aliases": [
+            "drop",
+            "drp",
+            "beat drop"
+          ],
+          "zh": [
+            "Drop段"
+          ],
+          "ja": [
+            "ドロップ"
+          ]
+        },
+        {
+          "canonical": "Solo Section",
+          "aliases": [
+            "solo section",
+            "solo",
+            "instrumental break"
+          ],
+          "zh": [
+            "獨奏段"
+          ],
+          "ja": [
+            "ソロ",
+            "間奏ソロ"
+          ]
+        },
+        {
+          "canonical": "Outro",
+          "aliases": [
+            "outro",
+            "out",
+            "ending",
+            "end",
+            "coda",
+            "tag",
+            "fade",
+            "fadeout"
+          ],
+          "zh": [
+            "尾奏",
+            "結尾"
+          ],
+          "ja": [
+            "アウトロ",
+            "エンディング",
+            "後奏"
+          ]
+        }
+      ]
+    },
+    "take_version": {
+      "description": "Take, comp and version markers.",
+      "terms": [
+        {
+          "canonical": "Take",
+          "aliases": [
+            "take",
+            "tk",
+            "tak",
+            "pass"
+          ],
+          "zh": [
+            "錄音版本",
+            "Take"
+          ],
+          "ja": [
+            "テイク"
+          ]
+        },
+        {
+          "canonical": "Comp",
+          "aliases": [
+            "comp",
+            "comped",
+            "composite",
+            "best",
+            "keeper",
+            "master take"
+          ],
+          "zh": [
+            "剪輯版",
+            "最佳版"
+          ],
+          "ja": [
+            "コンプ",
+            "OKテイク",
+            "本テイク"
+          ]
+        },
+        {
+          "canonical": "Alt",
+          "aliases": [
+            "alt",
+            "alternate",
+            "option",
+            "opt",
+            "var",
+            "variation",
+            "b side"
+          ],
+          "zh": [
+            "替代版"
+          ],
+          "ja": [
+            "別テイク",
+            "オルタネイト"
+          ]
+        },
+        {
+          "canonical": "Edit",
+          "aliases": [
+            "edit",
+            "edited",
+            "ed",
+            "tuned",
+            "tune",
+            "melodyne",
+            "autotuned",
+            "aligned",
+            "vocalign",
+            "fixed",
+            "fix",
+            "cleaned"
+          ],
+          "zh": [
+            "編輯",
+            "修音"
+          ],
+          "ja": [
+            "エディット",
+            "ピッチ補正",
+            "修正"
+          ]
+        },
+        {
+          "canonical": "Punch",
+          "aliases": [
+            "punch",
+            "punch in",
+            "pickup",
+            "overdub",
+            "od",
+            "drop in"
+          ],
+          "zh": [
+            "補錄"
+          ],
+          "ja": [
+            "パンチイン",
+            "差し替え"
+          ]
+        },
+        {
+          "canonical": "Print",
+          "aliases": [
+            "print",
+            "printed",
+            "bounce",
+            "bounced",
+            "render",
+            "rendered",
+            "frozen",
+            "freeze",
+            "commit",
+            "consolidated"
+          ],
+          "zh": [
+            "輸出",
+            "凍結"
+          ],
+          "ja": [
+            "書き出し",
+            "フリーズ",
+            "バウンス"
+          ]
+        },
+        {
+          "canonical": "Version",
+          "aliases": [
+            "version",
+            "ver",
+            "v",
+            "rev",
+            "revision",
+            "mix 1",
+            "mix 2",
+            "final",
+            "fin",
+            "old",
+            "new",
+            "unused",
+            "spare",
+            "backup",
+            "copy",
+            "dup",
+            "duplicate"
+          ],
+          "zh": [
+            "版本",
+            "最終版",
+            "舊版"
+          ],
+          "ja": [
+            "バージョン",
+            "最終",
+            "旧"
+          ]
+        }
+      ]
+    },
+    "processing": {
+      "description": "Processing state of the audio.",
+      "terms": [
+        {
+          "canonical": "Dry",
+          "aliases": [
+            "dry",
+            "raw",
+            "unprocessed",
+            "no fx",
+            "nofx"
+          ],
+          "zh": [
+            "乾聲",
+            "未處理"
+          ],
+          "ja": [
+            "ドライ",
+            "素"
+          ]
+        },
+        {
+          "canonical": "Wet",
+          "aliases": [
+            "wet",
+            "processed",
+            "fx",
+            "w fx",
+            "with fx",
+            "effected"
+          ],
+          "zh": [
+            "濕聲",
+            "含效果"
+          ],
+          "ja": [
+            "ウェット",
+            "エフェクト込み"
+          ]
+        },
+        {
+          "canonical": "Compressed",
+          "aliases": [
+            "compressed",
+            "comp",
+            "squashed",
+            "smash",
+            "smashed",
+            "crush",
+            "crushed",
+            "limited",
+            "parallel",
+            "ny"
+          ],
+          "zh": [
+            "壓縮"
+          ],
+          "ja": [
+            "コンプ",
+            "潰し"
+          ]
+        },
+        {
+          "canonical": "EQ",
+          "aliases": [
+            "eq",
+            "eqd",
+            "filtered",
+            "filter",
+            "hpf",
+            "lpf",
+            "bandpass",
+            "telephone",
+            "radio",
+            "phone fx"
+          ],
+          "zh": [
+            "等化",
+            "濾波"
+          ],
+          "ja": [
+            "EQ",
+            "フィルター",
+            "ラジオボイス"
+          ]
+        },
+        {
+          "canonical": "Pitched",
+          "aliases": [
+            "pitched",
+            "pitch",
+            "pitch up",
+            "pitch down",
+            "octaver",
+            "harmonizer",
+            "formant"
+          ],
+          "zh": [
+            "移調",
+            "變調"
+          ],
+          "ja": [
+            "ピッチ",
+            "ピッチシフト"
+          ]
+        },
+        {
+          "canonical": "Reversed",
+          "aliases": [
+            "reversed",
+            "reverse",
+            "rev",
+            "backwards"
+          ],
+          "zh": [
+            "反轉"
+          ],
+          "ja": [
+            "リバース",
+            "逆再生"
+          ]
+        },
+        {
+          "canonical": "Sidechain",
+          "aliases": [
+            "sidechain",
+            "side chain",
+            "sc",
+            "key input",
+            "ducked",
+            "duck",
+            "pump"
+          ],
+          "zh": [
+            "側鏈"
+          ],
+          "ja": [
+            "サイドチェイン"
+          ]
+        },
+        {
+          "canonical": "Stretched",
+          "aliases": [
+            "stretched",
+            "timestretch",
+            "time stretch",
+            "warped",
+            "halftime",
+            "half time",
+            "double time"
+          ],
+          "zh": [
+            "時間伸縮"
+          ],
+          "ja": [
+            "タイムストレッチ"
+          ]
+        }
+      ]
+    }
+  },
+  "ambiguous_terms": [
+    {
+      "term": "chorus",
+      "candidates": [
+        "modifiers.song_section:Chorus",
+        "backing_vocals.backing_vocal",
+        "utility.fx_return (chorus effect)"
+      ],
+      "resolution": "English sessions: song section unless combined with vox/vocal. Japanese sessions (コーラス / Cho): backing vocals."
+    },
+    {
+      "term": "cho",
+      "candidates": [
+        "backing_vocals.backing_vocal",
+        "modifiers.song_section:Chorus"
+      ],
+      "resolution": "Treat as backing vocals when it is the only instrument-like token or appears in parentheses after a song title, e.g. 'song(cho)_Track1'."
+    },
+    {
+      "term": "bass drum",
+      "candidates": [
+        "drums.kick",
+        "bass.bass"
+      ],
+      "resolution": "Always kick (longest phrase wins over 'bass')."
+    },
+    {
+      "term": "room",
+      "candidates": [
+        "drums.drum_room",
+        "utility.reverb_return",
+        "modifiers.mic_position:Room"
+      ],
+      "resolution": "With another instrument ('Piano Room') it is a mic-position modifier; alone it is drum room; with verb/rev it is a reverb return."
+    },
+    {
+      "term": "horn / horns",
+      "candidates": [
+        "brass.french_horn",
+        "brass.horns_pop"
+      ],
+      "resolution": "Orchestral context or 'french' -> French horn; pop/funk sessions -> horn section."
+    },
+    {
+      "term": "harp",
+      "candidates": [
+        "strings.harp",
+        "woodwinds.harmonica"
+      ],
+      "resolution": "'blues harp' / 'harp' next to guitar-band tracks -> harmonica; otherwise harp."
+    },
+    {
+      "term": "pad",
+      "candidates": [
+        "synths.synth_pad",
+        "drums (drum pad / Octapad)"
+      ],
+      "resolution": "Synth pad unless combined with drum/perc/sample."
+    },
+    {
+      "term": "sub",
+      "candidates": [
+        "bass.sub_bass",
+        "drums.kick_sub",
+        "utility.bus (sub mix)"
+      ],
+      "resolution": "'kick sub' -> kick_sub; 'sub mix'/'submix' -> bus; alone -> sub bass."
+    },
+    {
+      "term": "808",
+      "candidates": [
+        "bass.bass_808",
+        "drums.drum_machine"
+      ],
+      "resolution": "Alone or with bass/sub -> 808 bass; '808 kit' or with kick/snare/hat -> drum machine."
+    },
+    {
+      "term": "keys",
+      "candidates": [
+        "keys.keys",
+        "musical key (C min)"
+      ],
+      "resolution": "Instrument unless preceded by a note name."
+    },
+    {
+      "term": "br",
+      "candidates": [
+        "brass.brass",
+        "modifiers.song_section:Bridge"
+      ],
+      "resolution": "Abbreviation only; prefer Bridge when another instrument is already present."
+    },
+    {
+      "term": "bd",
+      "candidates": [
+        "drums.kick",
+        "modifiers.song_section:Breakdown"
+      ],
+      "resolution": "Kick when it is the only instrument token."
+    },
+    {
+      "term": "bs",
+      "candidates": [
+        "bass.bass",
+        "woodwinds.baritone_sax",
+        "utility.bus"
+      ],
+      "resolution": "Bass by default; bari sax only next to other sax tracks."
+    },
+    {
+      "term": "cb",
+      "candidates": [
+        "strings.contrabass",
+        "percussion.cowbell"
+      ],
+      "resolution": "Contrabass in orchestral sessions, cowbell otherwise."
+    },
+    {
+      "term": "kb",
+      "candidates": [
+        "keys.keys",
+        "strings.contrabass (Kontrabass)"
+      ],
+      "resolution": "Keys by default."
+    },
+    {
+      "term": "tb",
+      "candidates": [
+        "brass.trombone",
+        "utility.guide (talkback)"
+      ],
+      "resolution": "Trombone unless the session has a talkback track."
+    },
+    {
+      "term": "voc",
+      "candidates": [
+        "lead_vocals.vocal",
+        "synths.vocoder_synth"
+      ],
+      "resolution": "Vocal by default."
+    },
+    {
+      "term": "lead",
+      "candidates": [
+        "modifiers.part_role:Lead"
+      ],
+      "resolution": "Modifier only; 'Lead' alone is not an instrument (could be vocal, guitar or synth)."
+    },
+    {
+      "term": "tom",
+      "candidates": [
+        "drums.tom",
+        "a person's name"
+      ],
+      "resolution": "Instrument when followed by a number or drum context."
+    },
+    {
+      "term": "bell / bells",
+      "candidates": [
+        "percussion.glockenspiel",
+        "drums.ride (ride bell)",
+        "percussion.tubular_bells",
+        "synths.synth_bell",
+        "percussion.cowbell"
+      ],
+      "resolution": "Use the longer phrase; 'bells' alone -> glockenspiel."
+    },
+    {
+      "term": "mix",
+      "candidates": [
+        "utility.mix_print",
+        "a version label ('Mix 1.04')"
+      ],
+      "resolution": "A full-mix print only when no instrument is present; treat 'mix' followed by a number as a version label."
+    },
+    {
+      "term": "se",
+      "candidates": [
+        "fx.sfx (Japanese SE)"
+      ],
+      "resolution": "Sound effects in Japanese sessions."
+    },
+    {
+      "term": "太鼓",
+      "candidates": [
+        "world.taiko",
+        "drums.drums"
+      ],
+      "resolution": "Japanese generic word for drum; taiko only with 和太鼓 or festival context."
+    },
+    {
+      "term": "琴",
+      "candidates": [
+        "keys.piano (鋼琴)",
+        "world.guzheng (古箏)",
+        "world.koto (箏)"
+      ],
+      "resolution": "Never match '琴' alone; it is a generic suffix in Chinese."
+    },
+    {
+      "term": "koto",
+      "candidates": [
+        "world.koto",
+        "Japanese word 言葉 'kotoba'"
+      ],
+      "resolution": "Whole-token match only."
+    },
+    {
+      "term": "st / str",
+      "candidates": [
+        "strings.strings",
+        "modifiers.position_channel:Stereo"
+      ],
+      "resolution": "Strings only when no other instrument; otherwise stereo."
+    },
+    {
+      "term": "sx",
+      "candidates": [
+        "woodwinds.sax",
+        "fx.sfx"
+      ],
+      "resolution": "Sax when other horn/sax tracks exist; otherwise SFX."
+    },
+    {
+      "term": "mmm",
+      "candidates": [
+        "utility.mmm",
+        "backing_vocals.oohs_aahs (humming)"
+      ],
+      "resolution": "Minus-one deliverable (MMM). Humming backing vocals only with a vocal word ('mmm vox') or as 'hum'."
+    }
+  ]
+}

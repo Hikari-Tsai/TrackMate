@@ -1,0 +1,113 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:stem_import/engine/engine_api.dart';
+import 'package:stem_import/models.dart';
+
+Map<String, dynamic> fixture(String name) =>
+    jsonDecode(File('test/fixtures/$name').readAsStringSync()) as Map<String, dynamic>;
+
+/// Engine stand-in built from real engine output (test/fixtures, exported from engine/ and the
+/// M3 end-to-end run). Records what the app sends.
+class FakeEngine implements EngineApi {
+  FakeEngine({String analysis = 'analyze_m3.json'}) : _analysis = _load(analysis);
+
+  static Map<String, dynamic> _load(String name) =>
+      {for (final t in fixture(name)['tracks'] as List) (t as Map)['file'] as String: t};
+
+  final analyzed = <String>[];
+  // Failure injection. Each /session call takes the next entry: an EngineException to throw,
+  // 'no_session' for Pro Tools without an open session; when empty, a normal session.
+  final sessionQueue = <Object>[];
+  Object? previewError;
+  Object? applyError;
+  Object? analyzeError; // thrown once by the next /analyze
+  int sessionCalls = 0;
+  final feedbacks = <(String, String)>[];
+  final applied = <(List<Map<String, dynamic>>, bool)>[];
+  final Map<String, dynamic> _analysis;
+
+  List<String> get files => _analysis.keys.toList();
+
+  @override
+  Future<Map<String, dynamic>> models() async => {
+        'layers': {'A': true, 'B': true, 'C': true, 'D': true},
+        'models': {
+          'qwen3_embedding': {'state': 'ready', 'progress': 1.0},
+          'peav_audio': {'state': 'ready', 'progress': 1.0},
+        },
+      };
+
+  @override
+  Future<List<Map<String, dynamic>>> analyze(List<String> files, {String audio = 'auto'}) async {
+    final err = analyzeError;
+    if (err != null) {
+      analyzeError = null;
+      throw err;
+    }
+    analyzed.add(audio);
+    return [for (final f in files) _analysis[f]! as Map<String, dynamic>];
+  }
+
+  @override
+  Future<void> feedback(String name, String instrument) async => feedbacks.add((name, instrument));
+
+  @override
+  Future<Catalog> catalog() async {
+    final inst = fixture('instruments.json');
+    final cats = fixture('categories.json');
+    final names = {for (final c in inst['categories'] as List) c['id'] as String: c as Map<String, dynamic>};
+    return Catalog(
+      categories: [
+        for (final e in (cats['categories'] as Map<String, dynamic>).entries)
+          CategoryInfo(
+              id: e.key,
+              name: (names[e.key]?['name'] as String?) ?? 'Other',
+              zh: (names[e.key]?['zh'] as String?) ?? '其他',
+              colorIndex: (e.value as Map)['color_index'] as int,
+              folder: (e.value as Map)['folder'] as String),
+      ],
+      instruments: [
+        for (final i in inst['instruments'] as List) Instrument(i['id'] as String, i['label'] as String, i['category'] as String),
+      ],
+      palette: [for (final c in cats['palette'] as List) Catalog.parseHex(c as String)],
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> session() async {
+    sessionCalls++;
+    if (sessionQueue.isNotEmpty) {
+      final next = sessionQueue.removeAt(0);
+      if (next is EngineException) throw next;
+      if (next == 'no_session') return {'connected': true, 'session': null, 'tracks': []};
+    }
+    return {
+      'connected': true,
+      'session': {'name': 'Demo Session', 'path': '/tmp/Demo.ptx', 'sample_rate': 48000},
+      'tracks': [],
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> apply(List<Map<String, dynamic>> tracks, {bool dryRun = false}) async {
+    if (dryRun && previewError != null) throw previewError!;
+    if (!dryRun && applyError != null) throw applyError!;
+    applied.add((tracks, dryRun));
+    final plan = [
+      {
+        'folder': 'ALL', 'category': 'drums', 'color_index': 8, 'exists': false,
+        'tracks': [for (final t in tracks) {'final_name': t['name'], 'color_index': t['color_index'], 'mono': t['mono']}],
+      },
+    ];
+    if (dryRun) return {'session': (await session())['session'], 'dry_run': true, 'plan': plan, 'ok': true};
+    return {
+      'session': (await session())['session'], 'dry_run': false, 'plan': plan, 'ok': true, 'seconds': 1.5,
+      'results': [
+        for (final t in tracks)
+          {'file': t['file'], 'final_name': t['name'], 'pt_name': t['name'], 'folder': 'ALL',
+           'name_ok': true, 'folder_ok': true, 'color_ok': true, 'errors': []},
+      ],
+    };
+  }
+}

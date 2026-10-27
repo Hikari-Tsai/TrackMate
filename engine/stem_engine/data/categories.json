@@ -1,0 +1,20 @@
+{
+ "description": "Per-category defaults. color_index is the 1-based Pro Tools track palette index (pt_track_palette.json); folder is the Basic Folder name used by /apply; representative is the instrument used when only the audio layer names the category.",
+ "categories": {
+  "drums":          {"color_index": 8,  "folder": "DRUMS",   "representative": "drums"},
+  "percussion":     {"color_index": 10, "folder": "PERC",    "representative": "percussion"},
+  "bass":           {"color_index": 3,  "folder": "BASS",    "representative": "bass"},
+  "guitars":        {"color_index": 11, "folder": "GUITARS", "representative": "guitar"},
+  "keys":           {"color_index": 15, "folder": "KEYS",    "representative": "keys"},
+  "synths":         {"color_index": 19, "folder": "SYNTHS",  "representative": "synth"},
+  "strings":        {"color_index": 18, "folder": "STRINGS", "representative": "strings"},
+  "brass":          {"color_index": 12, "folder": "BRASS",   "representative": "brass"},
+  "woodwinds":      {"color_index": 13, "folder": "WINDS",   "representative": "woodwinds"},
+  "world":          {"color_index": 6,  "folder": "WORLD",   "representative": null},
+  "lead_vocals":    {"color_index": 21, "folder": "VOX",     "representative": "vocal"},
+  "backing_vocals": {"color_index": 44, "folder": "BGV",     "representative": "backing_vocal"},
+  "fx":             {"color_index": 5,  "folder": "FX",      "representative": "sfx"},
+  "utility":        {"color_index": 68, "folder": "BUS",     "representative": null},
+  "other":          {"color_index": 55, "folder": "OTHER",   "representative": null}
+ }
+}

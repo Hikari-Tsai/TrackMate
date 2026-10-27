@@ -1,0 +1,3 @@
+tags:
+  # Screenshot comparisons: pixel output depends on the machine's fonts, so CI skips them.
+  golden:
