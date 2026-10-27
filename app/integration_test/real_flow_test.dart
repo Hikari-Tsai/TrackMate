@@ -53,6 +53,18 @@ void main() {
 
     mark('corrected via menu');
     await tester.tap(find.byKey(const ValueKey('apply-button')));
+    // The tempo step comes first; these test tones have no beat, so the tempo is left alone.
+    await waitFor(tester, () => find.byKey(const ValueKey('tempo-continue')).evaluate().isNotEmpty && !state.tempoBusy,
+        seconds: 120);
+    await settle(tester);
+    mark('tempo step: ${state.tempo == null ? 'no tempo (${state.tempoError?.code})' : state.tempoLabel}');
+    await tester.tap(find.text('Keep session tempo').evaluate().isEmpty
+        ? find.byKey(const ValueKey('tempo-continue'))
+        : find.text('Keep session tempo'));
+    await settle(tester);
+    if (find.byKey(const ValueKey('tempo-continue')).evaluate().isNotEmpty) {
+      await tester.tap(find.byKey(const ValueKey('tempo-continue')));
+    }
     await waitFor(tester, () => find.byKey(const ValueKey('confirm-apply')).evaluate().isNotEmpty, seconds: 30);
     await settle(tester);
     mark('preview shown');

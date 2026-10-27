@@ -26,8 +26,8 @@ You also need Pro Tools 2023.3 or later (with the Pro Tools Scripting Library), 
 1. Open Pro Tools and the session to import into.
 2. Drag stems or folders into TrackMate, or press **Add audio files**.
 3. Check the suggested names, categories, colours and mono conversions. Rows in orange need a look.
-4. Press **Preview & apply**, check the plan, then apply. TrackMate creates the folders, imports, renames and colours the tracks, and verifies the result.
-5. Optional: press **Detect BPM** (top right) to see the tempo, choose a constant tempo or a tempo map, and import it. In Pro Tools' *MIDI Import Options* dialog, keep *Import tempo map from MIDI File* ticked and press **OK**; TrackMate then checks the session tempo.
+4. The BPM is detected on its own and shown in the top right corner.
+5. Press **Preview & apply**: choose the tempo (constant, tempo map, or keep the session tempo), check the plan, then apply. TrackMate creates the folders, imports, renames and colours the tracks, then imports the tempo: in Pro Tools' *MIDI Import Options* dialog, keep *Import tempo map from MIDI File* ticked and press **OK**. Tracks and tempo are verified.
 
 Full guide: [README](https://github.com/{{REPO}}/blob/{{TAG}}/README.md#usage) · [繁體中文](https://github.com/{{REPO}}/blob/{{TAG}}/README.zh-TW.md) · [日本語](https://github.com/{{REPO}}/blob/{{TAG}}/README.ja.md)
 
@@ -40,7 +40,7 @@ Full guide: [README](https://github.com/{{REPO}}/blob/{{TAG}}/README.md#usage) �
 - **macOS：** 打開 `.dmg`，把 TrackMate 拖到右邊的 Applications（應用程式）資料夾。這個版本沒有經過 Apple 公證，第一次開啟請在 App 上按右鍵 →「打開」，或在終端機執行上面的 `xattr` 指令。
 - **Windows：** 解壓縮整個資料夾後執行 `TrackMate.exe`，`engine` 資料夾要留在旁邊。出現 SmartScreen 警告時，選「其他資訊」→「仍要執行」。
 
-**使用：** 開啟 Pro Tools 和要匯入的 session → 把分軌檔拖進 TrackMate → 確認名稱、大類、顏色和轉單聲道（橘色的列需要確認）→ 按 **Preview & apply** 確認後套用。需要設定速度時，按右上角的 **Detect BPM**，選固定速度或速度圖後匯入，在 Pro Tools 的 *MIDI Import Options* 保持勾選 *Import tempo map from MIDI File* 並按 **OK**。
+**使用：** 開啟 Pro Tools 和要匯入的 session → 把分軌檔拖進 TrackMate → 確認名稱、大類、顏色和轉單聲道（橘色的列需要確認）→ BPM 會自動偵測並顯示在右上角 → 按 **Preview & apply**，選擇速度（固定、速度圖或保留原速度）並確認後套用；分軌匯入後，在 Pro Tools 的 *MIDI Import Options* 保持勾選 *Import tempo map from MIDI File* 並按 **OK**。
 
 </details>
 
@@ -53,6 +53,6 @@ Full guide: [README](https://github.com/{{REPO}}/blob/{{TAG}}/README.md#usage) �
 - **macOS：** `.dmg` を開き、TrackMate を右側の Applications（アプリケーション）フォルダにドラッグします。このビルドは Apple の公証を受けていないため、初回はアプリを右クリックして「開く」を選ぶか、上の `xattr` コマンドを実行してください。
 - **Windows：** フォルダごと解凍して `TrackMate.exe` を起動します。`engine` フォルダは同じ場所に置いたままにしてください。SmartScreen の警告が出たら「詳細情報」→「実行」を選びます。
 
-**使い方：** Pro Tools と取り込み先のセッションを開く → ステムを TrackMate にドラッグ → 名前・カテゴリ・カラー・モノラル変換を確認（オレンジの行は要確認）→ **Preview & apply** で確認して適用。テンポを設定するには右上の **Detect BPM** を押し、固定テンポかテンポマップを選んで取り込みます。Pro Tools の *MIDI Import Options* では *Import tempo map from MIDI File* をオンのまま **OK** を押してください。
+**使い方：** Pro Tools と取り込み先のセッションを開く → ステムを TrackMate にドラッグ → 名前・カテゴリ・カラー・モノラル変換を確認（オレンジの行は要確認）→ BPM は自動で検出され右上に表示されます → **Preview & apply** でテンポ（固定、テンポマップ、セッションのまま）を選び、確認して適用。トラックの取り込み後、Pro Tools の *MIDI Import Options* では *Import tempo map from MIDI File* をオンのまま **OK** を押してください。
 
 </details>

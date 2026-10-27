@@ -73,7 +73,8 @@ $F test integration_test/real_flow_test.dart -d macos \
   --dart-define=ENGINE_HOME=<home with models> --dart-define=STEMS_DIR=$PWD/../build/m3_stems
 ```
 
-`integration_test/real_tempo_test.dart` does the same for tempo detection and import. `STEMS_DIR`
+`integration_test/real_tempo_test.dart` does the same for the tempo (detected on its own, chosen in
+the step before the import, imported after the tracks). `STEMS_DIR`
 holds rhythm stems with a known constant tempo, given as `TEMPO_BPM`; press **OK** in Pro Tools'
 *MIDI Import Options* dialog when it appears (twice):
 

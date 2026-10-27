@@ -13,11 +13,11 @@ import 'package:stem_import/ui/theme.dart';
 
 import 'fake_engine.dart';
 
-Future<(AppState, FakeEngine)> pumpApp(WidgetTester tester) async {
+Future<(AppState, FakeEngine)> pumpApp(WidgetTester tester, {FakeEngine? engine}) async {
   tester.view.physicalSize = const Size(1320, 820);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
-  final fake = FakeEngine();
+  final fake = engine ?? FakeEngine();
   final state = AppState();
   await tester.runAsync(() => state.attach(fake));
   await tester.pumpWidget(MaterialApp(
@@ -103,6 +103,9 @@ void main() {
     state.setKeepUnknown(false);
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('apply-button')));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tempo-continue')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('confirm-apply')));
@@ -235,6 +238,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('apply-button')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tempo-continue')));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
     expect(find.textContaining('Apply to Pro Tools: Demo Session'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('confirm-apply')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
@@ -250,80 +256,120 @@ void main() {
     expect(find.byIcon(LucideIcons.circleCheck), findsWidgets);
   });
 
-  testWidgets('Detect BPM: shows the tempo, half/double time, constant or tempo map, import', (tester) async {
+  testWidgets('the BPM is detected after adding stems and shown, not clickable, in the header', (tester) async {
     final (state, fake) = await pumpApp(tester);
-    await tester.tap(find.byKey(const ValueKey('detect-bpm')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pumpAndSettle();
     // Every track goes with its category; the engine picks the rhythm stems.
-    expect(fake.tempoRequests.single.length, 10);
+    expect(fake.tempoRequests, hasLength(1));
     expect(fake.tempoRequests.single.firstWhere((t) => (t['file'] as String).endsWith('Kick In.wav'))['category'], 'drums');
-    expect(find.descendant(of: find.byType(AlertDialog), matching: find.text('85 BPM')), findsOneWidget);
+    expect(find.byKey(const ValueKey('tempo-bpm')), findsOneWidget);
+    expect(find.text('85 BPM'), findsOneWidget);
+    expect(find.text('Constant'), findsOneWidget);
+    expect(find.byKey(const ValueKey('detect-bpm')), findsNothing); // no button: it is only a display
+    await tester.tap(find.byKey(const ValueKey('tempo-chip')));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    // A changed list is detected again on its own.
+    state.remove(row(state, 'MySong_BGVs'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+    expect(fake.tempoRequests, hasLength(2));
+    expect(fake.tempoRequests.last, hasLength(9));
+  });
+
+  Future<void> next(WidgetTester tester, String key) async {
+    await tester.tap(find.byKey(ValueKey(key)));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('Preview & apply asks for the tempo first and imports it after the tracks', (tester) async {
+    final (state, fake) = await pumpApp(tester);
+    await next(tester, 'apply-button');
+    expect(find.text('Tempo for this import'), findsOneWidget);
+    expect(find.byKey(const ValueKey('tempo-dialog-bpm')), findsOneWidget);
     expect(find.textContaining('Listened to 3 drum stems'), findsOneWidget);
-    expect(state.tempoMode, 'constant'); // the engine's suggestion
+    expect(find.byKey(const ValueKey('confirm-apply')), findsNothing); // the preview comes after the tempo
     await tester.tap(find.text('2× double time'));
     await tester.pumpAndSettle();
     expect(state.tempoBpm, 170);
-    await tester.tap(find.text('As detected'));
-    await tester.tap(find.byKey(const ValueKey('tempo-import')));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.tap(find.text('Tempo map'));
     await tester.pumpAndSettle();
+    expect(find.text('Continue with ≈ 170 BPM'), findsOneWidget);
+    await next(tester, 'tempo-continue');
+    expect(find.textContaining('Then sets the tempo: tempo map, ≈ 170 BPM'), findsOneWidget);
+    await next(tester, 'confirm-apply');
+    expect(find.textContaining('10 tracks imported and verified'), findsOneWidget);
+    expect(find.textContaining('Tempo set: ≈ 170 BPM (checked in Pro Tools)'), findsOneWidget);
+    expect(fake.calls, ['apply', 'tempo']); // tracks first, then the tempo
     final req = fake.tempoApplied.single;
     expect((req['mode'], req['bpm'], req['factor'], req['folder'], req['import_to_pro_tools']),
-        ('constant', 85, 1, '/stems', true));
+        ('variable', null, 2, '/stems', true));
     expect((req['beats'] as List).length, 324);
-    expect(find.textContaining('Pro Tools tempo is now 85 BPM (checked at bar 91)'), findsOneWidget);
-    // Tempo map, and the user cancels Pro Tools' dialog.
-    fake.tempoAccepted = false;
-    await tester.tap(find.text('Tempo map (variable)'));
-    await tester.tap(find.byKey(const ValueKey('tempo-import')));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
-    await tester.pumpAndSettle();
-    expect((fake.tempoApplied.last['mode'], fake.tempoApplied.last['bpm']), ('variable', null));
-    expect(find.textContaining('Pro Tools kept its tempo'), findsOneWidget);
-    await tester.tap(find.text('Close'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('tempo-bpm')), findsOneWidget);
-    expect(find.text('≈ 85 BPM'), findsOneWidget);
-    // Changing the list forgets the tempo.
-    state.remove(row(state, 'MySong_BGVs'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('detect-bpm')), findsOneWidget);
+    await next(tester, 'close-result');
+    expect(find.byIcon(LucideIcons.check), findsWidgets); // the header shows it was set
   });
 
-  testWidgets('Preview & apply also imports the detected tempo, after the tracks', (tester) async {
+  testWidgets('cancelled in Pro Tools: the result offers to import only the tempo again', (tester) async {
     final (state, fake) = await pumpApp(tester);
-    await tester.runAsync(state.detectTempo);
-    state.setTempoBpm(86);
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('apply-button')));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Then sets the tempo: 86 BPM, constant'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('confirm-apply')));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
-    await tester.pumpAndSettle();
-    expect(fake.applied.map((a) => a.$2), [true, false]);
-    expect(fake.tempoApplied.single['bpm'], 86);
-    expect(find.textContaining('Tempo set: 86 BPM.'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('close-result')));
-    await tester.pumpAndSettle();
-    // Unticked: apply leaves the tempo alone.
-    state.setTempoWithApply(false);
-    await tester.tap(find.byKey(const ValueKey('apply-button')));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('apply-tempo-line')), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('confirm-apply')));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
-    await tester.pumpAndSettle();
-    expect(fake.tempoApplied, hasLength(1));
+    fake.tempoAccepted = false;
+    await next(tester, 'apply-button');
+    await next(tester, 'tempo-continue');
+    await next(tester, 'confirm-apply');
+    expect(find.textContaining('The tempo was not changed'), findsOneWidget);
+    expect(find.text('Done, with problems'), findsOneWidget);
+    fake.tempoAccepted = true;
+    await next(tester, 'retry-tempo');
+    expect(find.textContaining('Tempo set: 85 BPM'), findsOneWidget);
+    expect(find.byKey(const ValueKey('retry-tempo')), findsNothing);
+    expect(fake.calls, ['apply', 'tempo', 'tempo']); // the tracks were not imported twice
+    await next(tester, 'close-result');
   });
 
-  testWidgets('screenshot of the tempo dialog', (tester) async {
+  testWidgets('keep the session tempo, or cancel at the tempo step', (tester) async {
+    final (_, fake) = await pumpApp(tester);
+    await next(tester, 'apply-button');
+    await next(tester, 'tempo-cancel');
+    expect(fake.applied, isEmpty); // nothing previewed or sent
+    await next(tester, 'apply-button');
+    await tester.tap(find.text('Keep session tempo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Continue without tempo'), findsOneWidget);
+    await next(tester, 'tempo-continue');
+    expect(find.text('The session tempo is not changed.'), findsOneWidget);
+    await next(tester, 'confirm-apply');
+    expect(find.textContaining('The session tempo was not changed.'), findsOneWidget);
+    expect(fake.calls, ['apply']);
+    await next(tester, 'close-result');
+  });
+
+  testWidgets('no beat in the stems: the header says so and the import goes on without tempo', (tester) async {
+    final fake = FakeEngine()..tempoError = EngineException(422, 'No steady beat found.', code: 'no_beats');
+    final (state, _) = await pumpApp(tester, engine: fake);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+    expect(find.text('No BPM found'), findsOneWidget);
+    expect(find.byType(AlertDialog), findsNothing); // no alert while the user reviews the names
+    await next(tester, 'apply-button');
+    expect(find.byKey(const ValueKey('tempo-error')), findsOneWidget);
+    expect(find.textContaining('No steady beat was found in the stems'), findsOneWidget);
+    fake.tempoError = null;
+    await next(tester, 'tempo-retry'); // detect again, now with a beat
+    expect(find.byKey(const ValueKey('tempo-dialog-bpm')), findsOneWidget);
+    await tester.tap(find.text('Keep session tempo'));
+    await tester.pumpAndSettle();
+    await next(tester, 'tempo-continue');
+    expect(find.byKey(const ValueKey('confirm-apply')), findsOneWidget);
+    expect(state.tempoWillImport, isFalse);
+  });
+
+  testWidgets('screenshot of the tempo step', (tester) async {
     await loadRealFonts(tester);
     await pumpApp(tester);
-    await tester.tap(find.byKey(const ValueKey('detect-bpm')));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('apply-button')));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pumpAndSettle();
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/tempo_dialog.png'));

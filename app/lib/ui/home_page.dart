@@ -123,7 +123,7 @@ class _Header extends StatelessWidget {
             ],
             Flexible(child: _EngineStatus(state: state)),
             const SizedBox(width: 16),
-            TempoButton(state: state),
+            TempoIndicator(state: state),
           ]),
         ),
       ]),

@@ -34,7 +34,7 @@ TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名�
 - **四層辨識：** 已知軌名字典 → 拼字校正 → AI 讀名稱 → 聽聲音。中、英、日文名稱都能辨識；名稱看不出來的軌（例如 `Audio 3`），會改用音訊判斷。
 - **有疑問的地方交給你決定：** 每一軌顯示 Top-1 和信心程度；下拉選單列出 Top-5，也可以自己打名稱、搜尋全部樂器、保留原名，或改大類和顏色。
 - **立體聲分析：** 偵測假立體聲、單邊立體聲、極性反相和延遲，需要時自動轉成 mono。
-- **BPM 偵測：** 右上角直接顯示 BPM。可以選固定速度（平均值四捨五入）或逐小節跟著變的速度圖（tempo map），TrackMate 匯入 Pro Tools 後會確認 session 的速度確實改變；速度也會存成 MIDI 檔。
+- **BPM 偵測：** 自動偵測 BPM 並顯示在右上角。每次匯入前選擇固定速度（平均值四捨五入）、逐小節跟著變的速度圖（tempo map）或保留 session 原本的速度，TrackMate 和分軌一起匯入 Pro Tools，並確認 session 的速度確實改變；速度也會存成 MIDI 檔。
 - **Pro Tools 整合：** 透過 PTSL 操作。名稱自動避開重複，套用後逐軌驗證名稱、資料夾和顏色。
 - **完全在本機執行：** 模型第一次啟動時下載，之後不需要網路。
 
@@ -96,15 +96,14 @@ TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名�
    - **To mono：** 依立體聲分析的建議預設勾選，可以自己改。
    - 你從 Top-5 改選的樂器會被記住，下次遇到同樣的名稱會直接辨識正確。
 5. **Keep unrecognised words（預設關閉）：** 關閉時，無法辨識的字和 Pro Tools 的後綴（例如 `_04-01`、`-TCEx_01`）會被刪掉；打開後保留。名稱重複時會自動加上流水號，例如 `Lead Vocal 1`、`Lead Vocal 2`。
-6. **按「Preview & apply」：** 先預覽會建立哪些資料夾、每軌的最終名稱和是否轉 mono，確認後才寫入 Pro Tools。完成後，每一軌會顯示驗證結果。
-7. **速度（可選）：** 按右上角的 **Detect BPM**。TrackMate 會聽鼓組和打擊樂分軌（沒有的話改聽貝斯、吉他、鍵盤和合成器），馬上顯示 BPM，接著打開速度設定：
-   - **Import as（匯入方式）：** *Constant tempo* 是整個 session 用同一個 BPM：取平均值四捨五入，可以用 − 和 + 調整。*Tempo map (variable)* 是每小節一個速度，讓每條小節線都對準分軌裡聽到的第一拍。TrackMate 會建議其中一種：每一拍都落在同一條直線網格的 30 ms 內時，建議固定速度。
-   - **Beat（拍子）：** 如果歌曲被聽成半速或倍速，選 *½× half time* 或 *2× double time*。
-   - **Import to Pro Tools：** Pro Tools 會跳出 *MIDI Import Options* 對話框，保持勾選 *Import tempo map from MIDI File* 後按 **OK**。TrackMate 接著讀回 session，確認新的速度；如果速度沒有改變（例如按了取消），也會告訴你。
-   - **Save MIDI：** 把速度檔（`TrackMate Tempo 85 BPM.mid` 或 `TrackMate Tempo Map (avg 85 BPM).mid`）存到分軌旁邊，可以給其他 DAW 使用。
-   - 勾選 *Also import the tempo with Preview & apply*（預設勾選）時，第 6 步會在匯入分軌之後設定速度。新增或移除分軌後，偵測結果會清除，需要重新偵測。
+6. **速度（自動）：** 你在確認名稱時，TrackMate 會從鼓組和打擊樂分軌（沒有的話改聽貝斯、吉他、鍵盤和合成器）偵測 BPM，顯示在右上角，不需要按任何按鈕。新增或移除分軌後會重新偵測。
+7. **按「Preview & apply」：** 每次匯入都會經過以下步驟：
+   - **速度：** 視窗顯示 BPM，請你選擇 session 的速度：*Constant tempo* 是整首用一個 BPM（平均值四捨五入，可以用 − 和 + 調整）；*Tempo map* 是每小節一個速度，讓每條小節線都對準分軌裡聽到的第一拍；*Keep session tempo* 是不改速度。每一拍都落在同一條直線網格的 30 ms 內時，TrackMate 會建議固定速度。如果被聽成半速或倍速，選 *½× half time* 或 *2× double time*。找不到拍子時，可以重新偵測或不設定速度繼續。
+   - **預覽：** 會建立哪些資料夾、每軌的最終名稱、是否轉 mono，以及速度設定。確認後才寫入 Pro Tools。
+   - **匯入：** 先匯入分軌，再匯入速度。Pro Tools 會跳出 *MIDI Import Options*，保持勾選 *Import tempo map from MIDI File* 並按 **OK**，TrackMate 接著讀回 session 確認速度。
+   - **結果：** 每一軌顯示驗證結果，也會顯示速度有沒有設定成功。沒有成功時（例如按了取消），按 **Import tempo again** 只重新匯入速度。速度也會存成 MIDI 檔放在分軌旁邊（`TrackMate Tempo 85 BPM.mid`），可以給其他 DAW 使用。
 
-![速度設定](docs/images/tempo_dialog.png)
+![匯入前的速度設定](docs/images/tempo_dialog.png)
 
 ![Category 選單](docs/images/category_menu.png)
 

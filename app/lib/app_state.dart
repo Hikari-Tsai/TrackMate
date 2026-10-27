@@ -83,6 +83,7 @@ class AppState extends ChangeNotifier {
     final m = await api!.models();
     layers = {for (final e in (m['layers'] as Map).entries) e.key as String: e.value as bool};
     models = m['models'] as Map<String, dynamic>;
+    if (tempoModelReady && tempoError?.code == 'tempo_model_not_ready' && !busy) unawaited(detectTempo(again: true));
     final downloading = models.values.any((s) => (s as Map)['state'] == 'downloading');
     _modelTimer?.cancel();
     if (downloading) {
@@ -181,6 +182,7 @@ class AppState extends ChangeNotifier {
         _merge(audio);
       }
       message = null;
+      unawaited(detectTempo()); // in the background while the user reviews the names
     } catch (e) {
       for (final r in rows) {
         r.audioPending = false;
@@ -311,6 +313,7 @@ class AppState extends ChangeNotifier {
     tracks.remove(row);
     _forgetTempo();
     notifyListeners();
+    if (tracks.isNotEmpty && !busy) unawaited(detectTempo());
   }
 
   void clear() {
@@ -356,47 +359,88 @@ class AppState extends ChangeNotifier {
   }
 
   // ------------------------------------------------------------------ tempo
-  TempoInfo? tempo; // null until detected, and again when the list changes
-  bool tempoBusy = false;
-  String tempoMode = 'constant'; // constant | variable (tempo map)
+  // Detected automatically once the stems are recognised. Preview & apply always asks how to set
+  // it (constant, tempo map, or keep the session tempo) and imports it right after the tracks.
+  TempoInfo? tempo; // null until detected
+  EngineException? tempoError; // why the last detection gave no tempo (no beat, model missing)
+  bool tempoBusy = false; // detecting, or importing into Pro Tools
+  String tempoMode = 'constant'; // constant | variable (tempo map) | none (keep the session tempo)
   double tempoFactor = 1; // 0.5 or 2 when the beat was heard in double or half time
   int tempoBpm = 120; // the constant tempo to set; starts at the rounded average
-  bool tempoWithApply = true; // Preview & apply also imports the tempo
   Map<String, dynamic>? tempoResult; // last /tempo/apply
+  String? _tempoInput; // the files and categories the current result was detected from
+  Future<void>? _tempoJob;
 
   bool get tempoModelReady => layers['T'] ?? false;
 
+  String get _tempoKey => [for (final t in tracks) '${t.file}\t${t.category}'].join('\n');
+
   /// Average BPM after half/double time.
   double get tempoAverage => (tempo?.bpm ?? 0) * tempoFactor;
+
+  /// Whether Preview & apply will set the tempo.
+  bool get tempoWillImport => tempo != null && tempoMode != 'none';
 
   /// What the header shows: the constant BPM, or the average of the map.
   String get tempoLabel => tempo == null
       ? ''
       : tempoMode == 'constant'
           ? '$tempoBpm BPM'
-          : '≈ ${tempoAverage.round()} BPM';
+          : tempoMode == 'variable'
+              ? '≈ ${tempoAverage.round()} BPM'
+              : '${tempoAverage.round()} BPM';
 
   void _forgetTempo() {
     tempo = null;
+    tempoError = null;
     tempoResult = null;
+    _tempoInput = null;
   }
 
-  Future<void> detectTempo() async {
-    if (api == null || tracks.isEmpty || tempoBusy) return;
-    tempoBusy = true;
-    tempoResult = null;
-    notifyListeners();
-    try {
-      final res = await api!.tempo([for (final t in tracks) {'file': t.file, 'category': t.category}]);
-      tempo = TempoInfo(res);
-      tempoFactor = 1;
-      tempoMode = tempo!.suggestedMode;
-      tempoBpm = tempo!.bpmRounded;
-    } catch (e) {
-      alert(AppAlert.fromError(e, doing: 'detect the tempo'));
-    } finally {
-      tempoBusy = false;
+  /// Detects the tempo of the current list, unless that was already done for these files and
+  /// categories ([again] repeats it). Errors are kept in [tempoError], not shown as alerts: the
+  /// detection runs on its own and the tempo step of Preview & apply explains them.
+  Future<void> detectTempo({bool again = false}) async {
+    if (api == null || tracks.isEmpty) return;
+    if (_tempoJob != null) {
+      await _tempoJob; // the list may have changed meanwhile: check again
+      return detectTempo(again: again);
+    }
+    if (!again && _tempoInput == _tempoKey) return;
+    if (!tempoModelReady) {
+      tempo = null;
+      tempoError = EngineException(503, 'The tempo model is still downloading.', code: 'tempo_model_not_ready');
       notifyListeners();
+      return; // tried again when the download finishes (refreshModels)
+    }
+    final key = _tempoKey;
+    _tempoJob = () async {
+      tempoBusy = true;
+      tempoResult = null;
+      notifyListeners();
+      try {
+        final res = await api!.tempo([for (final t in tracks) {'file': t.file, 'category': t.category}]);
+        tempo = TempoInfo(res);
+        tempoError = null;
+        tempoFactor = 1;
+        tempoMode = tempo!.suggestedMode;
+        tempoBpm = tempo!.bpmRounded;
+      } on EngineException catch (e) {
+        tempo = null;
+        tempoError = e;
+      } catch (e) {
+        tempo = null;
+        tempoError = EngineException(0, '$e');
+      } finally {
+        _tempoInput = key;
+        tempoBusy = false;
+        notifyListeners();
+      }
+    }();
+    try {
+      await _tempoJob;
+    } finally {
+      _tempoJob = null;
     }
   }
 
@@ -417,17 +461,12 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setTempoWithApply(bool on) {
-    tempoWithApply = on;
-    notifyListeners();
-  }
-
-  /// Writes the tempo MIDI next to the stems and, with [toProTools], imports it: Pro Tools then
-  /// shows its MIDI Import Options dialog and the call returns when the user closes it.
-  Future<Map<String, dynamic>> applyTempo({bool toProTools = true}) async {
+  /// Writes the tempo MIDI next to the stems and imports it: Pro Tools then shows its MIDI
+  /// Import Options dialog and the call returns when the user closes it.
+  Future<Map<String, dynamic>> applyTempo() async {
     final t = tempo!;
     tempoBusy = true;
-    if (toProTools) message = 'Waiting for Pro Tools: press OK in "MIDI Import Options"';
+    message = 'Waiting for Pro Tools: press OK in "MIDI Import Options"';
     notifyListeners();
     try {
       final res = await api!.applyTempo({
@@ -439,17 +478,13 @@ class AppState extends ChangeNotifier {
         'bpm': tempoMode == 'constant' ? tempoBpm : null,
         'factor': tempoFactor == 0.5 ? 0.5 : tempoFactor.toInt(),
         'folder': t.sources.isEmpty ? null : File(t.sources.first).parent.path,
-        'import_to_pro_tools': toProTools,
+        'import_to_pro_tools': true,
       });
       tempoResult = res;
-      message = !toProTools
-          ? 'Saved ${baseName(res['midi_path'] as String)}'
-          : res['applied'] == true
-              ? 'Pro Tools tempo set: $tempoLabel'
-              : 'Pro Tools did not change its tempo';
+      message = res['applied'] == true ? 'Pro Tools tempo set: $tempoLabel' : 'Pro Tools did not change its tempo';
       return res;
     } catch (e) {
-      message = toProTools ? 'Tempo import stopped' : 'Could not save the tempo MIDI';
+      message = 'Tempo import stopped';
       rethrow;
     } finally {
       tempoBusy = false;

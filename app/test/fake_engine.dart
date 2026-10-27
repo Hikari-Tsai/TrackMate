@@ -28,6 +28,8 @@ class FakeEngine implements EngineApi {
   final tempoRequests = <List<Map<String, dynamic>>>[];
   final tempoApplied = <Map<String, dynamic>>[];
   bool tempoAccepted = true; // false: the user cancelled Pro Tools' MIDI Import Options
+  Object? tempoError; // thrown by every /tempo while set
+  final calls = <String>[]; // order of the writing calls: 'apply' (tracks), 'tempo'
   final Map<String, dynamic> _analysis;
 
   List<String> get files => _analysis.keys.toList();
@@ -98,6 +100,7 @@ class FakeEngine implements EngineApi {
     if (dryRun && previewError != null) throw previewError!;
     if (!dryRun && applyError != null) throw applyError!;
     applied.add((tracks, dryRun));
+    if (!dryRun) calls.add('apply');
     final plan = [
       {
         'folder': 'ALL', 'category': 'drums', 'color_index': 8, 'exists': false,
@@ -119,12 +122,14 @@ class FakeEngine implements EngineApi {
   @override
   Future<Map<String, dynamic>> tempo(List<Map<String, dynamic>> tracks) async {
     tempoRequests.add(tracks);
+    if (tempoError != null) throw tempoError!;
     return fixture('tempo.json');
   }
 
   @override
   Future<Map<String, dynamic>> applyTempo(Map<String, dynamic> request) async {
     tempoApplied.add(request);
+    calls.add('tempo');
     final constant = request['mode'] == 'constant';
     final name = constant ? 'TrackMate Tempo ${request['bpm']} BPM.mid' : 'TrackMate Tempo Map (avg 85 BPM).mid';
     final toPt = request['import_to_pro_tools'] == true;

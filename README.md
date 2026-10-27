@@ -32,7 +32,7 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
 - **Four recognition layers:** known track names → spelling → AI name reading → listening. Chinese, English and Japanese names all work; tracks whose names say nothing (for example `Audio 3`) are recognised from their audio.
 - **You decide where it is unsure:** every track shows its top-1 result and a confidence level; a menu lists the top 5, and you can type a name, search all instruments, keep the original name, or change the category and colour.
 - **Stereo analysis:** detects fake stereo, one-sided stereo, inverted polarity and delays, and converts to mono where needed.
-- **BPM detection:** the BPM appears in the top right corner. You choose a constant tempo (the average, rounded) or a tempo map that follows every bar, and TrackMate imports it into Pro Tools and checks that the session tempo changed. The tempo is also saved as a MIDI file.
+- **BPM detection:** the BPM is detected on its own and shown in the top right corner. Before every import you choose a constant tempo (the average, rounded), a tempo map that follows every bar, or the session's own tempo; TrackMate imports it with the tracks and checks that the session tempo changed. The tempo is also saved as a MIDI file.
 - **Pro Tools integration:** works through PTSL; names are kept unique, and after applying, every track's name, folder and colour are verified.
 - **Runs entirely on your computer:** the models are downloaded on first start; after that no network is needed.
 
@@ -92,15 +92,14 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
    - **To mono:** pre-ticked from the stereo analysis; you can change it.
    - Instruments you pick from the top 5 are remembered, so the same name is recognised correctly next time.
 5. **Keep unrecognised words (off by default):** when off, words that could not be recognised and Pro Tools suffixes (such as `_04-01` or `-TCEx_01`) are removed; turn it on to keep them. Duplicate names get running numbers, for example `Lead Vocal 1`, `Lead Vocal 2`.
-6. **Press Preview & apply:** you first see which folders will be created, each track's final name and whether it is converted to mono. Nothing is written to Pro Tools until you confirm. Afterwards, every track shows its verification result.
-7. **Tempo (optional):** press **Detect BPM** in the top right corner. TrackMate listens to the drum and percussion stems (or bass, guitars, keys and synths when there are none) and shows the BPM at once, then opens the tempo settings:
-   - **Import as:** *Constant tempo* sets one BPM for the session: the average, rounded, which you can change with − and +. *Tempo map (variable)* sets one tempo per bar, so every bar line falls on the downbeat heard in the stems. TrackMate suggests one: constant when every beat lies within 30 ms of one straight grid.
-   - **Beat:** if the song was heard in half or double time, pick *½× half time* or *2× double time*.
-   - **Import to Pro Tools:** Pro Tools shows its *MIDI Import Options* dialog; keep *Import tempo map from MIDI File* ticked and press **OK**. TrackMate then reads the session back and confirms the new tempo, or tells you that it did not change (for example when the dialog was cancelled).
-   - **Save MIDI** writes the tempo file (`TrackMate Tempo 85 BPM.mid` or `TrackMate Tempo Map (avg 85 BPM).mid`) next to the stems, for other DAWs.
-   - With *Also import the tempo with Preview & apply* ticked (the default), step 6 sets the tempo after the tracks. Adding or removing stems clears the result, so detect again.
+6. **Tempo (automatic):** while you check the names, TrackMate detects the BPM in the drum and percussion stems (or bass, guitars, keys and synths when there are none) and shows it in the top right corner. Nothing to press: it is detected again when you add or remove stems.
+7. **Press Preview & apply.** Every import goes through these steps:
+   - **Tempo:** a window shows the BPM and asks how to set the session tempo. *Constant tempo* sets one BPM, the average rounded, which you can change with − and +. *Tempo map* sets one tempo per bar, so every bar line falls on the downbeat heard in the stems. *Keep session tempo* leaves it as it is. TrackMate suggests constant when every beat lies within 30 ms of one straight grid. If the song was heard in half or double time, pick *½× half time* or *2× double time*. When no beat is found, you can detect again or continue without tempo.
+   - **Preview:** which folders will be created, each track's final name, whether it is converted to mono, and the tempo. Nothing is written to Pro Tools until you confirm.
+   - **Import:** first the tracks, then the tempo. Pro Tools shows its *MIDI Import Options* dialog; keep *Import tempo map from MIDI File* ticked and press **OK**. TrackMate then reads the session back and checks the tempo.
+   - **Result:** every track shows its verification result, and the tempo whether it was set. If it was not (for example the dialog was cancelled), **Import tempo again** imports only the tempo. The tempo is also saved as a MIDI file next to the stems (`TrackMate Tempo 85 BPM.mid`), for other DAWs.
 
-![Tempo settings](docs/images/tempo_dialog.png)
+![Tempo step before the import](docs/images/tempo_dialog.png)
 
 ![Category menu](docs/images/category_menu.png)
 

@@ -31,9 +31,18 @@ Future<void> settle(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// Goes past the tempo step of Preview & apply when it is shown.
+Future<void> passTempo(WidgetTester tester) async {
+  final next = find.byKey(const ValueKey('tempo-continue'));
+  if (next.evaluate().isEmpty) return;
+  await tester.tap(next);
+  await settle(tester);
+}
+
 Future<void> pressApply(WidgetTester tester) async {
   await tester.tap(find.byKey(const ValueKey('apply-button')));
   await settle(tester);
+  await passTempo(tester);
 }
 
 void main() {
@@ -72,6 +81,7 @@ void main() {
     expect(find.byKey(const ValueKey('alert-no_session')), findsOneWidget); // ... but no session yet
     await tester.tap(find.byKey(const ValueKey('alert-action'))); // user opened a session
     await settle(tester);
+    await passTempo(tester);
     expect(find.byKey(const ValueKey('confirm-apply')), findsOneWidget); // preview shown
     expect(fake.sessionCalls, greaterThanOrEqualTo(3));
   });
@@ -84,6 +94,7 @@ void main() {
     fake.previewError = null;
     await tester.tap(find.byKey(const ValueKey('alert-action')));
     await settle(tester);
+    await passTempo(tester);
     expect(find.byKey(const ValueKey('confirm-apply')), findsOneWidget);
   });
 
