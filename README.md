@@ -15,6 +15,12 @@
 
 Before a Pro Tools mix, engineers lose time on chores: stems arrive with inconsistent names full of typos, abbreviations and defaults like `Audio 3`, mono tracks come exported as stereo, and the tempo has to be set by hand. TrackMate does it all in one pass. It recognises every stem, proposes a standard name, category and colour, turns fake stereo back into mono, detects the BPM, and imports everything into Pro Tools with one click. It combines a naming dictionary with state-of-the-art text, audio and beat-tracking models: on real-world track names its first answer is right 96.6 % of the time (98.9 % within its top 5).
 
+![Drag stems into TrackMate: names, categories, colours and the BPM are recognised](docs/images/demo-recognise.gif)
+
+![Preview & apply: choose the tempo, then TrackMate builds the folders and tracks in Pro Tools and sets the tempo](docs/images/demo-import.gif)
+
+<sub>Recorded with the real app and Pro Tools; waiting is sped up.</sub>
+
 Recognition combines rules and AI models:
 - **Rules:** a dictionary of common track names and a spelling corrector.
 - **Reading the name:** the multilingual text-embedding model Qwen3-Embedding-0.6B understands track names it has never seen.

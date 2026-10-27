@@ -17,6 +17,12 @@
 
 Pro Tools 混音前，總要花時間整理分軌：檔名充滿錯字、縮寫和 `Audio 3` 這類預設名稱，單聲道的音被輸出成立體聲，速度還得手動設定。TrackMate 一次處理完：辨識每一軌、給出標準名稱、大類和顏色，把假立體聲轉回 mono，偵測 BPM，再一鍵匯入 Pro Tools。它結合命名字典與最先進的文字、音訊和節拍偵測模型，在真實軌名的測試中，第一個答案的準確率達 96.6%（前 5 名內 98.9%）。
 
+![把分軌拖進 TrackMate：辨識名稱、大類、顏色和 BPM](docs/images/demo-recognise.gif)
+
+![Preview & apply：選擇速度後，TrackMate 在 Pro Tools 建立資料夾和音軌並設定速度](docs/images/demo-import.gif)
+
+<sub>以真實的 App 和 Pro Tools 錄製，等待的部分已加速。</sub>
+
 辨識結合規則與 AI 模型：
 - **規則：** 常用軌名字典和拼字校正。
 - **讀名稱：** 用支援多語言的文字嵌入模型 Qwen3-Embedding-0.6B，理解沒看過的軌名。
