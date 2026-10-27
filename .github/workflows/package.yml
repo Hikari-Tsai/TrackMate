@@ -1,12 +1,26 @@
 name: Package
 
 # Builds TrackMate for macOS (one universal app for Apple Silicon and Intel) and Windows (x64)
-# with the engine inside. Every push to main keeps the builds as workflow artifacts; a tag v*
-# also publishes a release whose notes come from .github/release-notes.md.
+# with the engine inside, kept as workflow artifacts. Runs for:
+# - a tag v*: also publishes a release whose notes come from .github/release-notes.md;
+# - a push to main that changes how the apps are built (the paths below), so a broken build
+#   shows up before the release; other pushes only run CI;
+# - a manual run (Actions > Package > Run workflow), e.g. to try a build before tagging.
+# GitHub does not apply the path filter to tag pushes, so every tag builds.
 on:
   push:
     branches: [main]
     tags: ["v*"]
+    paths:
+      - ".github/workflows/package.yml"
+      - "scripts/**"
+      - "engine/packaging/**"
+      - "engine/pyproject.toml"
+      - "engine/uv.lock"
+      - "app/pubspec.yaml"
+      - "app/pubspec.lock"
+      - "app/macos/**"
+      - "app/windows/**"
   workflow_dispatch:
 
 permissions:

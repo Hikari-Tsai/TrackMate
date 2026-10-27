@@ -346,7 +346,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 | Workflow | 実行タイミング | 内容 |
 |---|---|---|
 | [CI](.github/workflows/ci.yml) | `main` への push、プルリクエスト | エンジンとステレオ解析のテスト、`flutter analyze`、アプリのテスト（スクリーンショット比較を除く） |
-| [Package](.github/workflows/package.yml) | `main` への push、`v*` タグ、手動 | エンジンをビルドしてスモークテスト（macOS：Apple Silicon 用と Intel 用を 1 つのユニバーサルアプリに同梱、Windows x64）し、アプリをビルドしてワークフローの成果物としてアップロード。`v*` タグでは GitHub Release を作成し、インストーラーとインストール手順（[テンプレート](.github/release-notes.md)）を添付 |
+| [Package](.github/workflows/package.yml) | `v*` タグ、手動実行、ビルド方法を変える `main` への push（パッケージ作成スクリプト、依存関係、macOS／Windows プロジェクト、workflow 自体） | エンジンをビルドしてスモークテスト（macOS：Apple Silicon 用と Intel 用を 1 つのユニバーサルアプリに同梱、Windows x64）し、アプリをビルドしてワークフローの成果物としてアップロード。`v*` タグでは GitHub Release を作成し、インストーラーとインストール手順（[テンプレート](.github/release-notes.md)）を添付 |
 
 リリースの公開：
 ```bash

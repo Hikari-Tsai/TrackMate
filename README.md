@@ -336,7 +336,7 @@ Index: [`docs/reports/`](docs/reports/README.md) (the reports are written in Tra
 | Workflow | Runs on | What it does |
 |---|---|---|
 | [CI](.github/workflows/ci.yml) | Push to `main`, pull requests | Engine and stereo-analysis tests, `flutter analyze`, app tests (without screenshot comparisons) |
-| [Package](.github/workflows/package.yml) | Push to `main`, `v*` tags, manual | Builds and smoke-tests the engines (macOS: Apple Silicon and Intel, packed into one universal app; Windows x64), builds the apps and uploads them as workflow artifacts. A `v*` tag also creates a GitHub release with the installers and install instructions ([template](.github/release-notes.md)) |
+| [Package](.github/workflows/package.yml) | `v*` tags, manual runs, and pushes to `main` that change how the apps are built (packaging scripts, dependencies, the macOS/Windows projects, the workflow) | Builds and smoke-tests the engines (macOS: Apple Silicon and Intel, packed into one universal app; Windows x64), builds the apps and uploads them as workflow artifacts. A `v*` tag also creates a GitHub release with the installers and install instructions ([template](.github/release-notes.md)) |
 
 To publish a release:
 ```bash

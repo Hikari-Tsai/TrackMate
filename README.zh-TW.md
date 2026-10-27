@@ -346,7 +346,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 | Workflow | 觸發時機 | 內容 |
 |---|---|---|
 | [CI](.github/workflows/ci.yml) | push 到 `main`、Pull Request | 引擎與立體聲分析的測試、`flutter analyze`、App 測試（不含截圖比對） |
-| [Package](.github/workflows/package.yml) | push 到 `main`、`v*` 標籤、手動觸發 | 打包引擎並跑 smoke test（macOS：Apple Silicon 和 Intel 兩個引擎放進同一個通用版 App；Windows x64），再建置 App，上傳成 Actions 產物；推送 `v*` 標籤時自動建立 GitHub Release，附上安裝檔和安裝說明（[範本](.github/release-notes.md)） |
+| [Package](.github/workflows/package.yml) | `v*` 標籤、手動觸發，以及改到打包方式的 push 到 `main`（打包腳本、相依套件、macOS／Windows 專案、workflow 本身） | 打包引擎並跑 smoke test（macOS：Apple Silicon 和 Intel 兩個引擎放進同一個通用版 App；Windows x64），再建置 App，上傳成 Actions 產物；推送 `v*` 標籤時自動建立 GitHub Release，附上安裝檔和安裝說明（[範本](.github/release-notes.md)） |
 
 發佈新版本：
 ```bash
