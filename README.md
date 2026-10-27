@@ -364,4 +364,6 @@ Research and model export also used [PyTorch](https://pytorch.org/) (BSD-3-Claus
 Pro Tools, AudioSuite and Avid are trademarks of Avid Technology, Inc. TrackMate is not affiliated with or endorsed by Avid. The Pro Tools Scripting Library (PTSL) is provided by Avid.
 
 ## License
-No license has been chosen for this project yet; until a LICENSE file is added, all rights are reserved. Third-party licences are listed under [Acknowledgements](#acknowledgements).
+TrackMate's source code, documentation and naming dictionary are released under the [MIT License](LICENSE).
+
+The pretrained models are **not** covered by the MIT License. Qwen3-Embedding-0.6B and PE-AV small are under the Apache License 2.0; TrackMate downloads them with a copy of their licence, and the files derived from PE-AV (`peav_prototypes.npz`, `prototypes.npz`) are under the same licence. Third-party models, datasets, fonts and libraries, and the changes made to the models, are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

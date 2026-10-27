@@ -18,6 +18,7 @@ cd "$ROOT/app"
 APP="$ROOT/app/build/macos/Build/Products/Release/TrackMate.app"
 rm -rf "$APP/Contents/Resources/engine"
 cp -R "$ROOT/engine/dist/stem-engine" "$APP/Contents/Resources/engine"
+cp "$ROOT/LICENSE" "$ROOT/THIRD_PARTY_NOTICES.md" "$APP/Contents/Resources/"
 # The bundle changed after Flutter signed it: sign again (ad hoc, no Developer ID).
 codesign --force --deep --sign - "$APP"
 codesign --verify --deep --strict "$APP"

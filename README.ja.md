@@ -335,4 +335,6 @@ Pro Tools、AudioSuite、Avid は Avid Technology, Inc. の商標です。TrackM
 ## ライセンス
 <sub>[English](README.md#license)</sub>
 
-本プロジェクトのライセンスはまだ決まっていません。LICENSE ファイルが追加されるまでは、すべての権利を留保します。サードパーティのライセンスは[謝辞](#謝辞)を参照してください。
+TrackMate のソースコード、ドキュメント、命名辞書は [MIT ライセンス](LICENSE)で公開しています。
+
+事前学習済みモデルには MIT ライセンスは**適用されません**。Qwen3-Embedding-0.6B と PE-AV small は Apache License 2.0 で提供されており、TrackMate はモデルと一緒にそのライセンスファイルもダウンロードします。PE-AV から生成したファイル（`peav_prototypes.npz`、`prototypes.npz`）も同じライセンスです。サードパーティのモデル、データセット、フォント、ライブラリのライセンスと、モデルに加えた変更は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) にまとめています。

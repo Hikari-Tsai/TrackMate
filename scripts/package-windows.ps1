@@ -17,6 +17,7 @@ Pop-Location
 $Out = "$Root/app/build/windows/x64/runner/Release"
 if (Test-Path "$Out/engine") { Remove-Item -Recurse -Force "$Out/engine" }
 Copy-Item -Recurse "$Root/engine/dist/stem-engine" "$Out/engine"
+Copy-Item "$Root/LICENSE", "$Root/THIRD_PARTY_NOTICES.md" $Out
 
 Write-Host "== archive"
 New-Item -ItemType Directory -Force "$Root/dist" | Out-Null
