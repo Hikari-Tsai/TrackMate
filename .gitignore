@@ -41,3 +41,6 @@ desktop.ini
 *.iml
 .vscode/
 *.swp
+
+# Archify working folders (diagram renders and browser evidence)
+.archify/

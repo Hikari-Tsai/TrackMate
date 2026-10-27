@@ -250,22 +250,10 @@ The categories are the ones shown in the list, including your own changes. The f
 
 ## Architecture
 
-```
-┌──────────────── TrackMate (Flutter: macOS / Windows) ───────────────┐
-│ drop & open dialog (Swift / C++)                                    │
-│ track list, top 5, colours, BPM, preview, alerts                    │
-└───────────────┬─────────────────────────────────────────────────────┘
-                │ HTTP, 127.0.0.1 only, new token on every start
-┌───────────────▼──────────── Local engine (Python, PyInstaller) ─────┐
-│ name preprocessing → layers A/B/C/D → merge                         │
-│ stereo analysis, model download and checks, alias learning          │
-│ onnxruntime: Qwen3-Embedding, PE-AV audio encoder, Beat This!       │
-└───────────────┬─────────────────────────────────────────────────────┘
-                │ gRPC (PTSL, localhost:31416)
-┌───────────────▼─────────────────────────────────────────────────────┐
-│ Pro Tools: read session, folders, import, rename, colour, tempo     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/architecture-dark.png">
+  <img src="docs/images/architecture.png" alt="TrackMate architecture: the app sends the stem paths to the local engine over HTTP; the engine recognises the stems with its naming dictionary and local models, detects the tempo with Beat This!, and imports tracks and tempo into Pro Tools over PTSL">
+</picture>
 
 - **Start-up:** the app starts its bundled engine as a child process and reads the port and token from the engine's first output line or from `engine.json`.
 - **API security:** local connections only; a new token on every start; requests whose Host is not local are refused. Endpoints are described in [`engine/README.md`](engine/README.md).

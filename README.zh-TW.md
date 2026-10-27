@@ -256,22 +256,10 @@ PTSL 目前沒有建立 bus 的指令，所以不自動設定輸出路由，詳�
 ## 系統架構
 <sub>[English](README.md#architecture)</sub>
 
-```
-┌─────────────── TrackMate（Flutter：macOS / Windows） ───────────────┐
-│ 拖放與選檔（Swift / C++）                                           │
-│ 分軌清單、Top-5、顏色、BPM、預覽、提醒                              │
-└───────────────┬─────────────────────────────────────────────────────┘
-                │ HTTP，只綁 127.0.0.1，每次啟動產生新 token
-┌───────────────▼──────────── 本機引擎（Python，PyInstaller 打包） ───┐
-│ 名稱前處理 → A/B/C/D 四層 → 合併                                    │
-│ 立體聲分析、模型下載與校驗、別名學習                                │
-│ onnxruntime：Qwen3-Embedding、PE-AV 音訊編碼器、Beat This!          │
-└───────────────┬─────────────────────────────────────────────────────┘
-                │ gRPC（PTSL，localhost:31416）
-┌───────────────▼─────────────────────────────────────────────────────┐
-│ Pro Tools：讀 session、建資料夾、匯入、改名、上色、設定速度         │
-└─────────────────────────────────────────────────────────────────────┘
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/architecture-dark.png">
+  <img src="docs/images/architecture.png" alt="TrackMate 系統架構：App 透過 HTTP 把分軌路徑交給本機引擎；引擎用命名字典和本機模型辨識分軌、用 Beat This! 偵測速度，再透過 PTSL 把分軌和速度匯入 Pro Tools">
+</picture>
 
 - **啟動：** App 啟動時，以子程序啟動內建的引擎，從引擎的第一行輸出或 `engine.json` 取得 port 和 token。
 - **API 安全：** 只接受本機連線；每次啟動產生新的 token；Host 不是本機的請求一律拒絕。端點說明見 [`engine/README.md`](engine/README.md)。

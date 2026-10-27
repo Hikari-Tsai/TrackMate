@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "TrackMate architecture",
+    "locale": "en",
+    "output": ".archify/architecture-trackmate-20261027-224250/trackmate-architecture.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "git@github.com:Hikari-Tsai/TrackMate.git",
+      "link_mode": "local-only",
+      "revision": "dfe994aef37ed50b6735c469b8e6afc16eb9ff53"
+    }
+  },
+  "components": [
+    {
+      "id": "engineer",
+      "type": "external",
+      "label": "Engineer",
+      "sublabel": "drops stem files",
+      "pos": [
+        40,
+        380
+      ],
+      "size": [
+        120,
+        64
+      ],
+      "sources": [
+        {
+          "path": "app/lib/native_bridge.dart",
+          "line": 5,
+          "end_line": 25,
+          "label": "drop and open dialog"
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "type": "frontend",
+      "label": "TrackMate app",
+      "sublabel": "Flutter · macOS / Windows",
+      "pos": [
+        220,
+        376
+      ],
+      "size": [
+        160,
+        72
+      ],
+      "sources": [
+        {
+          "path": "app/lib/app_state.dart",
+          "line": 142,
+          "end_line": 160,
+          "label": "addFiles"
+        },
+        {
+          "path": "app/lib/app_state.dart",
+          "line": 403,
+          "end_line": 450,
+          "label": "detectTempo"
+        },
+        {
+          "path": "app/lib/engine/engine_api.dart",
+          "line": 37,
+          "end_line": 135,
+          "label": "HTTP client"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Engine API",
+      "sublabel": "FastAPI · 127.0.0.1",
+      "tag": "bearer token",
+      "pos": [
+        490,
+        380
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/stem_engine/api.py",
+          "line": 93,
+          "end_line": 214,
+          "label": "create_app"
+        }
+      ]
+    },
+    {
+      "id": "recog",
+      "type": "backend",
+      "label": "Recognition",
+      "sublabel": "layers A–D · stereo",
+      "pos": [
+        490,
+        210
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/stem_engine/pipeline.py",
+          "line": 38,
+          "end_line": 243,
+          "label": "Analyzer"
+        },
+        {
+          "path": "engine/stem_engine/api.py",
+          "line": 124,
+          "end_line": 132,
+          "label": "/analyze"
+        }
+      ]
+    },
+    {
+      "id": "tempo",
+      "type": "backend",
+      "label": "Tempo",
+      "sublabel": "Beat This! · BPM / map",
+      "pos": [
+        745,
+        250
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/stem_engine/tempo.py",
+          "line": 366,
+          "end_line": 374,
+          "label": "detect"
+        },
+        {
+          "path": "engine/stem_engine/api.py",
+          "line": 179,
+          "end_line": 190,
+          "label": "/tempo"
+        }
+      ]
+    },
+    {
+      "id": "importer",
+      "type": "backend",
+      "label": "Pro Tools import",
+      "sublabel": "folders · tracks · tempo",
+      "pos": [
+        740,
+        380
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/stem_engine/apply.py",
+          "line": 102,
+          "end_line": 196,
+          "label": "apply"
+        },
+        {
+          "path": "engine/stem_engine/tempo.py",
+          "line": 326,
+          "end_line": 350,
+          "label": "tempo import"
+        },
+        {
+          "path": "engine/stem_engine/api.py",
+          "line": 163,
+          "end_line": 214,
+          "label": "/apply, /tempo/apply"
+        }
+      ]
+    },
+    {
+      "id": "protools",
+      "type": "external",
+      "label": "Pro Tools",
+      "sublabel": "PTSL · localhost:31416",
+      "pos": [
+        1000,
+        380
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/stem_engine/protools.py",
+          "line": 118,
+          "end_line": 221,
+          "label": "ProTools client"
+        }
+      ]
+    },
+    {
+      "id": "kb",
+      "type": "database",
+      "label": "Naming dictionary",
+      "sublabel": "mix_naming.json · aliases",
+      "pos": [
+        490,
+        40
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/stem_engine/kb.py",
+          "line": 47,
+          "end_line": 60,
+          "label": "KnowledgeBase"
+        }
+      ]
+    },
+    {
+      "id": "models",
+      "type": "database",
+      "label": "Local models",
+      "sublabel": "ONNX · SHA-256 checked",
+      "pos": [
+        745,
+        40
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/stem_engine/models.py",
+          "line": 72,
+          "end_line": 172,
+          "label": "ModelManager"
+        },
+        {
+          "path": "engine/stem_engine/engine.py",
+          "line": 26,
+          "end_line": 47,
+          "label": "lazy model loading"
+        }
+      ]
+    },
+    {
+      "id": "hf",
+      "type": "cloud",
+      "label": "Hugging Face",
+      "sublabel": "pinned revisions",
+      "pos": [
+        1000,
+        40
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/stem_engine/models.py",
+          "line": 19,
+          "end_line": 19,
+          "label": "download URL"
+        },
+        {
+          "path": "engine/stem_engine/data/model_manifest.json",
+          "line": 1,
+          "label": "pinned revisions"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Local engine · Python process",
+      "wraps": [
+        "api",
+        "recog",
+        "tempo",
+        "importer",
+        "kb",
+        "models"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "drop",
+      "from": "engineer",
+      "to": "app",
+      "label": "stems"
+    },
+    {
+      "id": "http",
+      "from": "app",
+      "to": "api",
+      "label": "HTTP + token",
+      "variant": "emphasis"
+    },
+    {
+      "id": "analyze",
+      "from": "api",
+      "to": "recog",
+      "label": "/analyze"
+    },
+    {
+      "id": "detect-tempo",
+      "from": "api",
+      "to": "tempo",
+      "label": "/tempo"
+    },
+    {
+      "id": "apply",
+      "from": "api",
+      "to": "importer",
+      "label": "/apply",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ptsl",
+      "from": "importer",
+      "to": "protools",
+      "label": "PTSL gRPC",
+      "variant": "emphasis"
+    },
+    {
+      "id": "names",
+      "from": "recog",
+      "to": "kb",
+      "label": "aliases"
+    },
+    {
+      "id": "recog-models",
+      "from": "recog",
+      "to": "models",
+      "label": "Qwen3, PE-AV",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          685,
+          242
+        ],
+        [
+          685,
+          72
+        ]
+      ]
+    },
+    {
+      "id": "tempo-models",
+      "from": "tempo",
+      "to": "models",
+      "label": "Beat This!"
+    },
+    {
+      "id": "download",
+      "from": "hf",
+      "to": "models",
+      "label": "download",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Recognition",
+      "items": [
+        "A dictionary · B spelling",
+        "C Qwen3 reads the name",
+        "D PE-AV listens to the audio",
+        "Stereo: fake stereo → mono"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Tempo",
+      "items": [
+        "Drum stems first, else rhythm",
+        "Beat This! beats and downbeats",
+        "Constant BPM or tempo map",
+        "Chosen before every import"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Pro Tools",
+      "items": [
+        "Folders per category",
+        "Import, rename, colour, verify",
+        "Tempo MIDI, checked in Bars|Beats"
+      ]
+    }
+  ]
+}

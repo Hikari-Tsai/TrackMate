@@ -256,22 +256,10 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 ## システム構成
 <sub>[English](README.md#architecture)</sub>
 
-```
-┌──────────────── TrackMate (Flutter: macOS / Windows) ───────────────┐
-│ drop & open dialog (Swift / C++)                                    │
-│ track list, top 5, colours, BPM, preview, alerts                    │
-└───────────────┬─────────────────────────────────────────────────────┘
-                │ HTTP, 127.0.0.1 only, new token on every start
-┌───────────────▼──────────── Local engine (Python, PyInstaller) ─────┐
-│ name preprocessing → layers A/B/C/D → merge                         │
-│ stereo analysis, model download and checks, alias learning          │
-│ onnxruntime: Qwen3-Embedding, PE-AV audio encoder, Beat This!       │
-└───────────────┬─────────────────────────────────────────────────────┘
-                │ gRPC (PTSL, localhost:31416)
-┌───────────────▼─────────────────────────────────────────────────────┐
-│ Pro Tools: read session, folders, import, rename, colour, tempo     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/architecture-dark.png">
+  <img src="docs/images/architecture.png" alt="TrackMate のシステム構成：アプリは HTTP でステムのパスをローカルエンジンに渡し、エンジンは命名辞書とローカルモデルでステムを認識し、Beat This! でテンポを検出して、PTSL でトラックとテンポを Pro Tools に取り込みます">
+</picture>
 
 - **起動：** アプリは同梱のエンジンを子プロセスとして起動し、エンジンの最初の出力行または `engine.json` からポートとトークンを取得します。
 - **API のセキュリティ：** ローカル接続のみ受け付け、起動のたびに新しいトークンを発行し、Host がローカルでないリクエストは拒否します。エンドポイントは [`engine/README.md`](engine/README.md) を参照してください。
