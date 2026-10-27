@@ -87,3 +87,20 @@ def test_full_engine_with_models(stems, tmp_path):
     assert res["Kick In_03"]["layers"]["audio"] is None             # settled by text, no audio run
     assert res["Audio 7"]["layers"]["audio"] is not None            # DAW default -> audio layer
     assert len(res["Audio 7"]["candidates"]) >= 1
+
+
+
+def test_loudest_segments_is_fast_and_finds_the_loud_parts():
+    """A 75-second stem: the two loudest 10-second windows, quickly (the old moving-sum
+    convolution took about 40 s for this length)."""
+    import time
+    import numpy as np
+    from stem_engine.audio import loudest_segments
+    sr = 48000
+    x = np.full(75 * sr, 0.001, dtype=np.float32)
+    x[30 * sr:40 * sr] = 0.5   # loudest
+    x[55 * sr:65 * sr] = 0.2   # second
+    started = time.time()
+    segments = loudest_segments(x, sr, 10.0, 2, -60.0)
+    assert time.time() - started < 1.0
+    assert [float(seg[0]) for seg in segments] == pytest.approx([0.5, 0.2]) and all(len(seg) == 10 * sr for seg in segments)

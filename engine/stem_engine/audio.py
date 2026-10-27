@@ -47,7 +47,10 @@ def loudest_segments(x: np.ndarray, sr: int, seconds: float, count: int, silence
         return [x] if rms > 0 and 20 * np.log10(rms) > silence_db else []
     hop = sr  # 1 s grid
     n = (len(x) - seg) // hop + 1
-    power = np.convolve(x.astype(np.float64) ** 2, np.ones(hop), "valid")[::hop]  # per-second energy
+    # Energy of each whole second: the sum over one-second blocks, in linear time (a moving-sum
+    # convolution with a one-second kernel took 34 s for a 60-second stem).
+    blocks = len(x) // hop
+    power = (x[:blocks * hop].astype(np.float64) ** 2).reshape(blocks, hop).sum(axis=1)
     per_window = np.array([power[i:i + int(seconds)].sum() for i in range(n)]) / seg
     order = np.argsort(-per_window)
     picked: list[int] = []
