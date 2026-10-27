@@ -17,9 +17,11 @@ Before a Pro Tools mix, engineers lose time on chores: stems arrive with inconsi
 
 ![Drag stems into TrackMate: names, categories, colours and the BPM are recognised](docs/images/demo-recognise.gif)
 
+<sub>**1. Drop the stems.** Drag files or folders in from Finder. Names, categories and colours appear at once; a track whose name says nothing (`Audio 3`) is recognised by listening, and the BPM shows in the top right corner. (The listening part is sped up 4×.)</sub>
+
 ![Preview & apply: choose the tempo, then TrackMate builds the folders and tracks in Pro Tools and sets the tempo](docs/images/demo-import.gif)
 
-<sub>Recorded with the real app and Pro Tools; waiting is sped up.</sub>
+<sub>**2. Preview & apply.** Choose the tempo, check the folders and names, and confirm. TrackMate builds the category folders and tracks in Pro Tools, colours them, sets the tempo (press OK in Pro Tools' MIDI dialog) and verifies the result. (Recorded with the real app and Pro Tools; the Pro Tools part plays at 1.6×.)</sub>
 
 Recognition combines rules and AI models:
 - **Rules:** a dictionary of common track names and a spelling corrector.
@@ -256,6 +258,8 @@ The categories are the ones shown in the list, including your own changes. The f
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/architecture-dark.png">
   <img src="docs/images/architecture.png" alt="TrackMate architecture: the app sends the stem paths to the local engine over HTTP; the engine recognises the stems with its naming dictionary and local models, detects the tempo with Beat This!, and imports tracks and tempo into Pro Tools over PTSL">
 </picture>
+
+<sub>**How it fits together:** the app hands only file paths to the local engine (127.0.0.1, with a token). The engine recognises the stems, detects the tempo and drives Pro Tools through PTSL. The models are downloaded once from Hugging Face; nothing else leaves your computer.</sub>
 
 - **Start-up:** the app starts its bundled engine as a child process and reads the port and token from the engine's first output line or from `engine.json`.
 - **API security:** local connections only; a new token on every start; requests whose Host is not local are refused. Endpoints are described in [`engine/README.md`](engine/README.md).

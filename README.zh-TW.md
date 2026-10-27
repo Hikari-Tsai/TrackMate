@@ -19,9 +19,11 @@ Pro Tools 混音前，總要花時間整理分軌：檔名充滿錯字、縮寫�
 
 ![把分軌拖進 TrackMate：辨識名稱、大類、顏色和 BPM](docs/images/demo-recognise.gif)
 
+<sub>**① 拖入分軌：** 從 Finder 拖入檔案或資料夾，名稱、大類和顏色立刻出現；名稱看不出來的軌（例如 `Audio 3`）改用聲音辨識，右上角顯示 BPM。（聽聲音的部分加速 4 倍）</sub>
+
 ![Preview & apply：選擇速度後，TrackMate 在 Pro Tools 建立資料夾和音軌並設定速度](docs/images/demo-import.gif)
 
-<sub>以真實的 App 和 Pro Tools 錄製，等待的部分已加速。</sub>
+<sub>**② Preview & apply：** 選擇速度，確認資料夾和名稱後套用。TrackMate 在 Pro Tools 依大類建立資料夾、匯入並上色，再設定速度（在 Pro Tools 的 MIDI 對話框按 OK），最後驗證結果。（以真實的 App 和 Pro Tools 錄製，Pro Tools 的部分以 1.6 倍速播放）</sub>
 
 辨識結合規則與 AI 模型：
 - **規則：** 常用軌名字典和拼字校正。
@@ -262,6 +264,8 @@ PTSL 目前沒有建立 bus 的指令，所以不自動設定輸出路由，詳�
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/architecture-dark.png">
   <img src="docs/images/architecture.png" alt="TrackMate 系統架構：App 透過 HTTP 把分軌路徑交給本機引擎；引擎用命名字典和本機模型辨識分軌、用 Beat This! 偵測速度，再透過 PTSL 把分軌和速度匯入 Pro Tools">
 </picture>
+
+<sub>**整體架構：** App 只把檔案路徑交給本機引擎（127.0.0.1，需要 token）。引擎辨識分軌、偵測速度，並透過 PTSL 操作 Pro Tools。模型只從 Hugging Face 下載一次，其他資料都不會離開你的電腦。</sub>
 
 - **啟動：** App 啟動時，以子程序啟動內建的引擎，從引擎的第一行輸出或 `engine.json` 取得 port 和 token。
 - **API 安全：** 只接受本機連線；每次啟動產生新的 token；Host 不是本機的請求一律拒絕。端點說明見 [`engine/README.md`](engine/README.md)。

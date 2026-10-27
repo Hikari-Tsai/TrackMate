@@ -19,9 +19,11 @@ Pro Tools でミックスを始める前は、ステムの整理に時間を取�
 
 ![ステムを TrackMate にドラッグ：名前・カテゴリ・カラー・BPM を認識](docs/images/demo-recognise.gif)
 
+<sub>**① ステムをドロップ：** Finder からファイルやフォルダをドラッグすると、名前・カテゴリ・カラーがすぐに表示されます。名前から判断できないトラック（`Audio 3` など）は音で認識し、右上に BPM を表示します。（音の聴き取りは 4 倍速）</sub>
+
 ![Preview & apply：テンポを選ぶと、TrackMate が Pro Tools にフォルダとトラックを作り、テンポを設定](docs/images/demo-import.gif)
 
-<sub>実際のアプリと Pro Tools で録画。待ち時間は早送りしています。</sub>
+<sub>**② Preview & apply：** テンポを選び、フォルダと名前を確認して適用します。TrackMate が Pro Tools にカテゴリごとのフォルダとトラックを作ってカラーを付け、テンポを設定し（Pro Tools の MIDI ダイアログで OK）、最後に結果を検証します。（実際のアプリと Pro Tools で録画。Pro Tools の部分は 1.6 倍速）</sub>
 
 認識はルールと AI モデルの組み合わせです。
 - **ルール：** よく使われるトラック名の辞書とスペル補正。
@@ -262,6 +264,8 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/architecture-dark.png">
   <img src="docs/images/architecture.png" alt="TrackMate のシステム構成：アプリは HTTP でステムのパスをローカルエンジンに渡し、エンジンは命名辞書とローカルモデルでステムを認識し、Beat This! でテンポを検出して、PTSL でトラックとテンポを Pro Tools に取り込みます">
 </picture>
+
+<sub>**全体の構成：** アプリはファイルのパスだけをローカルエンジン（127.0.0.1、トークン付き）に渡します。エンジンがステムの認識とテンポの検出を行い、PTSL で Pro Tools を操作します。モデルは Hugging Face から一度だけダウンロードし、それ以外のデータはコンピューターの外に出ません。</sub>
 
 - **起動：** アプリは同梱のエンジンを子プロセスとして起動し、エンジンの最初の出力行または `engine.json` からポートとトークンを取得します。
 - **API のセキュリティ：** ローカル接続のみ受け付け、起動のたびに新しいトークンを発行し、Host がローカルでないリクエストは拒否します。エンドポイントは [`engine/README.md`](engine/README.md) を参照してください。
