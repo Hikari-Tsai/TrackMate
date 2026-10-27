@@ -222,7 +222,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 | [`stereo_analysis/`](stereo_analysis) | 立體聲／單聲道判斷與測試 |
 | [`kb/mix_naming.json`](kb/mix_naming.json) | 樂器命名字典（大類、樂器、別名、縮寫、中日文、修飾詞、歧義詞） |
 | [`experiments/`](experiments) | 研究：[語意比對模型比較](experiments/c_layer_embedding)、[樂器辨識評測](experiments/instrument_zeroshot) |
-| [`tools/`](tools) | [Qwen ONNX 匯出](tools/qwen_onnx)、[PE-AV ONNX 匯出](tools/peav_onnx)、[Pro Tools 探測腳本](tools/ptsl_m0) |
+| [`tools/`](tools) | [Qwen ONNX 匯出](tools/qwen_onnx)、[PE-AV ONNX 匯出](tools/peav_onnx)、[Pro Tools 探測腳本](tools/ptsl_m0)、[PE-AV 樂器辨識 demo](tools/peav_space)（Hugging Face Space 原始碼：169 種樂器與聲音，[`app.py`](tools/peav_space/space/app.py)、[標籤與提示詞](tools/peav_space/space/labels.json)、[原型產生腳本](tools/peav_space/build_prototypes.py)） |
 | [`scripts/`](scripts) | macOS / Windows 打包腳本 |
 | [`docs/`](docs) | [研究與測試報告](docs/reports)、[截圖](docs/images) |
 | [`.github/workflows/`](.github/workflows) | [CI](.github/workflows/ci.yml)、[打包與發佈](.github/workflows/package.yml) |
@@ -299,7 +299,7 @@ TrackMate 使用了下列開源軟體、模型、資料集和字型，感謝各�
 | [pytest](https://pytest.org/)、[HTTPX](https://www.python-httpx.org/)（測試） | MIT、BSD-3-Clause |
 | [uv](https://docs.astral.sh/uv/)、[Hatchling](https://hatch.pypa.io/)（建置工具） | MIT / Apache-2.0、MIT |
 
-研究和模型匯出另外使用了 [PyTorch](https://pytorch.org/)（BSD-3-Clause）、[Transformers](https://github.com/huggingface/transformers)、[Sentence Transformers](https://www.sbert.net/)、[timm](https://github.com/huggingface/pytorch-image-models)（Apache-2.0）、[librosa](https://librosa.org/)（ISC）、[Pillow](https://python-pillow.org/)（MIT-CMU）。
+研究和模型匯出另外使用了 [PyTorch](https://pytorch.org/)（BSD-3-Clause）、[Transformers](https://github.com/huggingface/transformers)、[Sentence Transformers](https://www.sbert.net/)、[timm](https://github.com/huggingface/pytorch-image-models)（Apache-2.0）、[librosa](https://librosa.org/)（ISC）、[Pillow](https://python-pillow.org/)（MIT-CMU）。PE-AV demo 另外使用了 [Gradio](https://www.gradio.app/)、[huggingface_hub](https://github.com/huggingface/huggingface_hub)（Apache-2.0），以及 [FFmpeg](https://ffmpeg.org/)（LGPL-2.1+，用於解碼其他音訊格式）。
 
 ### App（Flutter）
 | 項目 | 授權 |

@@ -1,0 +1,1796 @@
+{
+ "templates": [
+  "the sound of {}",
+  "a recording of {}",
+  "{}",
+  "solo {}"
+ ],
+ "families": {
+  "keys": "鍵盤",
+  "free_reed": "簧片樂器",
+  "guitar": "吉他",
+  "bass": "貝斯",
+  "bowed": "弓弦樂器",
+  "plucked": "撥弦樂器",
+  "brass": "銅管",
+  "woodwind": "木管",
+  "drums": "鼓組",
+  "percussion": "打擊樂器",
+  "mallet": "有音高敲擊",
+  "electronic": "電子／合成器",
+  "fx": "音效",
+  "vocals": "人聲",
+  "east_asian": "東亞傳統樂器",
+  "world": "世界音樂",
+  "ensemble": "合奏",
+  "other": "非樂器"
+ },
+ "labels": [
+  {
+   "key": "grand_piano",
+   "en": "Grand piano",
+   "zh": "平台鋼琴",
+   "family": "keys",
+   "family_zh": "鍵盤",
+   "prompts": [
+    "a grand piano",
+    "an acoustic piano"
+   ]
+  },
+  {
+   "key": "upright_piano",
+   "en": "Upright piano",
+   "zh": "直立式鋼琴",
+   "family": "keys",
+   "family_zh": "鍵盤",
+   "prompts": [
+    "an upright piano",
+    "an old honky-tonk upright piano"
+   ]
+  },
+  {
+   "key": "electric_piano",
+   "en": "Electric piano (Rhodes)",
+   "zh": "電鋼琴（Rhodes）",
+   "family": "keys",
+   "family_zh": "鍵盤",
+   "prompts": [
+    "a Rhodes electric piano",
+    "an electric piano"
+   ]
+  },
+  {
+   "key": "wurlitzer",
+   "en": "Wurlitzer",
+   "zh": "Wurlitzer 電鋼琴",
+   "family": "keys",
+   "family_zh": "鍵盤",
+   "prompts": [
+    "a Wurlitzer electric piano"
+   ]
+  },
+  {
+   "key": "hammond_organ",
+   "en": "Hammond organ",
+   "zh": "哈蒙德風琴",
+   "family": "keys",
+   "family_zh": "鍵盤",
+   "prompts": [
+    "a Hammond organ",
+    "a rock organ with a rotary speaker"
+   ]
+  },
+  {
+   "key": "pipe_organ",
+   "en": "Pipe organ",
+   "zh": "管風琴",
+   "family": "keys",
+   "family_zh": "鍵盤",
+   "prompts": [
+    "a church pipe organ",
+    "a pipe organ"
+   ]
+  },
+  {
+   "key": "harpsichord",
+   "en": "Harpsichord",
+   "zh": "大鍵琴",
+   "family": "keys",
+   "family_zh": "鍵盤",
+   "prompts": [
+    "a harpsichord",
+    "a baroque harpsichord"
+   ]
+  },
+  {
+   "key": "clavinet",
+   "en": "Clavinet",
+   "zh": "克拉維內特琴",
+   "family": "keys",
+   "family_zh": "鍵盤",
+   "prompts": [
+    "a funky clavinet",
+    "a clavinet"
+   ]
+  },
+  {
+   "key": "celesta",
+   "en": "Celesta",
+   "zh": "鋼片琴",
+   "family": "keys",
+   "family_zh": "鍵盤",
+   "prompts": [
+    "a celesta"
+   ]
+  },
+  {
+   "key": "accordion",
+   "en": "Accordion",
+   "zh": "手風琴",
+   "family": "free_reed",
+   "family_zh": "簧片樂器",
+   "prompts": [
+    "an accordion"
+   ]
+  },
+  {
+   "key": "bandoneon",
+   "en": "Bandoneon",
+   "zh": "班多鈕手風琴",
+   "family": "free_reed",
+   "family_zh": "簧片樂器",
+   "prompts": [
+    "a bandoneon playing tango"
+   ]
+  },
+  {
+   "key": "harmonica",
+   "en": "Harmonica",
+   "zh": "口琴",
+   "family": "free_reed",
+   "family_zh": "簧片樂器",
+   "prompts": [
+    "a harmonica",
+    "a blues harmonica"
+   ]
+  },
+  {
+   "key": "melodica",
+   "en": "Melodica",
+   "zh": "口風琴",
+   "family": "free_reed",
+   "family_zh": "簧片樂器",
+   "prompts": [
+    "a melodica"
+   ]
+  },
+  {
+   "key": "harmonium",
+   "en": "Harmonium",
+   "zh": "簧風琴",
+   "family": "free_reed",
+   "family_zh": "簧片樂器",
+   "prompts": [
+    "a harmonium",
+    "an Indian harmonium"
+   ]
+  },
+  {
+   "key": "acoustic_guitar",
+   "en": "Acoustic guitar (steel string)",
+   "zh": "木吉他（鋼弦）",
+   "family": "guitar",
+   "family_zh": "吉他",
+   "prompts": [
+    "a steel-string acoustic guitar",
+    "an acoustic guitar strumming chords"
+   ]
+  },
+  {
+   "key": "classical_guitar",
+   "en": "Classical guitar",
+   "zh": "古典吉他",
+   "family": "guitar",
+   "family_zh": "吉他",
+   "prompts": [
+    "a nylon-string classical guitar",
+    "a classical guitar"
+   ]
+  },
+  {
+   "key": "twelve_string_guitar",
+   "en": "12-string guitar",
+   "zh": "十二弦吉他",
+   "family": "guitar",
+   "family_zh": "吉他",
+   "prompts": [
+    "a twelve-string acoustic guitar"
+   ]
+  },
+  {
+   "key": "clean_electric_guitar",
+   "en": "Electric guitar (clean)",
+   "zh": "電吉他（乾淨音色）",
+   "family": "guitar",
+   "family_zh": "吉他",
+   "prompts": [
+    "a clean electric guitar",
+    "a clean electric guitar playing chords"
+   ]
+  },
+  {
+   "key": "distorted_guitar",
+   "en": "Electric guitar (distorted)",
+   "zh": "破音電吉他",
+   "family": "guitar",
+   "family_zh": "吉他",
+   "prompts": [
+    "a distorted electric guitar",
+    "a heavy metal guitar riff"
+   ]
+  },
+  {
+   "key": "jazz_guitar",
+   "en": "Jazz guitar",
+   "zh": "爵士吉他",
+   "family": "guitar",
+   "family_zh": "吉他",
+   "prompts": [
+    "a hollow-body jazz guitar"
+   ]
+  },
+  {
+   "key": "slide_guitar",
+   "en": "Slide guitar",
+   "zh": "滑音吉他",
+   "family": "guitar",
+   "family_zh": "吉他",
+   "prompts": [
+    "a slide guitar",
+    "a bottleneck slide guitar"
+   ]
+  },
+  {
+   "key": "pedal_steel",
+   "en": "Pedal steel guitar",
+   "zh": "踏板滑音吉他",
+   "family": "guitar",
+   "family_zh": "吉他",
+   "prompts": [
+    "a pedal steel guitar"
+   ]
+  },
+  {
+   "key": "electric_bass",
+   "en": "Electric bass",
+   "zh": "電貝斯",
+   "family": "bass",
+   "family_zh": "貝斯",
+   "prompts": [
+    "an electric bass guitar",
+    "a fingerstyle electric bass line"
+   ]
+  },
+  {
+   "key": "slap_bass",
+   "en": "Slap bass",
+   "zh": "擊勾貝斯",
+   "family": "bass",
+   "family_zh": "貝斯",
+   "prompts": [
+    "a slap bass"
+   ]
+  },
+  {
+   "key": "fretless_bass",
+   "en": "Fretless bass",
+   "zh": "無琴格貝斯",
+   "family": "bass",
+   "family_zh": "貝斯",
+   "prompts": [
+    "a fretless bass"
+   ]
+  },
+  {
+   "key": "upright_bass",
+   "en": "Upright bass (pizzicato)",
+   "zh": "低音提琴（撥奏）",
+   "family": "bass",
+   "family_zh": "貝斯",
+   "prompts": [
+    "an upright double bass played pizzicato",
+    "a jazz upright bass"
+   ]
+  },
+  {
+   "key": "synth_bass",
+   "en": "Synth bass",
+   "zh": "合成器貝斯",
+   "family": "bass",
+   "family_zh": "貝斯",
+   "prompts": [
+    "a synth bass",
+    "an analog synthesizer bass line"
+   ]
+  },
+  {
+   "key": "sub_808",
+   "en": "808 sub bass",
+   "zh": "808 低音",
+   "family": "bass",
+   "family_zh": "貝斯",
+   "prompts": [
+    "an 808 sub bass",
+    "a deep 808 bass"
+   ]
+  },
+  {
+   "key": "violin",
+   "en": "Violin",
+   "zh": "小提琴",
+   "family": "bowed",
+   "family_zh": "弓弦樂器",
+   "prompts": [
+    "a violin"
+   ]
+  },
+  {
+   "key": "viola",
+   "en": "Viola",
+   "zh": "中提琴",
+   "family": "bowed",
+   "family_zh": "弓弦樂器",
+   "prompts": [
+    "a viola"
+   ]
+  },
+  {
+   "key": "cello",
+   "en": "Cello",
+   "zh": "大提琴",
+   "family": "bowed",
+   "family_zh": "弓弦樂器",
+   "prompts": [
+    "a cello"
+   ]
+  },
+  {
+   "key": "double_bass_arco",
+   "en": "Double bass (bowed)",
+   "zh": "低音提琴（拉奏）",
+   "family": "bowed",
+   "family_zh": "弓弦樂器",
+   "prompts": [
+    "a double bass played with a bow"
+   ]
+  },
+  {
+   "key": "string_section",
+   "en": "String section",
+   "zh": "弦樂組",
+   "family": "bowed",
+   "family_zh": "弓弦樂器",
+   "prompts": [
+    "an orchestral string section",
+    "a string ensemble"
+   ]
+  },
+  {
+   "key": "pizzicato_strings",
+   "en": "Pizzicato strings",
+   "zh": "撥奏弦樂",
+   "family": "bowed",
+   "family_zh": "弓弦樂器",
+   "prompts": [
+    "pizzicato strings"
+   ]
+  },
+  {
+   "key": "fiddle",
+   "en": "Fiddle",
+   "zh": "民謠小提琴",
+   "family": "bowed",
+   "family_zh": "弓弦樂器",
+   "prompts": [
+    "a folk fiddle",
+    "a bluegrass fiddle"
+   ]
+  },
+  {
+   "key": "harp",
+   "en": "Harp",
+   "zh": "豎琴",
+   "family": "plucked",
+   "family_zh": "撥弦樂器",
+   "prompts": [
+    "a harp",
+    "a concert harp"
+   ]
+  },
+  {
+   "key": "banjo",
+   "en": "Banjo",
+   "zh": "斑鳩琴",
+   "family": "plucked",
+   "family_zh": "撥弦樂器",
+   "prompts": [
+    "a banjo"
+   ]
+  },
+  {
+   "key": "mandolin",
+   "en": "Mandolin",
+   "zh": "曼陀林",
+   "family": "plucked",
+   "family_zh": "撥弦樂器",
+   "prompts": [
+    "a mandolin"
+   ]
+  },
+  {
+   "key": "ukulele",
+   "en": "Ukulele",
+   "zh": "烏克麗麗",
+   "family": "plucked",
+   "family_zh": "撥弦樂器",
+   "prompts": [
+    "a ukulele"
+   ]
+  },
+  {
+   "key": "lute",
+   "en": "Lute",
+   "zh": "魯特琴",
+   "family": "plucked",
+   "family_zh": "撥弦樂器",
+   "prompts": [
+    "a renaissance lute"
+   ]
+  },
+  {
+   "key": "trumpet",
+   "en": "Trumpet",
+   "zh": "小號",
+   "family": "brass",
+   "family_zh": "銅管",
+   "prompts": [
+    "a trumpet"
+   ]
+  },
+  {
+   "key": "muted_trumpet",
+   "en": "Muted trumpet",
+   "zh": "弱音小號",
+   "family": "brass",
+   "family_zh": "銅管",
+   "prompts": [
+    "a muted trumpet"
+   ]
+  },
+  {
+   "key": "flugelhorn",
+   "en": "Flugelhorn",
+   "zh": "富魯格號",
+   "family": "brass",
+   "family_zh": "銅管",
+   "prompts": [
+    "a flugelhorn"
+   ]
+  },
+  {
+   "key": "trombone",
+   "en": "Trombone",
+   "zh": "長號",
+   "family": "brass",
+   "family_zh": "銅管",
+   "prompts": [
+    "a trombone"
+   ]
+  },
+  {
+   "key": "french_horn",
+   "en": "French horn",
+   "zh": "法國號",
+   "family": "brass",
+   "family_zh": "銅管",
+   "prompts": [
+    "a french horn"
+   ]
+  },
+  {
+   "key": "tuba",
+   "en": "Tuba",
+   "zh": "低音號",
+   "family": "brass",
+   "family_zh": "銅管",
+   "prompts": [
+    "a tuba"
+   ]
+  },
+  {
+   "key": "euphonium",
+   "en": "Euphonium",
+   "zh": "上低音號",
+   "family": "brass",
+   "family_zh": "銅管",
+   "prompts": [
+    "a euphonium"
+   ]
+  },
+  {
+   "key": "brass_section",
+   "en": "Brass section",
+   "zh": "銅管組",
+   "family": "brass",
+   "family_zh": "銅管",
+   "prompts": [
+    "a brass section",
+    "horn section stabs"
+   ]
+  },
+  {
+   "key": "flute",
+   "en": "Flute",
+   "zh": "長笛",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a flute",
+    "a concert flute"
+   ]
+  },
+  {
+   "key": "piccolo",
+   "en": "Piccolo",
+   "zh": "短笛",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a piccolo"
+   ]
+  },
+  {
+   "key": "clarinet",
+   "en": "Clarinet",
+   "zh": "單簧管",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a clarinet"
+   ]
+  },
+  {
+   "key": "bass_clarinet",
+   "en": "Bass clarinet",
+   "zh": "低音單簧管",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a bass clarinet"
+   ]
+  },
+  {
+   "key": "oboe",
+   "en": "Oboe",
+   "zh": "雙簧管",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "an oboe"
+   ]
+  },
+  {
+   "key": "bassoon",
+   "en": "Bassoon",
+   "zh": "低音管",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a bassoon"
+   ]
+  },
+  {
+   "key": "soprano_sax",
+   "en": "Soprano saxophone",
+   "zh": "高音薩克斯風",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a soprano saxophone"
+   ]
+  },
+  {
+   "key": "alto_sax",
+   "en": "Alto saxophone",
+   "zh": "中音薩克斯風",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "an alto saxophone"
+   ]
+  },
+  {
+   "key": "tenor_sax",
+   "en": "Tenor saxophone",
+   "zh": "次中音薩克斯風",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a tenor saxophone"
+   ]
+  },
+  {
+   "key": "baritone_sax",
+   "en": "Baritone saxophone",
+   "zh": "上低音薩克斯風",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a baritone saxophone"
+   ]
+  },
+  {
+   "key": "recorder",
+   "en": "Recorder",
+   "zh": "直笛",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a recorder",
+    "a recorder flute"
+   ]
+  },
+  {
+   "key": "pan_flute",
+   "en": "Pan flute",
+   "zh": "排笛",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "a pan flute"
+   ]
+  },
+  {
+   "key": "tin_whistle",
+   "en": "Tin whistle",
+   "zh": "錫口笛",
+   "family": "woodwind",
+   "family_zh": "木管",
+   "prompts": [
+    "an Irish tin whistle"
+   ]
+  },
+  {
+   "key": "drum_kit",
+   "en": "Drum kit",
+   "zh": "爵士鼓（套鼓）",
+   "family": "drums",
+   "family_zh": "鼓組",
+   "prompts": [
+    "a full drum kit",
+    "a rock drum beat"
+   ]
+  },
+  {
+   "key": "brushed_drums",
+   "en": "Jazz drums (brushes)",
+   "zh": "爵士鼓（鼓刷）",
+   "family": "drums",
+   "family_zh": "鼓組",
+   "prompts": [
+    "jazz drums played with brushes"
+   ]
+  },
+  {
+   "key": "kick_drum",
+   "en": "Kick drum",
+   "zh": "大鼓（Kick）",
+   "family": "drums",
+   "family_zh": "鼓組",
+   "prompts": [
+    "a kick drum",
+    "a bass drum"
+   ]
+  },
+  {
+   "key": "snare_drum",
+   "en": "Snare drum",
+   "zh": "小鼓",
+   "family": "drums",
+   "family_zh": "鼓組",
+   "prompts": [
+    "a snare drum"
+   ]
+  },
+  {
+   "key": "toms",
+   "en": "Toms",
+   "zh": "通鼓",
+   "family": "drums",
+   "family_zh": "鼓組",
+   "prompts": [
+    "tom-tom drums",
+    "a drum fill on the toms"
+   ]
+  },
+  {
+   "key": "hi_hat",
+   "en": "Hi-hat",
+   "zh": "腳踏鈸",
+   "family": "drums",
+   "family_zh": "鼓組",
+   "prompts": [
+    "a hi-hat"
+   ]
+  },
+  {
+   "key": "cymbals",
+   "en": "Cymbals",
+   "zh": "銅鈸",
+   "family": "drums",
+   "family_zh": "鼓組",
+   "prompts": [
+    "crash cymbals",
+    "a ride cymbal"
+   ]
+  },
+  {
+   "key": "drum_machine",
+   "en": "Drum machine",
+   "zh": "鼓機",
+   "family": "drums",
+   "family_zh": "鼓組",
+   "prompts": [
+    "a drum machine beat",
+    "an 808 drum machine"
+   ]
+  },
+  {
+   "key": "breakbeat",
+   "en": "Breakbeat",
+   "zh": "碎拍（Breakbeat）",
+   "family": "drums",
+   "family_zh": "鼓組",
+   "prompts": [
+    "a breakbeat",
+    "a sampled funk breakbeat"
+   ]
+  },
+  {
+   "key": "congas",
+   "en": "Congas",
+   "zh": "康加鼓",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "congas"
+   ]
+  },
+  {
+   "key": "bongos",
+   "en": "Bongos",
+   "zh": "邦哥鼓",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "bongos"
+   ]
+  },
+  {
+   "key": "cajon",
+   "en": "Cajón",
+   "zh": "木箱鼓",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "a cajon"
+   ]
+  },
+  {
+   "key": "tambourine",
+   "en": "Tambourine",
+   "zh": "鈴鼓",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "a tambourine"
+   ]
+  },
+  {
+   "key": "shaker",
+   "en": "Shaker",
+   "zh": "沙鈴",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "a shaker",
+    "maracas"
+   ]
+  },
+  {
+   "key": "cowbell",
+   "en": "Cowbell",
+   "zh": "牛鈴",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "a cowbell"
+   ]
+  },
+  {
+   "key": "claves",
+   "en": "Claves",
+   "zh": "響棒",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "claves"
+   ]
+  },
+  {
+   "key": "triangle",
+   "en": "Triangle",
+   "zh": "三角鐵",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "a triangle"
+   ]
+  },
+  {
+   "key": "castanets",
+   "en": "Castanets",
+   "zh": "響板",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "castanets"
+   ]
+  },
+  {
+   "key": "guiro",
+   "en": "Güiro",
+   "zh": "刮瓜",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "a guiro"
+   ]
+  },
+  {
+   "key": "wood_block",
+   "en": "Wood block",
+   "zh": "木魚／木塊",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "a wood block"
+   ]
+  },
+  {
+   "key": "timpani",
+   "en": "Timpani",
+   "zh": "定音鼓",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "timpani",
+    "orchestral kettle drums"
+   ]
+  },
+  {
+   "key": "gong",
+   "en": "Gong",
+   "zh": "鑼",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "a gong",
+    "a tam-tam"
+   ]
+  },
+  {
+   "key": "hand_claps",
+   "en": "Hand claps",
+   "zh": "拍手",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "hand claps"
+   ]
+  },
+  {
+   "key": "finger_snaps",
+   "en": "Finger snaps",
+   "zh": "彈指",
+   "family": "percussion",
+   "family_zh": "打擊樂器",
+   "prompts": [
+    "finger snaps"
+   ]
+  },
+  {
+   "key": "glockenspiel",
+   "en": "Glockenspiel",
+   "zh": "鐵琴",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "a glockenspiel"
+   ]
+  },
+  {
+   "key": "xylophone",
+   "en": "Xylophone",
+   "zh": "木琴",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "a xylophone"
+   ]
+  },
+  {
+   "key": "marimba",
+   "en": "Marimba",
+   "zh": "馬林巴",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "a marimba"
+   ]
+  },
+  {
+   "key": "vibraphone",
+   "en": "Vibraphone",
+   "zh": "顫音琴",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "a vibraphone"
+   ]
+  },
+  {
+   "key": "tubular_bells",
+   "en": "Tubular bells",
+   "zh": "管鐘",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "tubular bells",
+    "orchestral chimes"
+   ]
+  },
+  {
+   "key": "music_box",
+   "en": "Music box",
+   "zh": "音樂盒",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "a music box"
+   ]
+  },
+  {
+   "key": "kalimba",
+   "en": "Kalimba",
+   "zh": "拇指琴",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "a kalimba",
+    "an mbira thumb piano"
+   ]
+  },
+  {
+   "key": "steel_pan",
+   "en": "Steel pan",
+   "zh": "鋼鼓",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "a steel pan",
+    "a Caribbean steel drum"
+   ]
+  },
+  {
+   "key": "handbells",
+   "en": "Handbells",
+   "zh": "手搖鈴",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "handbells"
+   ]
+  },
+  {
+   "key": "handpan",
+   "en": "Handpan",
+   "zh": "手碟",
+   "family": "mallet",
+   "family_zh": "有音高敲擊",
+   "prompts": [
+    "a handpan",
+    "a hang drum"
+   ]
+  },
+  {
+   "key": "synth_lead",
+   "en": "Synth lead",
+   "zh": "合成器主音",
+   "family": "electronic",
+   "family_zh": "電子／合成器",
+   "prompts": [
+    "a synth lead",
+    "a lead synthesizer melody"
+   ]
+  },
+  {
+   "key": "synth_pad",
+   "en": "Synth pad",
+   "zh": "合成器鋪底",
+   "family": "electronic",
+   "family_zh": "電子／合成器",
+   "prompts": [
+    "a synth pad",
+    "a lush ambient synthesizer pad"
+   ]
+  },
+  {
+   "key": "synth_arp",
+   "en": "Arpeggiated synth",
+   "zh": "琶音合成器",
+   "family": "electronic",
+   "family_zh": "電子／合成器",
+   "prompts": [
+    "an arpeggiated synthesizer"
+   ]
+  },
+  {
+   "key": "supersaw",
+   "en": "Supersaw synth",
+   "zh": "超級鋸齒波合成器",
+   "family": "electronic",
+   "family_zh": "電子／合成器",
+   "prompts": [
+    "a supersaw trance synth",
+    "an EDM supersaw lead"
+   ]
+  },
+  {
+   "key": "chiptune",
+   "en": "Chiptune (8-bit)",
+   "zh": "晶片音樂（8-bit）",
+   "family": "electronic",
+   "family_zh": "電子／合成器",
+   "prompts": [
+    "8-bit chiptune video game music"
+   ]
+  },
+  {
+   "key": "theremin",
+   "en": "Theremin",
+   "zh": "特雷門琴",
+   "family": "electronic",
+   "family_zh": "電子／合成器",
+   "prompts": [
+    "a theremin"
+   ]
+  },
+  {
+   "key": "vocoder",
+   "en": "Vocoder",
+   "zh": "聲碼器",
+   "family": "electronic",
+   "family_zh": "電子／合成器",
+   "prompts": [
+    "a vocoder voice"
+   ]
+  },
+  {
+   "key": "turntable_scratch",
+   "en": "Turntable scratching",
+   "zh": "DJ 刷碟",
+   "family": "electronic",
+   "family_zh": "電子／合成器",
+   "prompts": [
+    "DJ turntable scratching"
+   ]
+  },
+  {
+   "key": "riser",
+   "en": "Riser",
+   "zh": "上升音效（Riser）",
+   "family": "fx",
+   "family_zh": "音效",
+   "prompts": [
+    "a riser sound effect",
+    "a build-up white noise riser"
+   ]
+  },
+  {
+   "key": "impact",
+   "en": "Impact",
+   "zh": "撞擊音效",
+   "family": "fx",
+   "family_zh": "音效",
+   "prompts": [
+    "a cinematic impact sound effect",
+    "a boom hit"
+   ]
+  },
+  {
+   "key": "whoosh",
+   "en": "Whoosh",
+   "zh": "呼嘯音效",
+   "family": "fx",
+   "family_zh": "音效",
+   "prompts": [
+    "a whoosh sound effect"
+   ]
+  },
+  {
+   "key": "reverse_cymbal",
+   "en": "Reverse cymbal",
+   "zh": "反轉鈸",
+   "family": "fx",
+   "family_zh": "音效",
+   "prompts": [
+    "a reversed cymbal swell"
+   ]
+  },
+  {
+   "key": "male_singer",
+   "en": "Male singer",
+   "zh": "男聲演唱",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "a male singer",
+    "a man singing"
+   ]
+  },
+  {
+   "key": "female_singer",
+   "en": "Female singer",
+   "zh": "女聲演唱",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "a female singer",
+    "a woman singing"
+   ]
+  },
+  {
+   "key": "child_singer",
+   "en": "Child singer",
+   "zh": "童聲",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "a child singing"
+   ]
+  },
+  {
+   "key": "choir",
+   "en": "Choir",
+   "zh": "合唱團",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "a choir",
+    "a church choir"
+   ]
+  },
+  {
+   "key": "backing_vocals",
+   "en": "Backing vocals",
+   "zh": "和聲",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "backing vocals",
+    "background singers harmonizing"
+   ]
+  },
+  {
+   "key": "opera_singer",
+   "en": "Opera singer",
+   "zh": "歌劇美聲",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "an opera singer",
+    "an operatic soprano"
+   ]
+  },
+  {
+   "key": "falsetto",
+   "en": "Falsetto",
+   "zh": "假音",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "a falsetto voice"
+   ]
+  },
+  {
+   "key": "rap",
+   "en": "Rap vocal",
+   "zh": "饒舌",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "a rapper",
+    "rap vocals"
+   ]
+  },
+  {
+   "key": "growl_vocals",
+   "en": "Metal growl / scream",
+   "zh": "金屬嘶吼",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "death metal growling vocals",
+    "screamed vocals"
+   ]
+  },
+  {
+   "key": "autotune_vocal",
+   "en": "Auto-tuned vocal",
+   "zh": "自動修音人聲",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "an auto-tuned vocal"
+   ]
+  },
+  {
+   "key": "beatbox",
+   "en": "Beatbox",
+   "zh": "Beatbox 口技",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "beatboxing"
+   ]
+  },
+  {
+   "key": "humming",
+   "en": "Humming",
+   "zh": "哼唱",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "a person humming"
+   ]
+  },
+  {
+   "key": "whistling",
+   "en": "Whistling",
+   "zh": "口哨",
+   "family": "vocals",
+   "family_zh": "人聲",
+   "prompts": [
+    "a person whistling a melody"
+   ]
+  },
+  {
+   "key": "erhu",
+   "en": "Erhu",
+   "zh": "二胡",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "an erhu",
+    "a Chinese two-string fiddle"
+   ]
+  },
+  {
+   "key": "morin_khuur",
+   "en": "Morin khuur",
+   "zh": "馬頭琴",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a morin khuur",
+    "a Mongolian horsehead fiddle"
+   ]
+  },
+  {
+   "key": "pipa",
+   "en": "Pipa",
+   "zh": "琵琶",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a pipa",
+    "a Chinese lute"
+   ]
+  },
+  {
+   "key": "ruan",
+   "en": "Ruan",
+   "zh": "阮",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a ruan",
+    "a Chinese moon guitar"
+   ]
+  },
+  {
+   "key": "guzheng",
+   "en": "Guzheng",
+   "zh": "古箏",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a guzheng",
+    "a Chinese zither"
+   ]
+  },
+  {
+   "key": "guqin",
+   "en": "Guqin",
+   "zh": "古琴",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a guqin",
+    "a Chinese seven-string zither"
+   ]
+  },
+  {
+   "key": "yangqin",
+   "en": "Yangqin",
+   "zh": "揚琴",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a yangqin",
+    "a Chinese hammered dulcimer"
+   ]
+  },
+  {
+   "key": "dizi",
+   "en": "Dizi",
+   "zh": "笛子",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a dizi",
+    "a Chinese bamboo flute"
+   ]
+  },
+  {
+   "key": "xiao",
+   "en": "Xiao",
+   "zh": "簫",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a xiao",
+    "a Chinese vertical bamboo flute"
+   ]
+  },
+  {
+   "key": "hulusi",
+   "en": "Hulusi",
+   "zh": "葫蘆絲",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a hulusi",
+    "a Chinese gourd flute"
+   ]
+  },
+  {
+   "key": "suona",
+   "en": "Suona",
+   "zh": "嗩吶",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a suona",
+    "a Chinese double-reed horn"
+   ]
+  },
+  {
+   "key": "sheng",
+   "en": "Sheng",
+   "zh": "笙",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a sheng",
+    "a Chinese mouth organ"
+   ]
+  },
+  {
+   "key": "chinese_percussion",
+   "en": "Chinese opera percussion",
+   "zh": "鑼鼓（戲曲打擊）",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "Chinese opera percussion with gongs and cymbals",
+    "Chinese drums and gongs"
+   ]
+  },
+  {
+   "key": "koto",
+   "en": "Koto",
+   "zh": "日本箏",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a koto",
+    "a Japanese zither"
+   ]
+  },
+  {
+   "key": "shamisen",
+   "en": "Shamisen",
+   "zh": "三味線",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a shamisen"
+   ]
+  },
+  {
+   "key": "shakuhachi",
+   "en": "Shakuhachi",
+   "zh": "尺八",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a shakuhachi",
+    "a Japanese bamboo flute"
+   ]
+  },
+  {
+   "key": "taiko",
+   "en": "Taiko",
+   "zh": "太鼓",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "taiko drums",
+    "Japanese taiko drumming"
+   ]
+  },
+  {
+   "key": "gayageum",
+   "en": "Gayageum",
+   "zh": "伽倻琴",
+   "family": "east_asian",
+   "family_zh": "東亞傳統樂器",
+   "prompts": [
+    "a gayageum",
+    "a Korean zither"
+   ]
+  },
+  {
+   "key": "sitar",
+   "en": "Sitar",
+   "zh": "西塔琴",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a sitar"
+   ]
+  },
+  {
+   "key": "tanpura",
+   "en": "Tanpura",
+   "zh": "坦布拉（持續音）",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a tanpura drone"
+   ]
+  },
+  {
+   "key": "tabla",
+   "en": "Tabla",
+   "zh": "塔布拉鼓",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "tabla drums"
+   ]
+  },
+  {
+   "key": "bansuri",
+   "en": "Bansuri",
+   "zh": "班蘇里笛",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a bansuri",
+    "an Indian bamboo flute"
+   ]
+  },
+  {
+   "key": "santoor",
+   "en": "Santoor",
+   "zh": "桑圖爾琴",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a santoor"
+   ]
+  },
+  {
+   "key": "oud",
+   "en": "Oud",
+   "zh": "烏德琴",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "an oud"
+   ]
+  },
+  {
+   "key": "bouzouki",
+   "en": "Bouzouki",
+   "zh": "布祖基琴",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a bouzouki"
+   ]
+  },
+  {
+   "key": "balalaika",
+   "en": "Balalaika",
+   "zh": "巴拉萊卡琴",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a balalaika"
+   ]
+  },
+  {
+   "key": "ney",
+   "en": "Ney",
+   "zh": "奈伊笛",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a ney flute"
+   ]
+  },
+  {
+   "key": "darbuka",
+   "en": "Darbuka",
+   "zh": "達布卡鼓",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a darbuka",
+    "a goblet drum"
+   ]
+  },
+  {
+   "key": "djembe",
+   "en": "Djembe",
+   "zh": "金貝鼓",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a djembe"
+   ]
+  },
+  {
+   "key": "talking_drum",
+   "en": "Talking drum",
+   "zh": "說話鼓",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a West African talking drum"
+   ]
+  },
+  {
+   "key": "kora",
+   "en": "Kora",
+   "zh": "科拉琴",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a kora",
+    "a West African harp"
+   ]
+  },
+  {
+   "key": "gamelan",
+   "en": "Gamelan",
+   "zh": "甘美朗",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a gamelan ensemble"
+   ]
+  },
+  {
+   "key": "didgeridoo",
+   "en": "Didgeridoo",
+   "zh": "迪吉里杜管",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a didgeridoo"
+   ]
+  },
+  {
+   "key": "bagpipes",
+   "en": "Bagpipes",
+   "zh": "風笛",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "bagpipes",
+    "Scottish bagpipes"
+   ]
+  },
+  {
+   "key": "hurdy_gurdy",
+   "en": "Hurdy-gurdy",
+   "zh": "手搖弦琴",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a hurdy-gurdy"
+   ]
+  },
+  {
+   "key": "jaw_harp",
+   "en": "Jaw harp",
+   "zh": "口簧琴",
+   "family": "world",
+   "family_zh": "世界音樂",
+   "prompts": [
+    "a jaw harp"
+   ]
+  },
+  {
+   "key": "orchestra",
+   "en": "Full orchestra",
+   "zh": "管弦樂團（全奏）",
+   "family": "ensemble",
+   "family_zh": "合奏",
+   "prompts": [
+    "a full symphony orchestra"
+   ]
+  },
+  {
+   "key": "big_band",
+   "en": "Big band",
+   "zh": "爵士大樂隊",
+   "family": "ensemble",
+   "family_zh": "合奏",
+   "prompts": [
+    "a jazz big band"
+   ]
+  },
+  {
+   "key": "rock_band",
+   "en": "Rock band",
+   "zh": "搖滾樂團",
+   "family": "ensemble",
+   "family_zh": "合奏",
+   "prompts": [
+    "a rock band playing a song"
+   ]
+  },
+  {
+   "key": "full_mix",
+   "en": "Full song mix",
+   "zh": "完整混音（整首歌）",
+   "family": "ensemble",
+   "family_zh": "合奏",
+   "prompts": [
+    "a full song mix with many instruments",
+    "a pop song with vocals, drums and bass"
+   ]
+  },
+  {
+   "key": "string_quartet",
+   "en": "String quartet",
+   "zh": "弦樂四重奏",
+   "family": "ensemble",
+   "family_zh": "合奏",
+   "prompts": [
+    "a string quartet"
+   ]
+  },
+  {
+   "key": "speech",
+   "en": "Speech",
+   "zh": "說話聲",
+   "family": "other",
+   "family_zh": "非樂器",
+   "prompts": [
+    "a person talking",
+    "people speaking"
+   ]
+  },
+  {
+   "key": "applause",
+   "en": "Applause / crowd",
+   "zh": "掌聲／觀眾",
+   "family": "other",
+   "family_zh": "非樂器",
+   "prompts": [
+    "applause",
+    "a crowd cheering"
+   ]
+  },
+  {
+   "key": "metronome",
+   "en": "Metronome / click",
+   "zh": "節拍器",
+   "family": "other",
+   "family_zh": "非樂器",
+   "prompts": [
+    "a metronome click track",
+    "a metronome ticking"
+   ]
+  },
+  {
+   "key": "noise_hum",
+   "en": "Hiss / hum",
+   "zh": "底噪／嗡聲",
+   "family": "other",
+   "family_zh": "非樂器",
+   "prompts": [
+    "background hiss and hum",
+    "electrical noise"
+   ]
+  },
+  {
+   "key": "white_noise",
+   "en": "White noise",
+   "zh": "白噪音",
+   "family": "other",
+   "family_zh": "非樂器",
+   "prompts": [
+    "white noise"
+   ]
+  },
+  {
+   "key": "sine_tone",
+   "en": "Test tone",
+   "zh": "測試音（正弦波）",
+   "family": "other",
+   "family_zh": "非樂器",
+   "prompts": [
+    "a sine wave test tone"
+   ]
+  },
+  {
+   "key": "vinyl_crackle",
+   "en": "Vinyl crackle",
+   "zh": "黑膠雜音",
+   "family": "other",
+   "family_zh": "非樂器",
+   "prompts": [
+    "vinyl record crackle"
+   ]
+  },
+  {
+   "key": "ambience",
+   "en": "Room / nature ambience",
+   "zh": "環境音",
+   "family": "other",
+   "family_zh": "非樂器",
+   "prompts": [
+    "ambient room tone",
+    "nature sounds such as birds and rain"
+   ]
+  }
+ ]
+}
