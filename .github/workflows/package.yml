@@ -1,7 +1,8 @@
 name: Package
 
-# Builds TrackMate for macOS (Apple Silicon) and Windows (x64) with the engine inside.
-# Every push to main keeps the builds as workflow artifacts; a tag v* also publishes a release.
+# Builds TrackMate for macOS (one universal app for Apple Silicon and Intel) and Windows (x64)
+# with the engine inside. Every push to main keeps the builds as workflow artifacts; a tag v*
+# also publishes a release whose notes come from .github/release-notes.md.
 on:
   push:
     branches: [main]
@@ -25,6 +26,9 @@ jobs:
           flutter-version: "3.47.8"
           channel: stable
           cache: true
+      # The Intel engine is built with an x86_64 Python, which runs under Rosetta 2.
+      - name: Rosetta 2
+        run: arch -x86_64 /usr/bin/true || softwareupdate --install-rosetta --agree-to-license
       - name: Build engine and app
         run: scripts/package-macos.sh
       - uses: actions/upload-artifact@v4
@@ -63,6 +67,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+      - name: Release notes
+        run: sed -e "s|{{TAG}}|${GITHUB_REF_NAME}|g" -e "s|{{REPO}}|${GITHUB_REPOSITORY}|g" .github/release-notes.md > "$RUNNER_TEMP/release-notes.md"
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -70,4 +77,5 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
+          body_path: ${{ runner.temp }}/release-notes.md
           generate_release_notes: true

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi' show Abi;
 import 'dart:io';
 
 import 'engine_api.dart';
@@ -7,7 +8,8 @@ import 'engine_api.dart';
 /// How to reach the engine, from --dart-define values:
 ///   ENGINE_ATTACH  path to an engine.json of an engine that is already running
 ///   ENGINE_CMD     engine executable to start; default: the engine bundled with the app
-///                  (TrackMate.app/Contents/Resources/engine, or engine\ next to TrackMate.exe),
+///                  (TrackMate.app/Contents/Resources/engine/arm64 or engine/x86_64, or
+///                  engine\ next to TrackMate.exe),
 ///                  else `stem-engine` on PATH
 ///   ENGINE_ARGS    extra arguments, space separated (e.g. --no-download)
 ///   ENGINE_HOME    STEM_ENGINE_HOME for the started engine
@@ -30,8 +32,13 @@ class EngineConfig {
 /// The engine shipped inside the app, or null in a development build.
 String? bundledEngine() {
   final exe = File(Platform.resolvedExecutable).parent; // .../Contents/MacOS or the .exe folder
+  // The universal macOS app carries one engine per architecture (engine/arm64, engine/x86_64).
+  final macArch = Abi.current() == Abi.macosX64 ? 'x86_64' : 'arm64';
   final candidates = Platform.isMacOS
-      ? ['${exe.parent.path}/Resources/engine/stem-engine']
+      ? [
+          '${exe.parent.path}/Resources/engine/$macArch/stem-engine',
+          '${exe.parent.path}/Resources/engine/stem-engine',
+        ]
       : Platform.isWindows
           ? ['${exe.path}\\engine\\stem-engine.exe']
           : ['${exe.path}/engine/stem-engine'];

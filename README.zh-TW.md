@@ -2,6 +2,15 @@
 
 <p align="center"><a href="README.md">English</a> | <b>繁體中文</b> | <a href="README.ja.md">日本語</a></p>
 
+<p align="center">
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg"><img src="https://img.shields.io/badge/Download-macOS%20Universal-5B5BD6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJ2LTQiLz48cG9seWxpbmUgcG9pbnRzPSI3IDEwIDEyIDE1IDE3IDEwIi8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIxNSIgeTI9IjMiLz48L3N2Zz4K" alt="下載 macOS 版（通用）"></a>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip"><img src="https://img.shields.io/badge/Download-Windows%20x64-5B5BD6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJ2LTQiLz48cG9seWxpbmUgcG9pbnRzPSI3IDEwIDEyIDE1IDE3IDEwIi8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIxNSIgeTI9IjMiLz48L3N2Zz4K" alt="下載 Windows x64 版"></a>
+  <br>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest"><img src="https://img.shields.io/github/v/release/Hikari-Tsai/TrackMate?label=latest%20release" alt="最新版本"></a>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/actions/workflows/ci.yml"><img src="https://github.com/Hikari-Tsai/TrackMate/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
+</p>
+
 # TrackMate（音軌助手）
 
 > 本文件是英文版 README 的翻譯，內容以[英文版](README.md)為準。
@@ -50,15 +59,15 @@ TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名�
 ### 系統需求
 | 項目 | 需求 |
 |---|---|
-| macOS | Apple Silicon（M 系列），macOS 12 以上 |
+| macOS | macOS 14（Sonoma）以上，Apple Silicon 和 Intel 都支援（同一個通用版 App） |
 | Windows | Windows 10/11 x64（目前只在 CI 上建置，還沒在實機上驗證，見[已知限制](#已知限制)） |
 | Pro Tools | 支援 PTSL 的版本（2023.3 以上）；測試環境是 Pro Tools 26.4.1。上色需要支援 `SetTrackColor` 的 PTSL |
-| 磁碟空間 | App 約 150 MB；第一次啟動會再下載約 1.35 GB 的模型 |
+| 磁碟空間 | macOS App 約 340 MB（內含兩種 CPU 的引擎），Windows 約 150 MB；第一次啟動會再下載約 1.35 GB 的模型 |
 
 ### 安裝
-1. 到 [Releases](../../releases) 下載最新版本：
-   - macOS：`TrackMate-macos-arm64.dmg`（或 `.zip`）
-   - Windows：`TrackMate-windows-x64.zip`
+1. 用上方的按鈕下載最新版本，或到 [Releases](https://github.com/Hikari-Tsai/TrackMate/releases) 選擇版本：
+   - macOS：[`TrackMate-macos-universal.dmg`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg)（或 `.zip`），Apple Silicon 和 Intel Mac 都能用
+   - Windows：[`TrackMate-windows-x64.zip`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip)
 2. **macOS：** 把 `TrackMate.app` 拖進「應用程式」資料夾。目前的版本沒有經過 Apple 公證，第一次開啟時請在 App 上按右鍵 →「打開」；也可以在終端機執行：
    ```bash
    xattr -dr com.apple.quarantine /Applications/TrackMate.app
@@ -219,7 +228,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 ```
 
 **打包成可以發佈的 App：**
-- macOS：執行 [`scripts/package-macos.sh`](scripts/package-macos.sh)。
+- macOS：執行 [`scripts/package-macos.sh`](scripts/package-macos.sh)。它會分別打包 Apple Silicon 和 Intel 的引擎（Intel 版用 Rosetta 2 執行 x86_64 的 Python，所以在 Apple Silicon Mac 上就能建置），再一起放進同一個通用版 App。
 - Windows：執行 [`scripts/package-windows.ps1`](scripts/package-windows.ps1)。
 - 兩個腳本都會打包引擎、執行 smoke test、建置 App、把引擎放進 App，然後輸出到 `dist/`。
 
@@ -261,7 +270,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 | Workflow | 觸發時機 | 內容 |
 |---|---|---|
 | [CI](.github/workflows/ci.yml) | push 到 `main`、Pull Request | 引擎與立體聲分析的測試、`flutter analyze`、App 測試（不含截圖比對） |
-| [Package](.github/workflows/package.yml) | push 到 `main`、`v*` 標籤、手動觸發 | 在 macOS（Apple Silicon）和 Windows 各自打包引擎並跑 smoke test，再建置 App，上傳成 Actions 產物；推送 `v*` 標籤時自動建立 GitHub Release 並附上安裝檔 |
+| [Package](.github/workflows/package.yml) | push 到 `main`、`v*` 標籤、手動觸發 | 打包引擎並跑 smoke test（macOS：Apple Silicon 和 Intel 兩個引擎放進同一個通用版 App；Windows x64），再建置 App，上傳成 Actions 產物；推送 `v*` 標籤時自動建立 GitHub Release，附上安裝檔和安裝說明（[範本](.github/release-notes.md)） |
 
 發佈新版本：
 ```bash
@@ -273,7 +282,7 @@ git push origin v0.1.0
 <sub>[English](README.md#known-limitations)</sub>
 - **輸出路由：** PTSL 目前不能建立 bus，所以只建立資料夾分組，輸出路由要自己設定。
 - **Windows 版：** 在 CI 上編譯和打包，但還沒在實機上操作過；拖放時也不會顯示 hover 效果。
-- **macOS 版：** 只支援 Apple Silicon；目前是 ad-hoc 簽章，沒有經過 Apple 公證。
+- **macOS 版：** 目前是 ad-hoc 簽章，沒有經過 Apple 公證。Intel 版引擎使用 onnxruntime 1.23.2（最後一個提供 Intel macOS 版本的 release），評測結果和 Apple Silicon 版相同，但目前只在 Rosetta 2 下測過，還沒在真的 Intel Mac 上測試。
 - **門檻：** 目前的門檻是用小型測試集定出的起始值，還需要用真實 session 再校準。
 - **字典：** 沒收錄的中日文寫法，主要靠擴充字典和你的修正來學習。
 - **音訊辨識：** 只判斷大類，而且只用獨奏片段驗證過。CPU 處理每 10 秒片段約 2.8 秒，所以只對名稱看不出來的軌執行。

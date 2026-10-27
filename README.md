@@ -2,6 +2,15 @@
 
 <p align="center"><b>English</b> | <a href="README.zh-TW.md">繁體中文</a> | <a href="README.ja.md">日本語</a></p>
 
+<p align="center">
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg"><img src="https://img.shields.io/badge/Download-macOS%20Universal-5B5BD6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJ2LTQiLz48cG9seWxpbmUgcG9pbnRzPSI3IDEwIDEyIDE1IDE3IDEwIi8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIxNSIgeTI9IjMiLz48L3N2Zz4K" alt="Download for macOS (universal)"></a>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip"><img src="https://img.shields.io/badge/Download-Windows%20x64-5B5BD6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJ2LTQiLz48cG9seWxpbmUgcG9pbnRzPSI3IDEwIDEyIDE1IDE3IDEwIi8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIxNSIgeTI9IjMiLz48L3N2Zz4K" alt="Download for Windows x64"></a>
+  <br>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest"><img src="https://img.shields.io/github/v/release/Hikari-Tsai/TrackMate?label=latest%20release" alt="Latest release"></a>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/actions/workflows/ci.yml"><img src="https://github.com/Hikari-Tsai/TrackMate/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
+</p>
+
 # TrackMate
 
 TrackMate takes care of the most tedious part of preparing a Pro Tools mix: stem files with inconsistent names full of typos and abbreviations, and tracks that are really mono but were exported as stereo.
@@ -47,15 +56,15 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
 ### Requirements
 | Item | Requirement |
 |---|---|
-| macOS | Apple Silicon (M series), macOS 12 or later |
+| macOS | macOS 14 (Sonoma) or later, Apple Silicon or Intel (one universal app) |
 | Windows | Windows 10/11 x64 (built in CI, not yet verified on a real machine; see [Known limitations](#known-limitations)) |
 | Pro Tools | A version with PTSL (2023.3 or later); tested with Pro Tools 26.4.1. Colouring needs a PTSL with `SetTrackColor` |
-| Disk space | About 150 MB for the app, plus about 1.35 GB of models downloaded on first start |
+| Disk space | About 340 MB for the macOS app (it carries both engines) or 150 MB on Windows, plus about 1.35 GB of models downloaded on first start |
 
 ### Install
-1. Download the latest version from [Releases](../../releases):
-   - macOS: `TrackMate-macos-arm64.dmg` (or `.zip`)
-   - Windows: `TrackMate-windows-x64.zip`
+1. Download the latest version with the buttons at the top, or pick a version on [Releases](https://github.com/Hikari-Tsai/TrackMate/releases):
+   - macOS: [`TrackMate-macos-universal.dmg`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg) (or `.zip`), for both Apple Silicon and Intel Macs
+   - Windows: [`TrackMate-windows-x64.zip`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip)
 2. **macOS:** drag `TrackMate.app` into Applications. The current builds are not notarized by Apple, so the first time, right-click the app and choose **Open**, or run:
    ```bash
    xattr -dr com.apple.quarantine /Applications/TrackMate.app
@@ -212,7 +221,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 ```
 
 **Packaging the app for distribution:**
-- macOS: [`scripts/package-macos.sh`](scripts/package-macos.sh).
+- macOS: [`scripts/package-macos.sh`](scripts/package-macos.sh). It builds an Apple Silicon engine and an Intel engine (with an x86_64 Python under Rosetta 2, so it runs on an Apple Silicon Mac) and puts both in one universal app.
 - Windows: [`scripts/package-windows.ps1`](scripts/package-windows.ps1).
 - Both build the engine, smoke-test it, build the app, put the engine inside, and write the result to `dist/`.
 
@@ -251,7 +260,7 @@ Index: [`docs/reports/`](docs/reports/README.md) (the reports are written in Tra
 | Workflow | Runs on | What it does |
 |---|---|---|
 | [CI](.github/workflows/ci.yml) | Push to `main`, pull requests | Engine and stereo-analysis tests, `flutter analyze`, app tests (without screenshot comparisons) |
-| [Package](.github/workflows/package.yml) | Push to `main`, `v*` tags, manual | Builds and smoke-tests the engine on macOS (Apple Silicon) and Windows, builds the app and uploads it as a workflow artifact; a `v*` tag also creates a GitHub release with the installers |
+| [Package](.github/workflows/package.yml) | Push to `main`, `v*` tags, manual | Builds and smoke-tests the engines (macOS: Apple Silicon and Intel, packed into one universal app; Windows x64), builds the apps and uploads them as workflow artifacts. A `v*` tag also creates a GitHub release with the installers and install instructions ([template](.github/release-notes.md)) |
 
 To publish a release:
 ```bash
@@ -262,7 +271,7 @@ git push origin v0.1.0
 ## Known limitations
 - **Output routing:** PTSL cannot create buses yet, so TrackMate only groups tracks into folders; set up routing yourself.
 - **Windows:** built and packaged in CI but not yet used on a real machine; dragging files shows no hover highlight.
-- **macOS:** Apple Silicon only; builds are ad-hoc signed and not notarized by Apple.
+- **macOS:** builds are ad-hoc signed and not notarized by Apple. The Intel engine uses onnxruntime 1.23.2, the last release with an Intel macOS build; it gives the same evaluation results as the Apple Silicon engine, but has so far been tested under Rosetta 2, not on a real Intel Mac.
 - **Thresholds:** current values are starting points from small test sets and still need calibration on real sessions.
 - **Dictionary:** Chinese and Japanese spellings that are not in the dictionary are learnt mainly by extending it and from your corrections.
 - **Audio recognition:** category only, and verified on solo recordings only. A 10-second segment takes about 2.8 s on CPU, so it runs only for tracks whose names say nothing.

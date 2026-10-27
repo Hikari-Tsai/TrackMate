@@ -26,7 +26,7 @@ App 原始碼在 [`app/`](../../app)：介面用 Flutter，拖放和選檔視窗
 **另外確認過的行為：**
 - **學習別名：** 改選候選時，送回引擎的別名是去掉歌名後的文字（`synth pad`）；DAW 預設名稱（`Audio 3`）不學。
 - **關閉 App：** 引擎會在 1 秒內一起結束，不會留下孤兒程序。
-- **打包版：** 解壓後打開，App 會使用內建的引擎（`TrackMate.app/Contents/Resources/engine`），以及正式的資料夾（`~/Library/Application Support/TrackMate`）。
+- **打包版：** 解壓後打開，App 會依 CPU 使用內建的引擎（`TrackMate.app/Contents/Resources/engine/arm64` 或 `x86_64`），以及正式的資料夾（`~/Library/Application Support/TrackMate`）。
 
 ## 尚未驗證
 - **Windows 版：** 會在 CI 上編譯和打包，但還沒有在真實的 Windows 電腦上操作過，拖放和選檔視窗都還沒實測。

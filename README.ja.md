@@ -2,6 +2,15 @@
 
 <p align="center"><a href="README.md">English</a> | <a href="README.zh-TW.md">繁體中文</a> | <b>日本語</b></p>
 
+<p align="center">
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg"><img src="https://img.shields.io/badge/Download-macOS%20Universal-5B5BD6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJ2LTQiLz48cG9seWxpbmUgcG9pbnRzPSI3IDEwIDEyIDE1IDE3IDEwIi8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIxNSIgeTI9IjMiLz48L3N2Zz4K" alt="macOS 版（ユニバーサル）をダウンロード"></a>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip"><img src="https://img.shields.io/badge/Download-Windows%20x64-5B5BD6?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDE1djRhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJ2LTQiLz48cG9seWxpbmUgcG9pbnRzPSI3IDEwIDEyIDE1IDE3IDEwIi8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIxNSIgeTI9IjMiLz48L3N2Zz4K" alt="Windows x64 版をダウンロード"></a>
+  <br>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/releases/latest"><img src="https://img.shields.io/github/v/release/Hikari-Tsai/TrackMate?label=latest%20release" alt="最新リリース"></a>
+  <a href="https://github.com/Hikari-Tsai/TrackMate/actions/workflows/ci.yml"><img src="https://github.com/Hikari-Tsai/TrackMate/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
+</p>
+
 # TrackMate
 
 > このドキュメントは英語版 README の翻訳です。内容は[英語版](README.md)が優先されます。
@@ -50,15 +59,15 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 ### 動作環境
 | 項目 | 要件 |
 |---|---|
-| macOS | Apple Silicon（M シリーズ）、macOS 12 以降 |
+| macOS | macOS 14（Sonoma）以降。Apple Silicon と Intel の両方に対応（1 つのユニバーサルアプリ） |
 | Windows | Windows 10/11 x64（CI でビルド済み。実機での検証はまだです。[既知の制限](#既知の制限)を参照） |
 | Pro Tools | PTSL 対応バージョン（2023.3 以降）。Pro Tools 26.4.1 で検証。カラー設定には `SetTrackColor` に対応した PTSL が必要 |
-| ディスク容量 | アプリ約 150 MB、初回起動時に約 1.35 GB のモデルをダウンロード |
+| ディスク容量 | macOS アプリ約 340 MB（両方の CPU 用エンジンを同梱）、Windows 約 150 MB。初回起動時に約 1.35 GB のモデルをダウンロード |
 
 ### インストール
-1. [Releases](../../releases) から最新版をダウンロードします。
-   - macOS：`TrackMate-macos-arm64.dmg`（または `.zip`）
-   - Windows：`TrackMate-windows-x64.zip`
+1. 上部のボタンから最新版をダウンロードするか、[Releases](https://github.com/Hikari-Tsai/TrackMate/releases) でバージョンを選びます。
+   - macOS：[`TrackMate-macos-universal.dmg`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg)（または `.zip`）。Apple Silicon と Intel の Mac で使えます
+   - Windows：[`TrackMate-windows-x64.zip`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip)
 2. **macOS：** `TrackMate.app` を「アプリケーション」フォルダにドラッグします。現在のビルドは Apple の公証を受けていないため、初回はアプリを右クリックして「開く」を選ぶか、ターミナルで次を実行してください。
    ```bash
    xattr -dr com.apple.quarantine /Applications/TrackMate.app
@@ -219,7 +228,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 ```
 
 **配布用パッケージの作成：**
-- macOS：[`scripts/package-macos.sh`](scripts/package-macos.sh)
+- macOS：[`scripts/package-macos.sh`](scripts/package-macos.sh)。Apple Silicon 用と Intel 用のエンジンをそれぞれビルドし（Intel 用は Rosetta 2 上の x86_64 Python でビルドするため、Apple Silicon の Mac で実行できます）、1 つのユニバーサルアプリにまとめます。
 - Windows：[`scripts/package-windows.ps1`](scripts/package-windows.ps1)
 - どちらもエンジンをビルドしてスモークテストし、アプリをビルドしてエンジンを同梱し、`dist/` に出力します。
 
@@ -261,7 +270,7 @@ flutter run -d macos --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engi
 | Workflow | 実行タイミング | 内容 |
 |---|---|---|
 | [CI](.github/workflows/ci.yml) | `main` への push、プルリクエスト | エンジンとステレオ解析のテスト、`flutter analyze`、アプリのテスト（スクリーンショット比較を除く） |
-| [Package](.github/workflows/package.yml) | `main` への push、`v*` タグ、手動 | macOS（Apple Silicon）と Windows でエンジンをビルドしてスモークテストし、アプリをビルドしてワークフローの成果物としてアップロード。`v*` タグでは GitHub Release を作成してインストーラーを添付 |
+| [Package](.github/workflows/package.yml) | `main` への push、`v*` タグ、手動 | エンジンをビルドしてスモークテスト（macOS：Apple Silicon 用と Intel 用を 1 つのユニバーサルアプリに同梱、Windows x64）し、アプリをビルドしてワークフローの成果物としてアップロード。`v*` タグでは GitHub Release を作成し、インストーラーとインストール手順（[テンプレート](.github/release-notes.md)）を添付 |
 
 リリースの公開：
 ```bash
@@ -274,7 +283,7 @@ git push origin v0.1.0
 
 - **出力ルーティング：** PTSL はまだバスを作成できないため、TrackMate はフォルダへのグループ分けだけを行います。ルーティングは手動で設定してください。
 - **Windows：** CI でビルドとパッケージ作成はできていますが、実機ではまだ使われていません。ファイルをドラッグしたときのハイライト表示もありません。
-- **macOS：** Apple Silicon のみ。ad-hoc 署名で、Apple の公証は受けていません。
+- **macOS：** ad-hoc 署名で、Apple の公証は受けていません。Intel 用エンジンは Intel macOS 版が提供される最後のリリースである onnxruntime 1.23.2 を使います。評価結果は Apple Silicon 用と同じですが、テストは Rosetta 2 上のみで、実機の Intel Mac ではまだ試していません。
 - **しきい値：** 現在の値は小さなテストセットから決めた初期値で、実際のセッションでの調整が必要です。
 - **辞書：** 辞書にない中国語・日本語の表記は、主に辞書の拡充とユーザーの修正から学習します。
 - **音声認識：** カテゴリのみの判定で、ソロ録音でしか検証していません。CPU では 10 秒の区間に約 2.8 秒かかるため、名前から判断できないトラックにだけ使います。
