@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build a universal TrackMate.app (Apple Silicon and Intel) with both engines inside, ad-hoc
-# signed, and pack it as .zip and .dmg in dist/. The x86_64 engine is built with an x86_64
-# Python under Rosetta 2, so this runs on an Apple Silicon Mac.
+# signed, and pack it as .zip and a drag-to-install .dmg in dist/. The x86_64 engine is built
+# with an x86_64 Python under Rosetta 2, so this runs on an Apple Silicon Mac.
 # Usage: scripts/package-macos.sh   (FLUTTER=/path/to/flutter to use another Flutter)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -40,5 +40,7 @@ echo "== archives"
 mkdir -p "$ROOT/dist"
 rm -f "$ROOT/dist"/TrackMate-macos-*.{zip,dmg}
 ditto -c -k --keepParent "$APP" "$ROOT/dist/TrackMate-macos-universal.zip"
-hdiutil create -volname TrackMate -srcfolder "$APP" -ov -format UDZO "$ROOT/dist/TrackMate-macos-universal.dmg" >/dev/null
+# Drag-to-install window: the app, an arrow and an Applications shortcut (scripts/dmg).
+uvx --from dmgbuild==1.6.7 dmgbuild -s "$ROOT/scripts/dmg/settings.py" -D app="$APP" \
+  -D background="$ROOT/scripts/dmg/background.png" TrackMate "$ROOT/dist/TrackMate-macos-universal.dmg" >/dev/null
 ls -lh "$ROOT/dist"

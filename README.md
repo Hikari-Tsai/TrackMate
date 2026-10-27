@@ -67,7 +67,7 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
 1. Download the latest version with the buttons at the top, or pick a version on [Releases](https://github.com/Hikari-Tsai/TrackMate/releases):
    - macOS: [`TrackMate-macos-universal.dmg`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg) (or `.zip`), for both Apple Silicon and Intel Macs
    - Windows: [`TrackMate-windows-x64.zip`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip)
-2. **macOS:** drag `TrackMate.app` into Applications. The current builds are not notarized by Apple, so the first time, right-click the app and choose **Open**, or run:
+2. **macOS:** open the `.dmg`; the window shows TrackMate on the left and the Applications folder on the right. Drag TrackMate onto Applications. The current builds are not notarized by Apple, so the first time, right-click the app and choose **Open**, or run:
    ```bash
    xattr -dr com.apple.quarantine /Applications/TrackMate.app
    ```
@@ -338,7 +338,7 @@ TrackMate is built on the following open-source software, models, datasets and f
 | [Protocol Buffers](https://protobuf.dev/) | BSD-3-Clause |
 | [PyInstaller](https://pyinstaller.org/) (packaging; the bootloader exception allows distributing bundled programs) | GPL-2.0 with bootloader exception |
 | [pytest](https://pytest.org/), [HTTPX](https://www.python-httpx.org/) (tests) | MIT, BSD-3-Clause |
-| [uv](https://docs.astral.sh/uv/), [Hatchling](https://hatch.pypa.io/) (build tools) | MIT / Apache-2.0, MIT |
+| [uv](https://docs.astral.sh/uv/), [Hatchling](https://hatch.pypa.io/), [dmgbuild](https://github.com/dmgbuild/dmgbuild) (build tools) | MIT / Apache-2.0, MIT, MIT |
 
 Research and model export also used [PyTorch](https://pytorch.org/) (BSD-3-Clause), [Transformers](https://github.com/huggingface/transformers), [Sentence Transformers](https://www.sbert.net/), [timm](https://github.com/huggingface/pytorch-image-models) (Apache-2.0), [librosa](https://librosa.org/) (ISC) and [Pillow](https://python-pillow.org/) (MIT-CMU). The PE-AV demo also uses [Gradio](https://www.gradio.app/), [huggingface_hub](https://github.com/huggingface/huggingface_hub) (Apache-2.0) and [FFmpeg](https://ffmpeg.org/) (LGPL-2.1+, for decoding other audio formats).
 

@@ -70,7 +70,7 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 1. 上部のボタンから最新版をダウンロードするか、[Releases](https://github.com/Hikari-Tsai/TrackMate/releases) でバージョンを選びます。
    - macOS：[`TrackMate-macos-universal.dmg`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg)（または `.zip`）。Apple Silicon と Intel の Mac で使えます
    - Windows：[`TrackMate-windows-x64.zip`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip)
-2. **macOS：** `TrackMate.app` を「アプリケーション」フォルダにドラッグします。現在のビルドは Apple の公証を受けていないため、初回はアプリを右クリックして「開く」を選ぶか、ターミナルで次を実行してください。
+2. **macOS：** `.dmg` を開くと、左に TrackMate、右に Applications（アプリケーション）フォルダが表示されます。TrackMate を Applications にドラッグします。現在のビルドは Apple の公証を受けていないため、初回はアプリを右クリックして「開く」を選ぶか、ターミナルで次を実行してください。
    ```bash
    xattr -dr com.apple.quarantine /Applications/TrackMate.app
    ```
@@ -351,7 +351,7 @@ TrackMate は以下のオープンソースソフトウェア、モデル、デ�
 | [Protocol Buffers](https://protobuf.dev/) | BSD-3-Clause |
 | [PyInstaller](https://pyinstaller.org/)（パッケージ化。ブートローダー例外により同梱プログラムの配布が可能） | GPL-2.0 with bootloader exception |
 | [pytest](https://pytest.org/)、[HTTPX](https://www.python-httpx.org/)（テスト） | MIT、BSD-3-Clause |
-| [uv](https://docs.astral.sh/uv/)、[Hatchling](https://hatch.pypa.io/)（ビルドツール） | MIT / Apache-2.0、MIT |
+| [uv](https://docs.astral.sh/uv/)、[Hatchling](https://hatch.pypa.io/)、[dmgbuild](https://github.com/dmgbuild/dmgbuild)（ビルドツール） | MIT / Apache-2.0、MIT、MIT |
 
 研究とモデル変換では、ほかに [PyTorch](https://pytorch.org/)（BSD-3-Clause）、[Transformers](https://github.com/huggingface/transformers)、[Sentence Transformers](https://www.sbert.net/)、[timm](https://github.com/huggingface/pytorch-image-models)（Apache-2.0）、[librosa](https://librosa.org/)（ISC）、[Pillow](https://python-pillow.org/)（MIT-CMU）を使用しました。PE-AV デモでは、ほかに [Gradio](https://www.gradio.app/)、[huggingface_hub](https://github.com/huggingface/huggingface_hub)（Apache-2.0）、[FFmpeg](https://ffmpeg.org/)（LGPL-2.1+、その他の音声形式のデコード用）を使用しています。
 

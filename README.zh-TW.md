@@ -70,7 +70,7 @@ TrackMate 要解決 Pro Tools 混音前最瑣碎的整理工作：分軌檔名�
 1. 用上方的按鈕下載最新版本，或到 [Releases](https://github.com/Hikari-Tsai/TrackMate/releases) 選擇版本：
    - macOS：[`TrackMate-macos-universal.dmg`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-macos-universal.dmg)（或 `.zip`），Apple Silicon 和 Intel Mac 都能用
    - Windows：[`TrackMate-windows-x64.zip`](https://github.com/Hikari-Tsai/TrackMate/releases/latest/download/TrackMate-windows-x64.zip)
-2. **macOS：** 把 `TrackMate.app` 拖進「應用程式」資料夾。目前的版本沒有經過 Apple 公證，第一次開啟時請在 App 上按右鍵 →「打開」；也可以在終端機執行：
+2. **macOS：** 打開 `.dmg`，視窗左邊是 TrackMate，右邊是 Applications（應用程式）資料夾，把 TrackMate 拖到 Applications 上。目前的版本沒有經過 Apple 公證，第一次開啟時請在 App 上按右鍵 →「打開」；也可以在終端機執行：
    ```bash
    xattr -dr com.apple.quarantine /Applications/TrackMate.app
    ```
@@ -350,7 +350,7 @@ TrackMate 使用了下列開源軟體、模型、資料集和字型，感謝各�
 | [Protocol Buffers](https://protobuf.dev/) | BSD-3-Clause |
 | [PyInstaller](https://pyinstaller.org/)（打包；bootloader 例外條款允許散布打包後的程式） | GPL-2.0 with bootloader exception |
 | [pytest](https://pytest.org/)、[HTTPX](https://www.python-httpx.org/)（測試） | MIT、BSD-3-Clause |
-| [uv](https://docs.astral.sh/uv/)、[Hatchling](https://hatch.pypa.io/)（建置工具） | MIT / Apache-2.0、MIT |
+| [uv](https://docs.astral.sh/uv/)、[Hatchling](https://hatch.pypa.io/)、[dmgbuild](https://github.com/dmgbuild/dmgbuild)（建置工具） | MIT / Apache-2.0、MIT、MIT |
 
 研究和模型匯出另外使用了 [PyTorch](https://pytorch.org/)（BSD-3-Clause）、[Transformers](https://github.com/huggingface/transformers)、[Sentence Transformers](https://www.sbert.net/)、[timm](https://github.com/huggingface/pytorch-image-models)（Apache-2.0）、[librosa](https://librosa.org/)（ISC）、[Pillow](https://python-pillow.org/)（MIT-CMU）。PE-AV demo 另外使用了 [Gradio](https://www.gradio.app/)、[huggingface_hub](https://github.com/huggingface/huggingface_hub)（Apache-2.0），以及 [FFmpeg](https://ffmpeg.org/)（LGPL-2.1+，用於解碼其他音訊格式）。
 
