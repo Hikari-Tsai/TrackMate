@@ -13,17 +13,13 @@
 
 # TrackMate
 
-TrackMate takes care of the most tedious part of preparing a Pro Tools mix: stem files with inconsistent names full of typos and abbreviations, and tracks that are really mono but were exported as stereo.
-
-It recognises the instrument on every stem, proposes a standard name, a category and a colour, and decides whether the file should be turned back into mono. It also finds the song's tempo in the drum stems. After you confirm, one click imports everything into Pro Tools: folders per category, import, rename, colour and tempo.
+Before a Pro Tools mix, engineers lose time on chores: stems arrive with inconsistent names full of typos, abbreviations and defaults like `Audio 3`, mono tracks come exported as stereo, and the tempo has to be set by hand. TrackMate does it all in one pass. It recognises every stem, proposes a standard name, category and colour, turns fake stereo back into mono, detects the BPM, and imports everything into Pro Tools with one click. It combines a naming dictionary with state-of-the-art text, audio and beat-tracking models: on real-world track names its first answer is right 96.6 % of the time (98.9 % within its top 5).
 
 Recognition combines rules and AI models:
 - **Rules:** a dictionary of common track names and a spelling corrector.
 - **Reading the name:** the multilingual text-embedding model Qwen3-Embedding-0.6B understands track names it has never seen.
 - **Listening:** Meta's pretrained audio–text model PE-AV (in the same family as CLAP; only the audio encoder, converted to ONNX) handles tracks whose names say nothing.
 - **Tempo:** the beat-tracking model Beat This! (CPJKU, ISMIR 2024, converted to ONNX) finds every beat and downbeat in the drum and percussion stems.
-
-On a test set of real-world track names, the top-1 accuracy is 96.6 %, and the right answer is among the top 5 in 98.9 % of cases.
 
 TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. It uses Avid's official Pro Tools Scripting Library (PTSL), which is far less sensitive to interface changes and keeps working across future versions.
 
