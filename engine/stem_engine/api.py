@@ -110,9 +110,14 @@ def create_app(engine: Engine, token: str) -> FastAPI:
     def health() -> dict:
         return {"status": "ok", "version": __version__}
 
+    def models_answer() -> dict:
+        # One shape for GET /models, POST /models/download and DELETE /models: the app
+        # applies all three the same way.
+        return {"models": engine.models.summary(), "layers": engine.layers(), "dir": str(engine.models.dir)}
+
     @app.get("/models", dependencies=[Depends(auth)])
     def models() -> dict:
-        return {"models": engine.models.summary(), "layers": engine.layers(), "dir": str(engine.models.dir)}
+        return models_answer()
 
     @app.delete("/models", dependencies=[Depends(auth)])
     def clear_models() -> dict:
@@ -121,7 +126,7 @@ def create_app(engine: Engine, token: str) -> FastAPI:
             freed = engine.clear_models()
         except DownloadInProgress as exc:
             raise fail(409, "models_downloading", f"Cannot delete the models now: {exc}.")
-        return {"freed_bytes": freed, "models": engine.models.summary(), "layers": engine.layers()}
+        return {"freed_bytes": freed, **models_answer()}
 
     @app.post("/models/download", dependencies=[Depends(auth)])
     def download(req: DownloadRequest) -> dict:
@@ -129,7 +134,7 @@ def create_app(engine: Engine, token: str) -> FastAPI:
         if unknown:
             raise HTTPException(status_code=404, detail=f"unknown models: {sorted(unknown)}")
         engine.models.start(req.models)
-        return {"models": engine.models.summary()}
+        return models_answer()
 
     @app.post("/analyze", dependencies=[Depends(auth)])
     def analyze(req: AnalyzeRequest) -> dict:

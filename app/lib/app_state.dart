@@ -95,8 +95,10 @@ class AppState extends ChangeNotifier {
 
   /// Takes a /models answer; polls again every 2 s while a download runs.
   void _applyModels(Map<String, dynamic> m) {
-    layers = {for (final e in (m['layers'] as Map).entries) e.key as String: e.value as bool};
-    models = m['models'] as Map<String, dynamic>;
+    // Every model answer carries layers; an engine that leaves them out keeps the last ones
+    // rather than crashing the download or clear that asked.
+    if (m['layers'] is Map) layers = {for (final e in (m['layers'] as Map).entries) e.key as String: e.value as bool};
+    models = (m['models'] as Map?)?.cast<String, dynamic>() ?? models;
     modelsDir = (m['dir'] as String?) ?? modelsDir;
     if (tempoModelReady && tempoError?.code == 'tempo_model_not_ready' && !busy) unawaited(detectTempo(again: true));
     _modelTimer?.cancel();

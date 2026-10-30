@@ -54,6 +54,7 @@ The packaged app contains the Flutter runtime and a Python engine built with PyI
 | [py-ptsl](https://github.com/iluvcapra/py-ptsl) | BSD-3-Clause |
 | [gRPC](https://grpc.io/) (grpcio) | Apache-2.0 |
 | [Protocol Buffers](https://protobuf.dev/) | BSD-3-Clause |
+| [certifi](https://github.com/certifi/python-certifi) (Mozilla CA bundle for the model downloads) | MPL-2.0 |
 | [python-soundfile](https://github.com/bastibe/python-soundfile) | BSD-3-Clause |
 | [libsndfile](https://libsndfile.github.io/libsndfile/) (bundled with python-soundfile) | LGPL-2.1-or-later |
 | [python-soxr](https://github.com/dofuuz/python-soxr) with [libsoxr](https://sourceforge.net/projects/soxr/) | LGPL-2.1-or-later |

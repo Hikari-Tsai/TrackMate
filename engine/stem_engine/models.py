@@ -10,16 +10,22 @@ import hashlib
 import json
 import pathlib
 import shutil
+import ssl
 import threading
 import time
 import urllib.request
 from dataclasses import dataclass, field
+
+import certifi
 
 from .config import DATA_DIR
 
 HF_URL = "https://huggingface.co/{repo}/resolve/{revision}/{path}"
 CHUNK = 1 << 20
 MANIFEST_PATH = DATA_DIR / "model_manifest.json"
+# The packaged engine's Python has no system CA store (PyInstaller, python-build-standalone),
+# so every download would fail with CERTIFICATE_VERIFY_FAILED: use certifi's bundle instead.
+SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
 
 
 class ChecksumError(RuntimeError):
@@ -178,7 +184,7 @@ class ModelManager:
         if have < meta["size"]:
             url = self.url_template.format(repo=spec.repo, revision=spec.revision, path=path)
             req = urllib.request.Request(url, headers={"Range": f"bytes={have}-"} if have else {})
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with urllib.request.urlopen(req, timeout=60, context=SSL_CONTEXT) as resp:
                 if have and resp.status != 206:  # server ignored the range: start over
                     have, h = 0, hashlib.sha256()
                 with open(part, "ab" if have else "wb") as f:

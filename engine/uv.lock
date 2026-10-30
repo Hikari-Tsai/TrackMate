@@ -817,6 +817,7 @@ name = "stem-engine"
 version = "0.99.8"
 source = { editable = "." }
 dependencies = [
+    { name = "certifi" },
     { name = "fastapi" },
     { name = "numpy" },
     { name = "onnxruntime", version = "1.23.2", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine == 'x86_64' and sys_platform == 'darwin'" },
@@ -841,6 +842,7 @@ package = [
 
 [package.metadata]
 requires-dist = [
+    { name = "certifi", specifier = ">=2024.2" },
     { name = "fastapi", specifier = ">=0.110" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "onnxruntime", marker = "platform_machine != 'x86_64' or sys_platform != 'darwin'", specifier = ">=1.20" },

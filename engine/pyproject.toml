@@ -16,6 +16,7 @@ dependencies = [
     "fastapi>=0.110",
     "uvicorn>=0.29",
     "py-ptsl==602.0.0",
+    "certifi>=2024.2",  # CA bundle for the model downloads (the packaged Python has none)
     "stereo-analysis",
 ]
 

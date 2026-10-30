@@ -55,6 +55,27 @@ def test_clear_models_deletes_files_and_resets_state(client, config):
     assert body["layers"]["T"] is False
 
 
+def test_every_model_answer_has_the_same_shape(client, engine, monkeypatch):
+    # The app applies GET /models, POST /models/download and DELETE /models the same way, so
+    # all three must carry models, layers and dir (0.99.8 crashed on a download answer without
+    # layers). The download itself is not started here.
+    monkeypatch.setattr(engine.models, "start", lambda names=None: None)
+    get = client.get("/models", headers=AUTH).json()
+    download = client.post("/models/download", json={"models": ["beat_this"]}, headers=AUTH).json()
+    clear = client.delete("/models", headers=AUTH).json()
+    assert set(get) == {"models", "layers", "dir"}
+    assert set(download) == set(get)
+    assert set(clear) == set(get) | {"freed_bytes"}
+    assert download["layers"] == get["layers"] and download["dir"] == get["dir"]
+
+
+def test_downloads_verify_tls_with_certifi():
+    # The packaged engine has no system CA store; the context must come from certifi.
+    from stem_engine import models as m
+    assert m.SSL_CONTEXT.verify_mode == m.ssl.CERT_REQUIRED
+    assert m.SSL_CONTEXT.cert_store_stats()["x509_ca"] > 100
+
+
 def test_clear_models_refused_while_downloading(client, engine):
     # Marked as downloading, as start() does before its thread runs.
     engine.models.status["peav_audio"].state = "downloading"
