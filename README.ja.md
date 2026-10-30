@@ -79,7 +79,7 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
    xattr -dr com.apple.quarantine /Applications/TrackMate.app
    ```
 3. **Windows：** 解凍して `TrackMate.exe` を起動します。SmartScreen の警告が出たら「詳細情報」→「実行」を選びます。
-4. **初回起動：** アプリがバックグラウンドでモデルをダウンロードし、ヘッダーに進捗を表示します。ダウンロード完了前でも、既知のトラック名とスペル補正による認識は使えます。モデルと設定の保存先：
+4. **初回起動：** 3 つのモデル（AI によるトラック名の読み取り 1.13 GB、音による認識 222 MB、テンポ検出 82 MB）をチェックボックス付きで一覧するウィンドウが開きます。すべてダウンロードすることも、必要なものだけ選ぶこともできます。各行に個別の進捗が表示され、完了すると緑の **Ready** が付きます。失敗した場合はエラーと再試行ボタンが表示されます。モデルがなくても、既知のトラック名とスペル補正による認識は使えます。このウィンドウはヘッダーのモデル状態をクリックすればいつでも開け、**Clear models** でダウンロード済みのモデルファイルを削除できます（確認のうえ、空く容量を表示します）。モデルと設定の保存先：
    - macOS：`~/Library/Application Support/TrackMate`
    - Windows：`%APPDATA%\TrackMate`
 
@@ -125,7 +125,7 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 | ドロップしたものに音声がない | No audio files found | — |
 | エンジンが停止した | The TrackMate engine stopped | *Restart engine*（リストはそのまま） |
 | ステムに拍がない（無音、リズムのステムがない） | No steady beat found | ドラムやリズムのステムを追加するか、Pro Tools でテンポを設定 |
-| テンポのモデルをダウンロード中 | The tempo model is still downloading | ヘッダーのダウンロードが終わるまで待つ |
+| テンポのモデルが未ダウンロード | The tempo model is not ready | ヘッダーのモデル状態をクリックしてダウンロードするか、進捗を確認する |
 
 ## アルゴリズム
 <sub>[English](README.md#how-it-works)</sub>

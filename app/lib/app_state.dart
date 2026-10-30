@@ -24,7 +24,11 @@ class AppState extends ChangeNotifier {
   String? engineError;
   Catalog? catalog;
   Map<String, bool> layers = {};
+  /// GET /models: {name: {state, progress, size, bytes_done, on_disk, current_file, error}}.
   Map<String, dynamic> models = {};
+  String modelsDir = '';
+  /// Set when the engine comes up with a model missing: the screen opens the models dialog once.
+  bool modelsDialogRequested = false;
   Map<String, dynamic>? session; // /session result, null until read
   String? sessionError; // short text for the session bar
   EngineException? sessionException; // why the last /session failed
@@ -59,6 +63,11 @@ class AppState extends ChangeNotifier {
       catalog = await engine.catalog();
       await refreshModels();
       engineState = EngineState.ready;
+      if (!modelsReady) modelsDialogRequested = true;
+      // A download the user started before (a partial file is on disk) goes on by itself; the
+      // engine itself downloads nothing unasked.
+      final partial = [for (final e in models.entries) if (modelState(e.key) == 'missing' && modelOnDisk(e.key) > 0) e.key];
+      if (partial.isNotEmpty) unawaited(downloadModels(partial).catchError((_) {}));
       unawaited(refreshSession());
     } catch (e) {
       engineState = EngineState.error;
@@ -80,15 +89,49 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> refreshModels() async {
-    final m = await api!.models();
+    _applyModels(await api!.models());
+    notifyListeners();
+  }
+
+  /// Takes a /models answer; polls again every 2 s while a download runs.
+  void _applyModels(Map<String, dynamic> m) {
     layers = {for (final e in (m['layers'] as Map).entries) e.key as String: e.value as bool};
     models = m['models'] as Map<String, dynamic>;
+    modelsDir = (m['dir'] as String?) ?? modelsDir;
     if (tempoModelReady && tempoError?.code == 'tempo_model_not_ready' && !busy) unawaited(detectTempo(again: true));
-    final downloading = models.values.any((s) => (s as Map)['state'] == 'downloading');
     _modelTimer?.cancel();
-    if (downloading) {
-      _modelTimer = Timer(const Duration(seconds: 2), () => refreshModels().then((_) => notifyListeners()));
+    if (modelsDownloading) {
+      _modelTimer = Timer(const Duration(seconds: 2), () => refreshModels().catchError((_) {}));
     }
+  }
+
+  Map<String, dynamic> _model(String name) => (models[name] as Map?)?.cast<String, dynamic>() ?? const {};
+  String modelState(String name) => (_model(name)['state'] as String?) ?? 'missing';
+  int modelOnDisk(String name) => ((_model(name)['on_disk'] as num?) ?? 0).toInt();
+  int modelSize(String name) => ((_model(name)['size'] as num?) ?? 0).toInt();
+
+  /// Every model is downloaded and verified.
+  bool get modelsReady => models.isNotEmpty && models.keys.every((n) => modelState(n) == 'ready');
+  bool get modelsDownloading => models.keys.any((n) => modelState(n) == 'downloading');
+  /// Models that can be downloaded now: missing or failed.
+  List<String> get modelsPending => [for (final n in models.keys) if (modelState(n) == 'missing' || modelState(n) == 'error') n];
+  /// Bytes the models take on disk, finished and partial files together.
+  int get modelsOnDisk => models.keys.fold(0, (sum, n) => sum + modelOnDisk(n));
+
+  /// Starts the download of [names] (missing or failed ones; ready ones are skipped by the engine).
+  Future<void> downloadModels(List<String> names) async {
+    if (names.isEmpty) return;
+    _applyModels(await api!.downloadModels(names));
+    notifyListeners();
+  }
+
+  /// Deletes every model file; returns the bytes freed. Throws the engine's 409
+  /// (`models_downloading`) while a download runs.
+  Future<int> clearModels() async {
+    final res = await api!.clearModels();
+    _applyModels(res);
+    notifyListeners();
+    return ((res['freed_bytes'] as num?) ?? 0).toInt();
   }
 
   Future<void> refreshSession() async {

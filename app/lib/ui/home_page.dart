@@ -8,6 +8,7 @@ import '../app_state.dart';
 import '../native_bridge.dart';
 import 'alert_dialog.dart';
 import 'apply_dialogs.dart';
+import 'models_dialog.dart';
 import 'tempo_dialog.dart';
 import 'theme.dart';
 import 'track_table.dart';
@@ -36,14 +37,36 @@ class _HomePageState extends State<HomePage> {
     if (act && alert.action == AlertAction.restartEngine) await widget.state.restartEngine?.call();
   }
 
+  bool _modelsOpen = false;
+
+  /// Opens the models window once when the engine came up with a model missing.
+  void _maybeShowModels() {
+    if (!widget.state.modelsDialogRequested || _modelsOpen || !mounted) return;
+    widget.state.modelsDialogRequested = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openModels());
+  }
+
+  Future<void> _openModels() async {
+    if (_modelsOpen || !mounted) return;
+    _modelsOpen = true;
+    try {
+      await showModelsDialog(context, widget.state);
+    } finally {
+      _modelsOpen = false;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _alerts; // subscribe now
+    widget.state.addListener(_maybeShowModels);
+    _maybeShowModels(); // the engine may be up already
   }
 
   @override
   void dispose() {
+    widget.state.removeListener(_maybeShowModels);
     _alerts.cancel();
     super.dispose();
   }
@@ -67,7 +90,7 @@ class _HomePageState extends State<HomePage> {
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(children: [
-                _Header(state: state),
+                _Header(state: state, onModels: _openModels),
                 const Divider(),
                 _SessionBar(state: state),
                 Expanded(child: _Body(state: state, bridge: bridge)),
@@ -97,8 +120,9 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.state});
+  const _Header({required this.state, required this.onModels});
   final AppState state;
+  final VoidCallback onModels;
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +145,7 @@ class _Header extends StatelessWidget {
               Text('$review to review', style: Type.label.copyWith(color: reviewText)),
               const SizedBox(width: 16),
             ],
-            Flexible(child: _EngineStatus(state: state)),
+            Flexible(child: _EngineStatus(state: state, onModels: onModels)),
             const SizedBox(width: 16),
             TempoIndicator(state: state),
           ]),
@@ -131,9 +155,12 @@ class _Header extends StatelessWidget {
   }
 }
 
+/// Engine and model status. Once the engine runs it is a button that opens the models window,
+/// where each model shows its own state and progress.
 class _EngineStatus extends StatelessWidget {
-  const _EngineStatus({required this.state});
+  const _EngineStatus({required this.state, required this.onModels});
   final AppState state;
+  final VoidCallback onModels;
 
   @override
   Widget build(BuildContext context) {
@@ -141,32 +168,48 @@ class _EngineStatus extends StatelessWidget {
       EngineState.starting => (LucideIcons.loader, Palette.muted, 'Starting engine', ''),
       EngineState.error => (LucideIcons.circleAlert, Palette.error, 'Engine error', state.engineError ?? ''),
       EngineState.ready => () {
-          final downloading = state.models.values.where((m) => (m as Map)['state'] == 'downloading').toList();
+          final downloading = [for (final n in state.models.keys) if (state.modelState(n) == 'downloading') n];
           if (downloading.isNotEmpty) {
-            final p = downloading.map((m) => (m as Map)['progress'] as num).reduce((a, b) => a + b) / downloading.length;
-            return (LucideIcons.download, Palette.muted, 'Downloading models ${(p * 100).toStringAsFixed(0)}%', '');
+            final p = downloading.map((n) => (state.models[n] as Map)['progress'] as num).reduce((a, b) => a + b) /
+                downloading.length;
+            return (
+              LucideIcons.download,
+              Palette.muted,
+              'Downloading ${downloading.length} model${downloading.length == 1 ? '' : 's'} ${(p * 100).toStringAsFixed(0)}%',
+              'Click to see each model\'s progress',
+            );
           }
-          // Plain words instead of the engine's layer letters A-D.
-          final ai = state.layers['C'] ?? false;
-          final sound = state.layers['D'] ?? false;
-          final text = ai && sound
-              ? 'Recognition ready'
-              : !ai && !sound
-                  ? 'Recognising by name list only'
-                  : !sound
-                      ? 'Sound recognition not ready'
-                      : 'AI name reading not ready';
-          return (ai && sound ? LucideIcons.sparkles : LucideIcons.circleAlert, ai && sound ? Palette.muted : Palette.review,
-              text, recognitionHelp);
+          final failed = [for (final n in state.models.keys) if (state.modelState(n) == 'error') n];
+          if (failed.isNotEmpty) {
+            return (LucideIcons.circleAlert, Palette.error, 'Model download failed', 'Click to see the error and try again');
+          }
+          final missing = state.modelsPending;
+          if (missing.isNotEmpty) {
+            return (
+              LucideIcons.circleAlert,
+              Palette.review,
+              '${missing.length} model${missing.length == 1 ? '' : 's'} not downloaded',
+              'Recognising by name list only. Click to download the models.',
+            );
+          }
+          return (LucideIcons.sparkles, Palette.muted, 'Recognition ready', '$recognitionHelp\n\nClick to see the models.');
         }(),
     };
+    final row = Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(icon, size: 15, color: color),
+      const SizedBox(width: 6),
+      Flexible(child: Text(text, style: Type.label.copyWith(color: color), overflow: TextOverflow.ellipsis)),
+    ]);
     return Tooltip(
       message: tip,
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 15, color: color),
-        const SizedBox(width: 6),
-        Flexible(child: Text(text, style: Type.label.copyWith(color: color), overflow: TextOverflow.ellipsis)),
-      ]),
+      child: state.engineState == EngineState.ready
+          ? InkWell(
+              key: const ValueKey('models-status'),
+              borderRadius: BorderRadius.circular(6),
+              onTap: onModels,
+              child: Padding(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4), child: row),
+            )
+          : row,
     );
   }
 }

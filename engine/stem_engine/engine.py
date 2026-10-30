@@ -51,6 +51,13 @@ class Engine:
         with self._lock:
             return Analyzer(self.kb, self._load_index(), self._load_audio(), self.config.thresholds)
 
+    def clear_models(self) -> int:
+        """Unloads the C, D and T layers and deletes the model files; returns the bytes freed.
+        Raises models.DownloadInProgress while a download runs."""
+        with self._lock:
+            self._index, self._audio, self._tempo = None, None, None
+            return self.models.clear()
+
     def layers(self) -> dict:
         return {"A": True, "B": True, "C": self._index is not None or self.models.is_ready("qwen3_embedding"),
                 "D": self._audio is not None or self.models.is_ready("peav_audio"),

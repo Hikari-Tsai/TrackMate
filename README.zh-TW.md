@@ -79,7 +79,7 @@ Pro Tools 混音前，總要花時間整理分軌：檔名充滿錯字、縮寫�
    xattr -dr com.apple.quarantine /Applications/TrackMate.app
    ```
 3. **Windows：** 解壓縮後執行 `TrackMate.exe`。如果出現 SmartScreen 警告，按「其他資訊」→「仍要執行」。
-4. **第一次啟動：** App 會在背景下載模型，標題列會顯示下載進度。下載完成前，「已知軌名」和「拼字校正」兩種辨識方式就已經可以使用。模型和設定存放在：
+4. **第一次啟動：** 會出現一個視窗列出三個模型（AI 讀軌名 1.13 GB、聽聲辨識 222 MB、速度偵測 82 MB），每個都有勾選框：可以全部下載，也可以只下載需要的。每一列各自顯示下載進度，完成後出現綠色的 **Ready**；下載失敗會顯示錯誤和重試按鈕。沒有模型時，「已知軌名」和「拼字校正」兩種辨識方式照樣可用。之後點標題列的模型狀態可以再打開這個視窗，裡面的 **Clear models** 會刪除已下載的模型檔（會先確認，並說明可以釋放多少空間）。模型和設定存放在：
    - macOS：`~/Library/Application Support/TrackMate`
    - Windows：`%APPDATA%\TrackMate`
 
@@ -125,7 +125,7 @@ Pro Tools 混音前，總要花時間整理分軌：檔名充滿錯字、縮寫�
 | 拖進來的東西沒有音檔 | No audio files found | — |
 | 引擎停止 | The TrackMate engine stopped | *Restart engine*（清單會保留） |
 | 分軌裡聽不到拍子（靜音、沒有節奏分軌） | No steady beat found | 加入鼓組或節奏分軌，或在 Pro Tools 自己設定速度 |
-| 速度模型還在下載 | The tempo model is still downloading | 等標題列的下載完成 |
+| 速度模型還沒下載 | The tempo model is not ready | 點標題列的模型狀態下載，或查看進度 |
 
 ## 演算法邏輯
 <sub>[English](README.md#how-it-works)</sub>

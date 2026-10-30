@@ -11,7 +11,7 @@ import 'engine_api.dart';
 ///                  (TrackMate.app/Contents/Resources/engine/arm64 or engine/x86_64, or
 ///                  engine\ next to TrackMate.exe),
 ///                  else `stem-engine` on PATH
-///   ENGINE_ARGS    extra arguments, space separated (e.g. --no-download)
+///   ENGINE_ARGS    extra arguments, space separated (e.g. --port 8765)
 ///   ENGINE_HOME    STEM_ENGINE_HOME for the started engine
 class EngineConfig {
   const EngineConfig({this.attach = '', this.command = '', this.args = '', this.home = ''});
@@ -81,7 +81,9 @@ class EngineLauncher {
     final infoFile = File('$home${Platform.pathSeparator}engine.json');
     final started = DateTime.now();
     final env = {if (cfg.home.isNotEmpty) 'STEM_ENGINE_HOME': cfg.home};
-    final args = cfg.args.split(' ').where((a) => a.isNotEmpty).toList();
+    // The app decides which models are downloaded (the models dialog), so the engine must not
+    // start every download by itself.
+    final args = {'--no-download', ...cfg.args.split(' ').where((a) => a.isNotEmpty)}.toList();
     final process = await Process.start(command, args, environment: env);
     // The engine announces {"port", "token", "pid"} on its first stdout line and in
     // engine.json; a packaged Windows engine has no stdout, so both are watched. Both pipes

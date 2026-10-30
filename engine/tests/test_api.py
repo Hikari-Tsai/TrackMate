@@ -9,8 +9,12 @@ AUTH = {"Authorization": f"Bearer {TOKEN}"}
 
 
 @pytest.fixture
-def client(config):
-    engine = Engine(config)  # empty home: no models, so only layers A and B
+def engine(config):
+    return Engine(config)  # empty home: no models, so only layers A and B
+
+
+@pytest.fixture
+def client(engine):
     return TestClient(create_app(engine, TOKEN), base_url="http://127.0.0.1")
 
 
@@ -24,6 +28,41 @@ def test_token_required(client):
     body = client.get("/models", headers=AUTH).json()
     assert body["layers"] == {"A": True, "B": True, "C": False, "D": False, "T": False}
     assert set(body["models"]) == {"qwen3_embedding", "peav_audio", "beat_this"}
+
+
+def test_models_report_size_and_disk_use(client):
+    body = client.get("/models", headers=AUTH).json()
+    m = body["models"]["beat_this"]
+    assert m["state"] == "missing" and m["size"] > 80_000_000 and m["on_disk"] == 0
+    assert m["repo"].startswith("aaatmy/") and body["dir"].endswith("models")
+    assert sum(v["size"] for v in body["models"].values()) > 1_400_000_000
+
+
+def test_clear_models_deletes_files_and_resets_state(client, config):
+    # Nothing on disk yet: allowed, frees nothing.
+    assert client.delete("/models", headers=AUTH).json()["freed_bytes"] == 0
+    # A finished file and a partial one, as left by an interrupted download.
+    d = config.models_dir / "beat_this"
+    d.mkdir(parents=True)
+    (d / "frontend.json").write_bytes(b"x" * 1000)
+    (d / "beat-this-final0.onnx.part").write_bytes(b"y" * 5000)
+    assert client.get("/models", headers=AUTH).json()["models"]["beat_this"]["on_disk"] == 6000
+    res = client.delete("/models", headers=AUTH)
+    assert res.status_code == 200
+    body = res.json()
+    assert body["freed_bytes"] == 6000 and not d.exists()
+    assert body["models"]["beat_this"]["state"] == "missing" and body["models"]["beat_this"]["on_disk"] == 0
+    assert body["layers"]["T"] is False
+
+
+def test_clear_models_refused_while_downloading(client, engine):
+    # Marked as downloading, as start() does before its thread runs.
+    engine.models.status["peav_audio"].state = "downloading"
+    res = client.delete("/models", headers=AUTH)
+    assert res.status_code == 409
+    assert res.json()["detail"]["code"] == "models_downloading"
+    engine.models.status["peav_audio"].state = "missing"
+    assert client.delete("/models", headers=AUTH).status_code == 200
 
 
 def test_foreign_host_refused(config):

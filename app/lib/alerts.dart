@@ -47,8 +47,9 @@ class AppAlert {
             'These files were moved, renamed or deleted. Remove them from the list or add them again.',
             details: error.files, code: 'missing_files');
       case 'tempo_model_not_ready':
-        return const AppAlert('The tempo model is still downloading',
-            'BPM detection starts working when the download in the header is finished.',
+        return const AppAlert('The tempo model is not ready',
+            'BPM detection starts working once the tempo model is downloaded. Click the model status in the '
+            'header to download it or to see the progress.',
             code: 'tempo_model_not_ready');
       case 'no_beats':
         return AppAlert('No steady beat found',

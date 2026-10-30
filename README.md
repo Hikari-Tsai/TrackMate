@@ -38,7 +38,7 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
 - **Stereo analysis:** detects fake stereo, one-sided stereo, inverted polarity and delays, and converts to mono where needed.
 - **BPM detection:** the BPM is detected on its own and shown in the top right corner. Before every import you choose a constant tempo (the average, rounded), a tempo map that follows every bar, or the session's own tempo; TrackMate imports it with the tracks and checks that the session tempo changed. The tempo is also saved as a MIDI file.
 - **Pro Tools integration:** works through PTSL; names are kept unique, and after applying, every track's name, folder and colour are verified.
-- **Runs entirely on your computer:** the models are downloaded on first start; after that no network is needed.
+- **Runs entirely on your computer:** the models are downloaded once, on first start (you choose which); after that no network is needed.
 
 ---
 
@@ -76,7 +76,7 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
    xattr -dr com.apple.quarantine /Applications/TrackMate.app
    ```
 3. **Windows:** unzip and run `TrackMate.exe`. If SmartScreen warns you, choose **More info** → **Run anyway**.
-4. **First start:** the app downloads the models in the background and shows the progress in its header. Known track names and spelling correction work before the download finishes. Models and settings are stored in:
+4. **First start:** a window lists the three models (AI name reading 1.13 GB, sound recognition 222 MB, tempo detection 82 MB) with a checkbox each: download all of them or only the ones you want. Each row shows its own progress and a green **Ready** mark when done; a failed download shows the error with a retry. Known track names and spelling correction work without the models. The window opens again from the model status in the header, where **Clear models** deletes the downloaded files (it asks first and says how much space it frees). Models and settings are stored in:
    - macOS: `~/Library/Application Support/TrackMate`
    - Windows: `%APPDATA%\TrackMate`
 
@@ -121,7 +121,7 @@ When something goes wrong, the app explains what happened and what to do:
 | Nothing dropped is audio | No audio files found | — |
 | The engine stopped | The TrackMate engine stopped | *Restart engine* (your list is kept) |
 | No beat in the stems (silence, no rhythm stems) | No steady beat found | Add the drum or rhythm stems, or set the tempo in Pro Tools |
-| The tempo model is still downloading | The tempo model is still downloading | Wait until the download in the header finishes |
+| The tempo model is not downloaded yet | The tempo model is not ready | Click the model status in the header to download it or see its progress |
 
 ## How it works
 

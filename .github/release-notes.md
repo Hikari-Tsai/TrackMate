@@ -20,7 +20,7 @@ You also need Pro Tools 2023.3 or later (with the Pro Tools Scripting Library), 
 1. Unzip the whole folder and run `TrackMate.exe`. Keep the `engine` folder next to it.
 2. If SmartScreen warns you, choose **More info** → **Run anyway**.
 
-**First start:** TrackMate downloads its models in the background and shows the progress in its header. Known track names and spelling correction already work during the download.
+**First start:** a window lists the three models (AI name reading 1.13 GB, sound recognition 222 MB, tempo detection 82 MB) with a checkbox each: download all of them or only the ones you want. Every row shows its own progress and a green **Ready** mark when done; a failed one shows the error with a retry. Known track names and spelling correction work without the models. The window opens again from the model status in the header, where **Clear models** deletes the downloaded files (it asks first and says how much space it frees).
 
 ## Use
 1. Open Pro Tools and the session to import into.
@@ -34,7 +34,7 @@ Full guide: [README](https://github.com/{{REPO}}/blob/{{TAG}}/README.md#usage) �
 <details>
 <summary>繁體中文</summary>
 
-**下載：** macOS 14 以上（Apple Silicon 和 Intel 通用）請下載 `TrackMate-macos-universal.dmg`；Windows 10/11 x64 請下載 `TrackMate-windows-x64.zip`。需要 Pro Tools 2023.3 以上，第一次啟動會下載約 1.43 GB 的模型。
+**下載：** macOS 14 以上（Apple Silicon 和 Intel 通用）請下載 `TrackMate-macos-universal.dmg`；Windows 10/11 x64 請下載 `TrackMate-windows-x64.zip`。需要 Pro Tools 2023.3 以上；第一次啟動會出現模型視窗，可以全部下載（約 1.43 GB）或只勾選需要的模型，每個模型各自顯示進度，之後可從標題列的模型狀態再打開，也可以在那裡一鍵刪除模型。
 
 **安裝：**
 - **macOS：** 打開 `.dmg`，把 TrackMate 拖到右邊的 Applications（應用程式）資料夾。這個版本沒有經過 Apple 公證，第一次開啟請在 App 上按右鍵 →「打開」，或在終端機執行上面的 `xattr` 指令。
@@ -47,7 +47,7 @@ Full guide: [README](https://github.com/{{REPO}}/blob/{{TAG}}/README.md#usage) �
 <details>
 <summary>日本語</summary>
 
-**ダウンロード：** macOS 14 以降（Apple Silicon と Intel に対応）は `TrackMate-macos-universal.dmg`、Windows 10/11 x64 は `TrackMate-windows-x64.zip` をダウンロードしてください。Pro Tools 2023.3 以降が必要です。初回起動時に約 1.43 GB のモデルをダウンロードします。
+**ダウンロード：** macOS 14 以降（Apple Silicon と Intel に対応）は `TrackMate-macos-universal.dmg`、Windows 10/11 x64 は `TrackMate-windows-x64.zip` をダウンロードしてください。Pro Tools 2023.3 以降が必要です。初回起動時にモデルのウィンドウが開き、すべて（約 1.43 GB）または必要なモデルだけを選んでダウンロードできます。各モデルの進捗が個別に表示され、ヘッダーのモデル状態からいつでも開き直せます（モデルの一括削除もそこから行えます）。
 
 **インストール：**
 - **macOS：** `.dmg` を開き、TrackMate を右側の Applications（アプリケーション）フォルダにドラッグします。このビルドは Apple の公証を受けていないため、初回はアプリを右クリックして「開く」を選ぶか、上の `xattr` コマンドを実行してください。

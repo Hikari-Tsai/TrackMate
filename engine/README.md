@@ -8,7 +8,7 @@ serves an HTTP API to the macOS front end.
 
 ```bash
 uv sync --group dev
-uv run stem-engine            # prints {"port": ..., "token": ...}; starts model downloads
+uv run stem-engine            # prints {"port": ..., "token": ...}; starts model downloads (--no-download: the app does)
 uv run pytest                 # 60 tests; the full-engine test needs downloaded models
 ```
 
@@ -40,7 +40,8 @@ All endpoints except `/health` need `Authorization: Bearer <token>`.
 | Endpoint | |
 |---|---|
 | `GET /health` | liveness |
-| `GET /models`, `POST /models/download` | download state per model, which layers are active |
+| `GET /models`, `POST /models/download` | per model: `state`, `progress`, `size`, `bytes_done`, `on_disk`, `current_file`, `error`; which layers are active; `dir` |
+| `DELETE /models` | deletes every downloaded model file → `freed_bytes`; 409 `models_downloading` while a download runs |
 | `POST /analyze` | `{"files": [...], "audio": "none" \| "auto" \| "all", "stereo": true}` |
 | `POST /feedback` | `{"name": "Gtr Fuzz", "instrument": "electric_guitar"}` → user alias |
 | `GET /instruments`, `GET /categories` | lists for the dropdown search and the settings page |

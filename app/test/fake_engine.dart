@@ -34,15 +34,67 @@ class FakeEngine implements EngineApi {
 
   List<String> get files => _analysis.keys.toList();
 
-  @override
-  Future<Map<String, dynamic>> models() async => {
-        'layers': {'A': true, 'B': true, 'C': true, 'D': true, 'T': true},
-        'models': {
-          'qwen3_embedding': {'state': 'ready', 'progress': 1.0},
-          'peav_audio': {'state': 'ready', 'progress': 1.0},
-          'beat_this': {'state': 'ready', 'progress': 1.0},
+  // ---------------------------------------------------------------- models
+  /// Sizes from the engine's manifest. Every model starts ready; tests set other states.
+  static const modelSizes = {'qwen3_embedding': 1129773279, 'peav_audio': 221755759, 'beat_this': 82398145};
+  static const modelLayers = {'qwen3_embedding': 'C', 'peav_audio': 'D', 'beat_this': 'T'};
+  final modelStates = {for (final n in modelSizes.keys) n: _modelEntry(n, 'ready')};
+  final downloads = <List<String>>[]; // every POST /models/download body
+  int clearCalls = 0;
+  Object? clearError; // thrown by DELETE /models while set (e.g. the 409)
+  final modelsDir = '/Users/demo/Library/Application Support/TrackMate/models';
+
+  static Map<String, dynamic> _modelEntry(String name, String state,
+      {int bytesDone = -1, String? file, String? error, int onDisk = -1}) {
+    final size = modelSizes[name]!;
+    final done = bytesDone >= 0 ? bytesDone : (state == 'ready' ? size : 0);
+    return {
+      'name': name, 'layer': modelLayers[name], 'state': state, 'size': size, 'bytes_total': size,
+      'bytes_done': done, 'progress': (done / size * 10000).round() / 10000, 'current_file': file,
+      'error': error, 'on_disk': onDisk >= 0 ? onDisk : done, 'repo': 'aaatmy/$name',
+    };
+  }
+
+  /// Puts [name] in [state]: 'missing', 'downloading' (at [progress], 0–1), 'error' or 'ready'.
+  void setModel(String name, String state, {double progress = 0, String? file, String? error, int onDisk = -1}) {
+    modelStates[name] = _modelEntry(name, state,
+        bytesDone: (modelSizes[name]! * progress).round(), file: file, error: error, onDisk: onDisk);
+  }
+
+  Map<String, dynamic> _modelsAnswer() => {
+        'layers': {
+          'A': true, 'B': true,
+          for (final e in modelLayers.entries) e.value: modelStates[e.key]!['state'] == 'ready',
         },
+        'models': {for (final e in modelStates.entries) e.key: Map<String, dynamic>.of(e.value)},
+        'dir': modelsDir,
       };
+
+  @override
+  Future<Map<String, dynamic>> models() async => _modelsAnswer();
+
+  /// Like the engine: a missing or failed model starts downloading (here: stuck at 36 % of its
+  /// first file until a test calls [setModel]); ready ones are skipped.
+  @override
+  Future<Map<String, dynamic>> downloadModels(List<String> names) async {
+    downloads.add(List.of(names));
+    for (final n in names) {
+      if (modelStates[n]!['state'] != 'ready') setModel(n, 'downloading', progress: 0.36, file: 'onnx/model.onnx');
+    }
+    return _modelsAnswer();
+  }
+
+  @override
+  Future<Map<String, dynamic>> clearModels() async {
+    clearCalls++;
+    if (clearError != null) throw clearError!;
+    var freed = 0;
+    for (final n in modelStates.keys.toList()) {
+      freed += modelStates[n]!['on_disk'] as int;
+      setModel(n, 'missing');
+    }
+    return {'freed_bytes': freed, ..._modelsAnswer()};
+  }
 
   @override
   Future<List<Map<String, dynamic>>> analyze(List<String> files, {String audio = 'auto'}) async {

@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 
 from . import __version__
 from .engine import Engine
+from .models import DownloadInProgress
 from . import apply as apply_mod
 from . import tempo as tempo_mod
 from .protools import NoSession, ProToolsLost, ProToolsNotResponding, ProToolsUnavailable, session_snapshot
@@ -111,7 +112,16 @@ def create_app(engine: Engine, token: str) -> FastAPI:
 
     @app.get("/models", dependencies=[Depends(auth)])
     def models() -> dict:
-        return {"models": engine.models.summary(), "layers": engine.layers()}
+        return {"models": engine.models.summary(), "layers": engine.layers(), "dir": str(engine.models.dir)}
+
+    @app.delete("/models", dependencies=[Depends(auth)])
+    def clear_models() -> dict:
+        """Deletes every downloaded model file. 409 while a download runs."""
+        try:
+            freed = engine.clear_models()
+        except DownloadInProgress as exc:
+            raise fail(409, "models_downloading", f"Cannot delete the models now: {exc}.")
+        return {"freed_bytes": freed, "models": engine.models.summary(), "layers": engine.layers()}
 
     @app.post("/models/download", dependencies=[Depends(auth)])
     def download(req: DownloadRequest) -> dict:

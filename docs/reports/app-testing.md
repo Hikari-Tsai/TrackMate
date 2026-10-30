@@ -5,12 +5,12 @@ App 原始碼在 [`app/`](../../app)：介面用 Flutter，拖放和選檔視窗
 ## 自動化測試
 | 測試 | 數量 | 內容 |
 |---|---|---|
-| [`test/app_test.dart`](../../app/test/app_test.dart) | 21 | 兩階段辨識（先文字、後音訊）、Top-5 改選並送回 `/feedback`、手動輸入名稱、搜尋全部樂器、保留原名、大類與顏色連動、百分比顯示、Pro Tools 後綴的保留開關、重複名稱流水號、預覽與套用送出的內容、速度（自動偵測、匯入前選擇、和分軌一起匯入、取消後只重新匯入速度、保留原速度、找不到拍子）、5 張截圖 |
+| [`test/app_test.dart`](../../app/test/app_test.dart) | 29 | 兩階段辨識（先文字、後音訊）、Top-5 改選並送回 `/feedback`、手動輸入名稱、搜尋全部樂器、保留原名、大類與顏色連動、百分比顯示、Pro Tools 後綴的保留開關、重複名稱流水號、預覽與套用送出的內容、速度（自動偵測、匯入前選擇、和分軌一起匯入、取消後只重新匯入速度、保留原速度、找不到拍子）、模型視窗（缺模型時第一次啟動就打開、每列的 Ready 標記與大小、勾選一個下載、全部下載、每個模型各自的進度條、下載失敗的錯誤與重試、上次中斷的下載自動續傳、從標題列打開、Clear models 先確認並顯示釋放空間、下載中清除被引擎拒絕 409）、6 張截圖 |
 | [`test/errors_test.dart`](../../app/test/errors_test.dart) | 10 | Pro Tools 沒開、沒有 session、沒有回應、套用中斷、檔案遺失、沒有音檔、引擎停止、引擎無法啟動，以及「Try again」的連續流程 |
 | [`integration_test/real_flow_test.dart`](../../app/integration_test/real_flow_test.dart) | 1 | 真實的 macOS App、真實的引擎子程序、真實的 Pro Tools |
 | [`integration_test/real_tempo_test.dart`](../../app/integration_test/real_tempo_test.dart) | 1 | 同上，自動偵測 85 BPM 分軌的速度，再用 Preview & apply 和分軌一起匯入固定速度與速度圖，兩次都讀回 Pro Tools 確認（[速度偵測報告](tempo-detection.md)） |
 
-**假引擎的資料：** widget 測試使用假的引擎（[`test/fake_engine.dart`](../../app/test/fake_engine.dart)），資料來自真實引擎的輸出（[`test/fixtures/`](../../app/test/fixtures)），可以模擬各種故障。
+**假引擎的資料：** widget 測試使用假的引擎（[`test/fake_engine.dart`](../../app/test/fake_engine.dart)），資料來自真實引擎的輸出（[`test/fixtures/`](../../app/test/fixtures)），可以模擬各種故障；模型的狀態（缺少、下載中、失敗、就緒）和 `/models/download`、`DELETE /models` 也由它扮演。
 
 **截圖測試：** 截圖比對（`golden` 標籤）會受到機器字型影響，所以 CI 不跑，只在本機執行。
 

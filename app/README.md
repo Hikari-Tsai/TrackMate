@@ -19,14 +19,13 @@ The Flutter SDK used during development lives in `../build/flutter-sdk` (stable 
 F=../build/flutter-sdk/bin/flutter
 $F run -d macos \
   --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engine \
-  --dart-define=ENGINE_ARGS=--no-download \
   --dart-define=ENGINE_HOME=$PWD/../build/engine_home
 ```
 
 | dart-define | Meaning |
 |---|---|
 | `ENGINE_CMD` | engine executable to start (default `stem-engine` on PATH) |
-| `ENGINE_ARGS` | extra engine arguments, space separated |
+| `ENGINE_ARGS` | extra engine arguments, space separated (`--no-download` is always passed: the models window starts the downloads) |
 | `ENGINE_HOME` | `STEM_ENGINE_HOME` for the engine (models, aliases, caches) |
 | `ENGINE_ATTACH` | path to `engine.json` of an engine already running; nothing is started |
 
@@ -69,7 +68,7 @@ $F test --update-goldens    # refresh test/goldens/track_list.png (screenshot)
 
 ```bash
 $F test integration_test/real_flow_test.dart -d macos \
-  --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engine --dart-define=ENGINE_ARGS=--no-download \
+  --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engine \
   --dart-define=ENGINE_HOME=<home with models> --dart-define=STEMS_DIR=$PWD/../build/m3_stems
 ```
 
@@ -80,6 +79,6 @@ holds rhythm stems with a known constant tempo, given as `TEMPO_BPM`; press **OK
 
 ```bash
 $F test integration_test/real_tempo_test.dart -d macos \
-  --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engine --dart-define=ENGINE_ARGS=--no-download \
+  --dart-define=ENGINE_CMD=$PWD/../engine/.venv/bin/stem-engine \
   --dart-define=ENGINE_HOME=<home with models> --dart-define=STEMS_DIR=<stems> --dart-define=TEMPO_BPM=85
 ```

@@ -413,4 +413,185 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/empty_state.png'));
   }, tags: ['golden'], skip: !File('/System/Library/Fonts/Supplemental/Arial Unicode.ttf').existsSync());
+
+  // ------------------------------------------------------------- models window
+  Future<(AppState, FakeEngine)> pumpHome(WidgetTester tester, FakeEngine fake) async {
+    tester.view.physicalSize = const Size(1320, 820);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final state = AppState();
+    await tester.runAsync(() => state.attach(fake));
+    await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false, theme: buildTheme(), home: HomePage(state: state)));
+    await tester.pumpAndSettle();
+    return (state, fake);
+  }
+
+  testWidgets('first start: the models window opens when a model is missing, with a ready mark per model', (tester) async {
+    final fake = FakeEngine()..setModel('beat_this', 'missing')..setModel('peav_audio', 'missing');
+    final (state, _) = await pumpHome(tester, fake);
+    expect(find.byKey(const ValueKey('models-dialog')), findsOneWidget);
+    expect(find.byKey(const ValueKey('models-ready-qwen3_embedding')), findsOneWidget);
+    expect(find.text('Ready'), findsOneWidget);
+    expect(find.byKey(const ValueKey('models-missing-peav_audio')), findsOneWidget);
+    expect(find.byKey(const ValueKey('models-missing-beat_this')), findsOneWidget);
+    // Each row names its layer and size; the text gives the total.
+    expect(find.text('AI name reading'), findsOneWidget);
+    expect(find.text('1.13 GB'), findsOneWidget);
+    expect(find.text('222 MB'), findsOneWidget);
+    expect(find.text('82 MB'), findsOneWidget);
+    expect(find.textContaining('1.43 GB in all'), findsOneWidget);
+    // A ready model cannot be ticked; "Download selected" waits for a tick.
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('models-pick-qwen3_embedding'))).onChanged, isNull);
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('models-pick-beat_this'))).onChanged, isNotNull);
+    expect(tester.widget<OutlinedButton>(find.byKey(const ValueKey('models-download-selected'))).enabled, isFalse);
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('models-download-all'))).enabled, isTrue);
+    expect(find.text('2 models not downloaded'), findsOneWidget); // the header
+    expect(fake.downloads, isEmpty); // nothing starts without the user
+    // "Later" closes it, and it does not come back on its own.
+    await tester.tap(find.byKey(const ValueKey('models-close')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('models-dialog')), findsNothing);
+    state.setDragHover(true);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('models-dialog')), findsNothing);
+    expect(state.layers['T'], isFalse);
+  });
+
+  testWidgets('tick one model and download it: its own progress bar, then the ready mark', (tester) async {
+    final fake = FakeEngine()..setModel('beat_this', 'missing')..setModel('peav_audio', 'missing');
+    final (state, _) = await pumpHome(tester, fake);
+    await tester.tap(find.byKey(const ValueKey('models-pick-beat_this')));
+    await tester.pumpAndSettle();
+    expect(find.text('Download selected (1)'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('models-download-selected')));
+    await tester.pumpAndSettle();
+    expect(fake.downloads, [['beat_this']]);
+    final bar = tester.widget<LinearProgressIndicator>(find.byKey(const ValueKey('models-progress-beat_this')));
+    expect(bar.value, closeTo(0.36, 0.001));
+    expect(find.text('30 MB of 82 MB · 36% · onnx/model.onnx'), findsOneWidget);
+    expect(find.byKey(const ValueKey('models-missing-peav_audio')), findsOneWidget); // the other one is untouched
+    expect(find.text('Downloading 1 model 36%'), findsOneWidget); // the header
+    expect(tester.widget<TextButton>(find.byKey(const ValueKey('models-clear'))).enabled, isFalse); // not while downloading
+    expect(tester.widget<Checkbox>(find.byKey(const ValueKey('models-pick-beat_this'))).onChanged, isNull);
+    // The download finishes; the 2 s poll shows it.
+    fake.setModel('beat_this', 'ready');
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('models-ready-beat_this')), findsOneWidget);
+    expect(find.byKey(const ValueKey('models-progress-beat_this')), findsNothing);
+    expect(state.tempoModelReady, isTrue);
+    expect(find.text('1 model not downloaded'), findsOneWidget);
+  });
+
+  testWidgets('Download all starts every missing model and ends with every row ready', (tester) async {
+    final fake = FakeEngine()..setModel('beat_this', 'missing')..setModel('peav_audio', 'missing');
+    await pumpHome(tester, fake);
+    await tester.tap(find.byKey(const ValueKey('models-download-all')));
+    await tester.pumpAndSettle();
+    expect(fake.downloads, [['peav_audio', 'beat_this']]);
+    expect(find.byType(LinearProgressIndicator), findsNWidgets(2));
+    expect(find.text('Downloading 2 models 36%'), findsOneWidget);
+    fake.setModel('peav_audio', 'ready');
+    fake.setModel('beat_this', 'ready');
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.text('Ready'), findsNWidgets(3));
+    expect(find.text('All models ready'), findsOneWidget);
+    expect(find.text('Done'), findsOneWidget);
+    expect(find.text('Recognition ready'), findsOneWidget);
+  });
+
+  testWidgets('a failed download shows its error in the row, with a retry', (tester) async {
+    final fake = FakeEngine()..setModel('beat_this', 'error', error: 'URLError: <urlopen error timed out>');
+    await pumpHome(tester, fake);
+    expect(find.byKey(const ValueKey('models-dialog')), findsOneWidget);
+    expect(find.text('URLError: <urlopen error timed out>'), findsOneWidget);
+    expect(find.text('Model download failed'), findsOneWidget); // the header
+    await tester.tap(find.byKey(const ValueKey('models-retry-beat_this')));
+    await tester.pumpAndSettle();
+    expect(fake.downloads, [['beat_this']]);
+    expect(find.byKey(const ValueKey('models-progress-beat_this')), findsOneWidget);
+    fake.setModel('beat_this', 'ready');
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('models-ready-beat_this')), findsOneWidget);
+  });
+
+  testWidgets('a download interrupted last time goes on by itself', (tester) async {
+    final fake = FakeEngine()..setModel('beat_this', 'missing', onDisk: 30000000);
+    final (state, _) = await pumpHome(tester, fake);
+    expect(fake.downloads, [['beat_this']]);
+    expect(find.byKey(const ValueKey('models-progress-beat_this')), findsOneWidget);
+    fake.setModel('beat_this', 'ready');
+    await tester.runAsync(state.refreshModels);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('models-ready-beat_this')), findsOneWidget);
+  });
+
+  testWidgets('Clear models: reachable from the header, asks first, says what it frees, empties the rows', (tester) async {
+    final (state, fake) = await pumpHome(tester, FakeEngine());
+    expect(find.byKey(const ValueKey('models-dialog')), findsNothing); // all ready: nothing to ask on start
+    await tester.tap(find.byKey(const ValueKey('models-status')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('models-dialog')), findsOneWidget);
+    expect(find.text('Ready'), findsNWidgets(3));
+    expect(find.text('On disk: 1.43 GB'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('models-clear')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('models-clear-confirm')), findsOneWidget);
+    expect(find.text('Delete 1.43 GB'), findsOneWidget);
+    expect(find.text(fake.modelsDir), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('models-clear-cancel')));
+    await tester.pumpAndSettle();
+    expect(fake.clearCalls, 0);
+    expect(find.text('Ready'), findsNWidgets(3));
+    await tester.tap(find.byKey(const ValueKey('models-clear')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('models-clear-delete')));
+    await tester.pumpAndSettle();
+    expect(fake.clearCalls, 1);
+    expect(find.byKey(const ValueKey('models-clear-confirm')), findsNothing);
+    expect(find.text('Ready'), findsNothing);
+    expect(find.text('Not downloaded'), findsNWidgets(3));
+    expect(find.textContaining('Freed 1.43 GB'), findsOneWidget);
+    expect(find.text('3 models not downloaded'), findsOneWidget);
+    expect(state.layers, {'A': true, 'B': true, 'C': false, 'D': false, 'T': false});
+    expect(tester.widget<TextButton>(find.byKey(const ValueKey('models-clear'))).enabled, isFalse);
+    // Back to the initial state: tick and download again.
+    await tester.tap(find.byKey(const ValueKey('models-pick-qwen3_embedding')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('models-download-selected')));
+    await tester.pumpAndSettle();
+    expect(fake.downloads, [['qwen3_embedding']]);
+    fake.setModel('qwen3_embedding', 'ready');
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('clearing while the engine still downloads is refused (409) and explained', (tester) async {
+    final (_, fake) = await pumpHome(tester, FakeEngine());
+    fake.clearError = EngineException(409, 'Cannot delete the models now: a model is still downloading.',
+        code: 'models_downloading');
+    await tester.tap(find.byKey(const ValueKey('models-status')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('models-clear')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('models-clear-delete')));
+    await tester.pumpAndSettle();
+    expect(fake.clearCalls, 1);
+    expect(find.byKey(const ValueKey('models-error')), findsOneWidget);
+    expect(find.textContaining('A download is still running'), findsOneWidget);
+    expect(find.text('Ready'), findsNWidgets(3)); // nothing was deleted
+  });
+
+  testWidgets('screenshot of the models window', (tester) async {
+    await loadRealFonts(tester);
+    final fake = FakeEngine()
+      ..setModel('peav_audio', 'downloading', progress: 0.36, file: 'onnx/model_q8.onnx')
+      ..setModel('beat_this', 'missing');
+    final (state, _) = await pumpHome(tester, fake);
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/models_dialog.png'));
+    fake.setModel('peav_audio', 'ready');
+    await tester.runAsync(state.refreshModels); // stops the 2 s poll
+  }, tags: ['golden'], skip: !File('/System/Library/Fonts/Supplemental/Arial Unicode.ttf').existsSync());
 }

@@ -20,7 +20,15 @@ class EngineException implements Exception {
 
 /// The engine's HTTP API (engine/README.md). Abstract so tests can use a fake.
 abstract class EngineApi {
+  /// {models: {name: {state, progress, size, bytes_done, on_disk, current_file, error}}, layers, dir}.
   Future<Map<String, dynamic>> models();
+
+  /// Starts downloading [names] in the engine; returns the same shape as [models].
+  Future<Map<String, dynamic>> downloadModels(List<String> names);
+
+  /// Deletes every downloaded model file: {freed_bytes, models, layers}. 409
+  /// (`models_downloading`) while a download runs.
+  Future<Map<String, dynamic>> clearModels();
   Future<List<Map<String, dynamic>>> analyze(List<String> files, {String audio = 'auto'});
   Future<void> feedback(String name, String instrument);
   Future<Catalog> catalog();
@@ -47,9 +55,11 @@ class HttpEngineApi implements EngineApi {
     final uri = base.resolve(path);
     final http.Response res;
     try {
-      res = method == 'GET'
-          ? await _client.get(uri, headers: _headers)
-          : await _client.post(uri, headers: _headers, body: jsonEncode(body ?? {}));
+      res = switch (method) {
+        'GET' => await _client.get(uri, headers: _headers),
+        'DELETE' => await _client.delete(uri, headers: _headers),
+        _ => await _client.post(uri, headers: _headers, body: jsonEncode(body ?? {})),
+      };
     } on SocketException catch (e) {
       throw EngineException(0, 'The engine does not answer ($e)', code: 'engine_unreachable');
     } on http.ClientException catch (e) {
@@ -82,6 +92,13 @@ class HttpEngineApi implements EngineApi {
 
   @override
   Future<Map<String, dynamic>> models() async => (await _send('GET', '/models')) as Map<String, dynamic>;
+
+  @override
+  Future<Map<String, dynamic>> downloadModels(List<String> names) async =>
+      (await _send('POST', '/models/download', {'models': names})) as Map<String, dynamic>;
+
+  @override
+  Future<Map<String, dynamic>> clearModels() async => (await _send('DELETE', '/models')) as Map<String, dynamic>;
 
   @override
   Future<List<Map<String, dynamic>>> analyze(List<String> files, {String audio = 'auto'}) async {

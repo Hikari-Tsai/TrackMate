@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import pathlib
+import shutil
 import threading
 import time
 import urllib.request
@@ -25,6 +26,10 @@ class ChecksumError(RuntimeError):
     pass
 
 
+class DownloadInProgress(RuntimeError):
+    """Raised by clear(): files being written are never deleted."""
+
+
 @dataclass
 class ModelStatus:
     name: str
@@ -39,6 +44,7 @@ class ModelStatus:
     def to_dict(self) -> dict:
         d = {k: v for k, v in self.__dict__.items() if k != "started"}
         d["progress"] = round(self.bytes_done / self.bytes_total, 4) if self.bytes_total else 0.0
+        d["size"] = self.bytes_total
         return d
 
 
@@ -97,7 +103,29 @@ class ModelManager:
         return all((self.model_dir(name) / p).exists() for p in self.specs[name].files)
 
     def summary(self) -> dict:
-        return {n: s.to_dict() for n, s in self.status.items()}
+        """Per model: state, progress, size, bytes on disk (finished files and .part files)."""
+        out = {}
+        for n, s in self.status.items():
+            d = s.to_dict()
+            d["repo"] = self.specs[n].repo
+            d["on_disk"] = self.on_disk(n)
+            out[n] = d
+        return out
+
+    def on_disk(self, name: str) -> int:
+        """Bytes the model takes now: verified files plus partial downloads."""
+        d = self.model_dir(name)
+        if not d.exists():
+            return 0
+        return sum(f.stat().st_size for f in d.rglob("*") if f.is_file())
+
+    def is_downloading(self) -> bool:
+        with self._lock:
+            return self._downloading_locked()
+
+    def _downloading_locked(self) -> bool:
+        return any(s.state == "downloading" for s in self.status.values()) or \
+            any(t.is_alive() for t in self._threads.values())
 
     # ------------------------------------------------------------- download
     def start(self, names: list[str] | None = None) -> None:
@@ -107,6 +135,8 @@ class ModelManager:
                 t = self._threads.get(name)
                 if self.is_ready(name) or (t and t.is_alive()):
                     continue
+                # Marked before the thread runs, so clear() can never slip in between.
+                self.status[name].state = "downloading"
                 t = threading.Thread(target=self.download, args=(name,), daemon=True, name=f"download-{name}")
                 self._threads[name] = t
                 t.start()
@@ -165,6 +195,24 @@ class ModelManager:
             raise ChecksumError(f"{path}: size {have} / sha256 {h.hexdigest()[:12]} does not match the manifest")
         part.replace(target)
         progress(meta["size"])
+
+    def clear(self) -> int:
+        """Deletes every model file (finished and partial) and returns the bytes freed.
+        Refused with DownloadInProgress while any download runs: a file being written is
+        never deleted."""
+        with self._lock:
+            if self._downloading_locked():
+                raise DownloadInProgress("a model is still downloading")
+            freed = 0
+            for name in self.specs:
+                freed += self.on_disk(name)
+                d = self.model_dir(name)
+                if d.exists():
+                    shutil.rmtree(d)
+                st = self.status[name]
+                st.state, st.bytes_done, st.current_file, st.error, st.started = "missing", 0, None, None, None
+            self._threads.clear()
+            return freed
 
     def verify(self, name: str) -> bool:
         """Full re-hash of every file (used by tests and on demand)."""

@@ -4,7 +4,7 @@ import threading
 
 import pytest
 
-from stem_engine.models import ModelManager, ModelSpec
+from stem_engine.models import DownloadInProgress, ModelManager, ModelSpec
 
 PAYLOAD = bytes(range(256)) * 4096  # 1 MiB
 
@@ -66,3 +66,34 @@ def test_checksum_mismatch_is_an_error(tmp_path, server):
     assert st.state == "error" and "sha256" in st.error
     assert not (tmp_path / "tiny" / "model.bin").exists()
     assert not (tmp_path / "tiny" / "model.bin.part").exists()
+
+
+def test_clear_frees_the_files_and_resets_the_state(tmp_path, server):
+    m = ModelManager(tmp_path, spec(), url_template=server)
+    m.download("tiny")
+    assert m.summary()["tiny"]["on_disk"] == len(PAYLOAD) == m.summary()["tiny"]["size"]
+    assert m.clear() == len(PAYLOAD)
+    assert not (tmp_path / "tiny").exists()
+    st = m.summary()["tiny"]
+    assert (st["state"], st["bytes_done"], st["progress"], st["on_disk"]) == ("missing", 0, 0.0, 0)
+    m.download("tiny")  # downloads again after a clear
+    assert m.is_ready("tiny")
+
+
+def test_clear_is_refused_while_downloading(tmp_path, server):
+    release = threading.Event()
+
+    class SlowManager(ModelManager):
+        def download(self, name):
+            release.wait(5)
+            super().download(name)
+
+    slow = SlowManager(tmp_path, spec(), url_template=server)
+    slow.start(["tiny"])
+    assert slow.status["tiny"].state == "downloading"  # marked before the thread does anything
+    with pytest.raises(DownloadInProgress):
+        slow.clear()
+    release.set()
+    slow.wait(10)
+    assert slow.is_ready("tiny")  # the refused clear deleted nothing
+    assert slow.clear() == len(PAYLOAD)
