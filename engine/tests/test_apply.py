@@ -32,6 +32,33 @@ def test_existing_folder_is_reused_and_taken_name_avoided():
     assert (plan[1].name, plan[1].exists) == ("KEYS 2", False)
 
 
+def test_a_taken_folder_name_makes_one_new_folder_for_the_category():
+    # "KEYS" is an audio track: both keys stems go into the single new folder "KEYS 2".
+    existing = [{"name": "KEYS", "type": "AudioTrack", "folder": None}]
+    plan = build_plan([req("Piano", "keys"), req("Rhodes", "keys")], CATEGORIES, existing)
+    assert [(f.name, f.exists, [t.final_name for t in f.tracks]) for f in plan] == [("KEYS 2", False, ["Piano", "Rhodes"])]
+
+
+def test_new_folder_is_created_even_when_one_of_that_name_exists():
+    existing = [{"name": "DRUMS", "type": "BasicFolder", "folder": None},
+                {"name": "DRUMS 2", "type": "AudioTrack", "folder": None}]
+    plan = build_plan([req("Kick", "drums", new_folder=True), req("Snare", "drums", new_folder=True),
+                       req("Bass DI", "bass")], CATEGORIES, existing)
+    assert [(f.name, f.exists) for f in plan] == [("DRUMS 3", False), ("BASS", False)]
+    assert [t.folder for t in plan[0].tracks] == ["DRUMS 3", "DRUMS 3"]
+    # Without the flag the existing folder is joined, as before.
+    plan = build_plan([req("Kick", "drums")], CATEGORIES, existing)
+    assert (plan[0].name, plan[0].exists) == ("DRUMS", True)
+
+
+def test_categories_can_join_one_existing_folder_of_another_name():
+    existing = [{"name": "RHYTHM", "type": "BasicFolder", "folder": None}]
+    plan = build_plan([req("Kick", "drums", folder="RHYTHM"), req("Bass DI", "bass", folder="RHYTHM"),
+                       req("Piano", "keys")], CATEGORIES, existing)
+    assert [(f.name, f.exists, len(f.tracks)) for f in plan] == [("RHYTHM", True, 2), ("KEYS", False, 1)]
+    assert plan[0].category == "drums"  # the first category to land there
+
+
 def test_overrides_and_other():
     plan = build_plan([req("Thing", "other"), req("Pad", "synths", color_index=40, folder="Pads", mono=True)],
                       CATEGORIES, [])

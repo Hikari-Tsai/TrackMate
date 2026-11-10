@@ -364,6 +364,54 @@ void main() {
     expect(state.tempoWillImport, isFalse);
   });
 
+  testWidgets('the preview lets a category join an existing folder or get a new one', (tester) async {
+    final (state, fake) = await pumpApp(tester);
+    final cat = state.tracks.first.category;
+    await next(tester, 'apply-button');
+    await next(tester, 'tempo-continue');
+    expect(find.text('Apply to Pro Tools: Demo Session'), findsOneWidget);
+    // Nothing chosen: one planned folder, created new.
+    expect(find.text('new folder'), findsOneWidget);
+    expect(find.text('existing folder'), findsNothing);
+    await next(tester, 'folder-choice-$cat');
+    expect(find.text('New folder'), findsOneWidget);
+    expect(find.text('Into MY BUS'), findsOneWidget);
+    await next(tester, 'folder-item-$cat-MY BUS');
+    // The dry run ran again with the choice: the category's tracks join MY BUS, the others are
+    // left as they were.
+    expect(fake.applied.length, 2);
+    var sent = fake.applied.last.$1;
+    expect(sent.where((t) => t['category'] == cat).every((t) => t['folder'] == 'MY BUS' && t['new_folder'] == false), isTrue);
+    expect(sent.where((t) => t['category'] != cat).every((t) => !t.containsKey('folder')), isTrue);
+    expect(find.text('MY BUS'), findsOneWidget);
+    expect(find.text('existing folder'), findsOneWidget);
+    expect(find.textContaining('puts tracks into 1 existing folder'), findsOneWidget);
+    // Back to a new folder: the engine names it after the category.
+    await next(tester, 'folder-choice-$cat');
+    await next(tester, 'folder-item-$cat-new');
+    sent = fake.applied.last.$1;
+    expect(sent.where((t) => t['category'] == cat).every((t) => t['folder'] == null && t['new_folder'] == true), isTrue);
+    expect(find.descendant(of: find.byType(AlertDialog), matching: find.text(cat.toUpperCase())), findsOneWidget);
+    expect(find.text('existing folder'), findsNothing);
+    await next(tester, 'confirm-apply');
+    expect(fake.applied.last.$2, isFalse); // the real apply carries the same choice
+    expect(fake.applied.last.$1.where((t) => t['category'] == cat).every((t) => t['new_folder'] == true), isTrue);
+    await next(tester, 'close-result');
+    state.clear(); // the choices go with the list
+    expect(state.folderChoices, isEmpty);
+  });
+
+  testWidgets('screenshot of the preview', (tester) async {
+    await loadRealFonts(tester);
+    final (state, _) = await pumpApp(tester);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+    state.setFolderChoice(state.tracks.first.category, 'MY BUS');
+    await next(tester, 'apply-button');
+    await next(tester, 'tempo-continue');
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/apply_preview.png'));
+  }, tags: ['golden'], skip: !File('/System/Library/Fonts/Supplemental/Arial Unicode.ttf').existsSync());
+
   testWidgets('screenshot of the tempo step', (tester) async {
     await loadRealFonts(tester);
     await pumpApp(tester);

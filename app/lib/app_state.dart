@@ -55,6 +55,10 @@ class AppState extends ChangeNotifier {
   /// Keep words nothing recognised and Pro Tools suffixes ("_04-01", "-TCEx_01") in names.
   /// Off by default: they are removed.
   bool keepUnknown = false;
+  /// Where a category's tracks go in Pro Tools, chosen in the preview: the name of a Basic
+  /// Folder the session already has, or null for a new folder. A category that is not in the
+  /// map takes its own folder, joining one of that name when the session has it.
+  final Map<String, String?> folderChoices = {};
   Timer? _modelTimer;
 
   Future<void> attach(EngineApi engine) async {
@@ -363,17 +367,37 @@ class AppState extends ChangeNotifier {
 
   void clear() {
     tracks.clear();
+    folderChoices.clear();
     message = null;
     _forgetTempo();
     notifyListeners();
   }
 
   // ------------------------------------------------------------------ apply
+  /// The Basic Folders of the open session, in session order.
+  List<String> get existingFolders => [
+        for (final t in (session?['tracks'] as List?) ?? const [])
+          if ((t as Map)['type'] == 'BasicFolder') t['name'] as String,
+      ];
+
+  /// [existing] is a folder of the session for the category's tracks to join; null asks for a
+  /// new folder, even when the session has one of the category's name.
+  void setFolderChoice(String category, String? existing) {
+    folderChoices[category] = existing;
+    notifyListeners();
+  }
+
   List<Map<String, dynamic>> _payload() {
     final names = finalNames;
     return [
       for (final t in tracks)
-        {'file': t.file, 'name': names[t], 'category': t.category, 'color_index': t.colorIndex, 'mono': t.mono},
+        {
+          'file': t.file, 'name': names[t], 'category': t.category, 'color_index': t.colorIndex, 'mono': t.mono,
+          if (folderChoices.containsKey(t.category)) ...{
+            'folder': folderChoices[t.category],
+            'new_folder': folderChoices[t.category] == null,
+          },
+        },
     ];
   }
 

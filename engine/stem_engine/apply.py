@@ -1,8 +1,8 @@
 """POST /apply (milestone M3): put the confirmed tracks into the open Pro Tools session.
 
-For each category, in the order of categories.json: create (or reuse) a Basic Folder, then
-import the files one by one, each after the previously placed track, so the folder keeps the
-order the front end sent. Every new track is found by its track ID and renamed right away to
+For each category, in the order of categories.json: create a Basic Folder (or join one the
+request names, or one of the same name already in the session), then import the files one by
+one, each after the previously placed track, so the folder keeps the order the front end sent. Every new track is found by its track ID and renamed right away to
 its final name; final names are made unique against the session beforehand, so a rename never
 hits a taken name. Colours are set per colour group, and at the end the track list is read
 again to verify name, folder and colour of every track (PTSL reports failed renames as
@@ -66,27 +66,35 @@ def unique(name: str, taken: set[str]) -> str:
 
 
 def build_plan(requests: list[dict], categories: dict, existing: list[dict]) -> list[PlannedFolder]:
-    """requests: [{file, name, category, color_index?, folder?, mono?}] in display order.
-    existing: current session tracks [{name, type, folder}]. Pure function (no Pro Tools)."""
+    """requests: [{file, name, category, color_index?, folder?, new_folder?, mono?}] in display
+    order. existing: current session tracks [{name, type, folder}]. Pure function (no Pro Tools).
+
+    Where a track goes: `folder` names a Basic Folder instead of the category's one; a folder
+    already in the session is joined, any other name is created. `new_folder` always creates one,
+    with a free name ('DRUMS 2') even when a folder of that name exists."""
     taken = {t["name"] for t in existing}
     existing_folders = {t["name"] for t in existing if t["type"] == "BasicFolder"}
     order = list(categories)
-    folders: dict[str, PlannedFolder] = {}
+    # One planned folder per (wanted name, new or not): every track that asks for the same thing
+    # lands in the same folder, whatever name it ended up with.
+    folders: dict[tuple[str, bool], PlannedFolder] = {}
     for req in sorted(requests, key=lambda r: order.index(r["category"]) if r["category"] in order else len(order)):
         cat = req["category"] if req["category"] in categories else "other"
         spec = categories[cat]
-        fname = clean_name(req.get("folder") or spec["folder"])
-        if fname not in folders:
-            exists = fname in existing_folders
+        wanted = clean_name(req.get("folder") or spec["folder"])
+        key = (wanted, bool(req.get("new_folder")))
+        folder = folders.get(key)
+        if folder is None:
+            exists = wanted in existing_folders and not key[1]
+            # A new folder gets a free name: not an existing folder's, nor any other track's.
+            fname = wanted if exists else unique(wanted, taken)
             if not exists:
-                # Name taken by a non-folder track: use a free variant for the new folder.
-                fname = fname if fname not in taken else unique(fname, taken)
                 taken.add(fname)
-            folders[fname] = PlannedFolder(fname, cat, spec["color_index"], exists)
+            folder = folders[key] = PlannedFolder(fname, cat, spec["color_index"], exists)
         final = unique(clean_name(req["name"]), taken)
         taken.add(final)
-        folders[fname].tracks.append(PlannedTrack(
-            file=req["file"], final_name=final, category=cat, folder=fname,
+        folder.tracks.append(PlannedTrack(
+            file=req["file"], final_name=final, category=cat, folder=folder.name,
             color_index=int(req.get("color_index") or spec["color_index"]),
             mono=bool(req.get("mono"))))
     return list(folders.values())
@@ -165,10 +173,12 @@ def _apply(requests: list[dict], categories: dict, palette: list[str], staging_r
                         if is_connection_error(exc):
                             raise  # Pro Tools is gone: stop instead of failing every remaining track
                         res["errors"].append(f"import: {type(exc).__name__}: {exc}")
-            # Colour: folder tracks and members grouped by palette index.
+            # Colour: new folder tracks and all members grouped by palette index. A folder that
+            # was already in the session keeps the colour it has.
             groups: dict[int, list[str]] = {}
             for folder in plan:
-                groups.setdefault(folder.color_index, []).append(folder.name)
+                if not folder.exists:
+                    groups.setdefault(folder.color_index, []).append(folder.name)
                 for t in folder.tracks:
                     if "pt_name" in t.result:
                         groups.setdefault(t.color_index, []).append(t.result["pt_name"])

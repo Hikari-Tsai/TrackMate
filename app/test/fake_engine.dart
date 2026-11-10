@@ -143,9 +143,14 @@ class FakeEngine implements EngineApi {
     return {
       'connected': true,
       'session': {'name': 'Demo Session', 'path': '/tmp/Demo.ptx', 'sample_rate': 48000},
-      'tracks': [],
+      'tracks': [
+        for (final f in sessionFolders) {'id': 'folder-$f', 'name': f, 'type': 'BasicFolder', 'folder': null},
+      ],
     };
   }
+
+  /// Basic Folders of the fake session: what the preview's folder picker offers.
+  final sessionFolders = ['DRUMS', 'MY BUS'];
 
   @override
   Future<Map<String, dynamic>> apply(List<Map<String, dynamic>> tracks, {bool dryRun = false}) async {
@@ -153,12 +158,18 @@ class FakeEngine implements EngineApi {
     if (!dryRun && applyError != null) throw applyError!;
     applied.add((tracks, dryRun));
     if (!dryRun) calls.add('apply');
-    final plan = [
-      {
-        'folder': 'ALL', 'category': 'drums', 'color_index': 8, 'exists': false,
-        'tracks': [for (final t in tracks) {'final_name': t['name'], 'color_index': t['color_index'], 'mono': t['mono']}],
-      },
-    ];
+    // Like the engine: one folder per requested name ('ALL' when none); `new_folder` makes a
+    // new one named after the category, `folder` joins a session folder when it has one.
+    final groups = <String, Map<String, dynamic>>{};
+    for (final t in tracks) {
+      final wanted = t['new_folder'] == true ? (t['category'] as String).toUpperCase() : (t['folder'] as String?) ?? 'ALL';
+      final g = groups.putIfAbsent(wanted, () => {
+        'folder': wanted, 'category': t['category'], 'color_index': t['color_index'] ?? 8,
+        'exists': t['new_folder'] != true && sessionFolders.contains(wanted), 'tracks': <Map<String, dynamic>>[],
+      });
+      (g['tracks'] as List).add({'final_name': t['name'], 'color_index': t['color_index'], 'mono': t['mono']});
+    }
+    final plan = groups.values.toList();
     if (dryRun) return {'session': (await session())['session'], 'dry_run': true, 'plan': plan, 'ok': true};
     return {
       'session': (await session())['session'], 'dry_run': false, 'plan': plan, 'ok': true, 'seconds': 1.5,

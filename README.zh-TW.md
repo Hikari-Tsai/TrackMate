@@ -103,11 +103,13 @@ Pro Tools 混音前，總要花時間整理分軌：檔名充滿錯字、縮寫�
 6. **速度（自動）：** 你在確認名稱時，TrackMate 會從鼓組和打擊樂分軌（沒有的話改聽貝斯、吉他、鍵盤和合成器）偵測 BPM，顯示在右上角，不需要按任何按鈕。新增或移除分軌後會重新偵測。
 7. **按「Preview & apply」：** 每次匯入都會經過以下步驟：
    - **速度：** 視窗顯示 BPM，請你選擇 session 的速度：*Constant tempo* 是整首用一個 BPM（平均值四捨五入，可以用 − 和 + 調整）；*Tempo map* 是每小節一個速度，讓每條小節線都對準分軌裡聽到的第一拍；*Keep session tempo* 是不改速度。每一拍都落在同一條直線網格的 30 ms 內時，TrackMate 會建議固定速度。如果被聽成半速或倍速，選 *½× half time* 或 *2× double time*。找不到拍子時，可以重新偵測或不設定速度繼續。
-   - **預覽：** 會建立哪些資料夾、每軌的最終名稱、是否轉 mono，以及速度設定。確認後才寫入 Pro Tools。
+   - **預覽：** 會建立哪些資料夾、每軌的最終名稱、是否轉 mono，以及速度設定。每個資料夾都可以選：*New folder* 新建一個（session 裡已有 `DRUMS` 時會取沒用過的名字，例如 `DRUMS 2`），或 *Into …* 把分軌放進 session 既有的 Basic Folder。併入的資料夾保留原本的顏色。確認後才寫入 Pro Tools。
    - **匯入：** 先匯入分軌，再匯入速度。Pro Tools 會跳出 *MIDI Import Options*，保持勾選 *Import tempo map from MIDI File* 並按 **OK**，TrackMate 接著讀回 session 確認速度。
    - **結果：** 每一軌顯示驗證結果，也會顯示速度有沒有設定成功。沒有成功時（例如按了取消），按 **Import tempo again** 只重新匯入速度。速度也會存成 MIDI 檔放在分軌旁邊（`TrackMate Tempo 85 BPM.mid`），可以給其他 DAW 使用。
 
 ![匯入前的速度設定](docs/images/tempo_dialog.png)
+
+![預覽：每個資料夾可以新建，或併入 session 既有的資料夾](docs/images/apply_preview.png)
 
 ![Category 選單](docs/images/category_menu.png)
 
@@ -185,10 +187,10 @@ Pro Tools 混音前，總要花時間整理分軌：檔名充滿錯字、縮寫�
 ### 5. 匯入 Pro Tools（`/apply`）
 程式：[`engine/stem_engine/apply.py`](engine/stem_engine/apply.py)、[`protools.py`](engine/stem_engine/protools.py)
 
-1. **資料夾：** 依大類順序建立 Basic Folder；session 裡已有同名資料夾時沿用。
+1. **資料夾：** 依大類順序建立 Basic Folder；session 裡已有同名資料夾時併入。預覽可以逐個資料夾改變：`new_folder` 一定新建，名字取 session 裡沒用過的（`DRUMS 2`）；`folder` 指定要併入的既有 Basic Folder，所以多個大類可以共用一個。
 2. **匯入：** 逐檔匯入（ConvertAudio，自動轉成 session 的取樣率），每次先選取前一軌，讓資料夾裡的順序和清單一致；需要轉 mono 的檔案先轉成暫存檔。
 3. **改名：** 用匯入前後的 track ID 差異找出新軌，立刻改成事先確認過不重複的名稱。
-4. **上色：** 依顏色把資料夾和軌分組後上色。
+4. **上色：** 新建的資料夾和所有音軌依顏色分組後上色；session 原有的資料夾保留原本的顏色。
 5. **驗證：** 重新讀取音軌清單，逐軌確認名稱、資料夾和顏色。
 
 PTSL 目前沒有建立 bus 的指令，所以不自動設定輸出路由，詳見[整合報告](docs/reports/pro-tools-integration.md)。
