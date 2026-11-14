@@ -44,6 +44,7 @@ The packaged app contains the Flutter runtime and a Python engine built with PyI
 |---|---|
 | [Flutter](https://flutter.dev/) engine and framework, [http](https://pub.dev/packages/http) | BSD-3-Clause |
 | [lucide_icons_flutter](https://pub.dev/packages/lucide_icons_flutter) / [Lucide](https://lucide.dev/) icons | MIT / ISC |
+| [audioplayers](https://pub.dev/packages/audioplayers) (Blue Fire; plays the stems through the system's AVFoundation or Media Foundation) with [path_provider](https://pub.dev/packages/path_provider) (Flutter team, BSD-3-Clause) | MIT |
 | [Python](https://www.python.org/) runtime | PSF License 2.0 |
 | [NumPy](https://numpy.org/) | BSD-3-Clause |
 | [ONNX Runtime](https://onnxruntime.ai/) | MIT |

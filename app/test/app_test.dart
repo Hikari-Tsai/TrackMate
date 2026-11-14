@@ -8,17 +8,19 @@ import 'package:stem_import/app_state.dart';
 import 'package:stem_import/engine/engine_api.dart';
 import 'package:stem_import/models.dart';
 import 'package:stem_import/native_bridge.dart';
+import 'package:stem_import/player.dart';
 import 'package:stem_import/ui/home_page.dart';
 import 'package:stem_import/ui/theme.dart';
 
 import 'fake_engine.dart';
+import 'fake_player.dart';
 
-Future<(AppState, FakeEngine)> pumpApp(WidgetTester tester, {FakeEngine? engine}) async {
+Future<(AppState, FakeEngine)> pumpApp(WidgetTester tester, {FakeEngine? engine, FakePlayer? player}) async {
   tester.view.physicalSize = const Size(1320, 820);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
   final fake = engine ?? FakeEngine();
-  final state = AppState();
+  final state = AppState(player: player);
   await tester.runAsync(() => state.attach(fake));
   await tester.pumpWidget(MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -400,6 +402,111 @@ void main() {
     state.clear(); // the choices go with the list
     expect(state.folderChoices, isEmpty);
   });
+
+  testWidgets('listen: a row plays in the bar, pauses and resumes, another row replaces it', (tester) async {
+    final player = FakePlayer();
+    final (state, _) = await pumpApp(tester, player: player);
+    final a = state.audition;
+    expect(find.byKey(const ValueKey('player-bar')), findsNothing);
+    await tapVisible(tester, const ValueKey('listen-MySong_Kick In'));
+    await tester.pumpAndSettle();
+    expect(player.loaded, row(state, 'MySong_Kick In').file);
+    expect(a.track, row(state, 'MySong_Kick In'));
+    expect(a.playing, isTrue);
+    expect(find.byKey(const ValueKey('player-bar')), findsOneWidget);
+    expect(find.text('0:00 / –:––'), findsOneWidget); // duration not known yet
+    player.emitDuration(const Duration(seconds: 187));
+    player.emitPosition(const Duration(seconds: 12));
+    await tester.pump();
+    expect(find.text('0:12 / 3:07'), findsOneWidget);
+    // The row's button pauses, the bar's button resumes.
+    await tapVisible(tester, const ValueKey('listen-MySong_Kick In'));
+    await tester.pumpAndSettle();
+    expect(player.calls.last, 'pause');
+    expect(a.playing, isFalse);
+    await tester.tap(find.byKey(const ValueKey('player-toggle')));
+    await tester.pumpAndSettle();
+    expect(player.calls.last, 'resume');
+    expect(a.playing, isTrue);
+    // Clicking the slider seeks.
+    await tester.tap(find.byKey(const ValueKey('player-seek')));
+    await tester.pumpAndSettle();
+    expect(player.calls.last, startsWith('seek '));
+    // Another row takes over from the start.
+    await tapVisible(tester, const ValueKey('listen-MySong_OH'));
+    await tester.pumpAndSettle();
+    expect(player.loaded, row(state, 'MySong_OH').file);
+    expect(a.track, row(state, 'MySong_OH'));
+    expect(a.position.value, Duration.zero);
+    expect(a.duration, isNull);
+    // At the end the button turns back to play; pressing it starts over.
+    player.emitDuration(const Duration(seconds: 60));
+    player.emitComplete();
+    await tester.pump();
+    expect(a.playing, isFalse);
+    expect(find.text('1:00 / 1:00'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('player-toggle')));
+    await tester.pumpAndSettle();
+    expect(player.calls.sublist(player.calls.length - 2), ['seek 0', 'resume']);
+    // Close stops the sound and hides the bar.
+    await tester.tap(find.byKey(const ValueKey('player-close')));
+    await tester.pumpAndSettle();
+    expect(player.calls.last, 'stop');
+    expect(a.track, isNull);
+    expect(find.byKey(const ValueKey('player-bar')), findsNothing);
+  });
+
+  testWidgets('listen: removing or clearing the track stops it; a file that cannot play shows why', (tester) async {
+    final player = FakePlayer();
+    final (state, _) = await pumpApp(tester, player: player);
+    await tapVisible(tester, const ValueKey('listen-MySong_Kick In'));
+    await tester.pumpAndSettle();
+    state.remove(row(state, 'MySong_Kick In'));
+    await tester.pumpAndSettle();
+    expect(player.calls.last, 'stop');
+    expect(find.byKey(const ValueKey('player-bar')), findsNothing);
+    await tapVisible(tester, const ValueKey('listen-MySong_OH'));
+    await tester.pumpAndSettle();
+    state.remove(row(state, 'MySong_Snr Top')); // another row: the sound goes on
+    await tester.pumpAndSettle();
+    expect(player.calls.last, isNot('stop'));
+    state.clear();
+    await tester.pumpAndSettle();
+    expect(player.calls.last, 'stop');
+    expect(state.audition.track, isNull);
+    // A format the system cannot decode.
+    await tester.runAsync(() => state.addFiles(FakeEngine().files));
+    await tester.pumpAndSettle();
+    player.playError = Exception('unsupported format');
+    await tapVisible(tester, const ValueKey('listen-MySong_Kick In'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cannot play this file (unsupported format)'), findsOneWidget);
+    expect(state.audition.playing, isFalse);
+    expect(tester.widget<IconButton>(find.byKey(const ValueKey('player-toggle'))).onPressed, isNull);
+    // The next try plays again.
+    await tapVisible(tester, const ValueKey('listen-MySong_Kick In'));
+    await tester.pumpAndSettle();
+    expect(state.audition.error, isNull);
+    expect(state.audition.playing, isTrue);
+  });
+
+  test('clock', () {
+    expect(clock(const Duration(seconds: 7)), '0:07');
+    expect(clock(const Duration(minutes: 3, seconds: 7)), '3:07');
+    expect(clock(const Duration(hours: 1, minutes: 2, seconds: 7)), '1:02:07');
+  });
+
+  testWidgets('screenshot of the player bar', (tester) async {
+    await loadRealFonts(tester);
+    final player = FakePlayer();
+    await pumpApp(tester, player: player);
+    await tapVisible(tester, const ValueKey('listen-MySong_Kick In'));
+    await tester.pumpAndSettle();
+    player.emitDuration(const Duration(minutes: 3, seconds: 7));
+    player.emitPosition(const Duration(minutes: 1, seconds: 2));
+    await tester.pump();
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/player_bar.png'));
+  }, tags: ['golden'], skip: !File('/System/Library/Fonts/Supplemental/Arial Unicode.ttf').existsSync());
 
   testWidgets('screenshot of the preview', (tester) async {
     await loadRealFonts(tester);

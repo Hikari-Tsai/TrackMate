@@ -93,6 +93,7 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 3. **結果を確認：**
    - まず名前による結果が表示され、名前から判断できないトラックは続けて音で認識されます（*Listening…* と表示）。
    - 信頼度の低いトラックはオレンジで強調され、ヘッダーに要確認の件数が表示されます。信頼度の列にマウスを乗せると、どの方法で認識したかがわかります。
+   - **試聴：** 各行の先頭にある ▶ を押すと、リストの下のプレーヤーでそのステムが再生され、迷うトラックを取り込む前に耳で確認できます。一時停止、スライダーのドラッグ、別の行の ▶ で切り替えができます。ファイルはそのまま再生されます（WAV、AIFF、FLAC、MP3、M4A、CAF など、システムがデコードできる形式）。✕ でプレーヤーを閉じます。
 4. **修正：**
    - **新しい名前のメニュー（上位 5 件）：** 別の候補を選ぶか、*Type a name…*（手入力）、*Search all instruments…*（全楽器を検索）、*Keep original name*（元の名前のまま）を選びます。名前欄を直接編集することもできます。
    - **Category：** カテゴリを変えると、カラーもそのカテゴリの既定色に変わります。
@@ -112,6 +113,8 @@ Pro Tools の操作は、AppleScript でマウスクリックを再現する方�
 ![プレビュー：フォルダごとに新規作成か、セッションにあるフォルダへの追加かを選べる](docs/images/apply_preview.png)
 
 ![Category メニュー](docs/images/category_menu.png)
+
+![取り込み前にステムを試聴](docs/images/player_bar.png)
 
 問題が起きると、アプリが状況と対処方法を表示します。
 
@@ -407,6 +410,7 @@ TrackMate は以下のオープンソースソフトウェア、モデル、デ�
 |---|---|
 | [Flutter](https://flutter.dev/)、[http](https://pub.dev/packages/http) | BSD-3-Clause |
 | [lucide_icons_flutter](https://pub.dev/packages/lucide_icons_flutter)（[Lucide](https://lucide.dev/) アイコン、ISC） | MIT |
+| [audioplayers](https://pub.dev/packages/audioplayers)（試聴：macOS は AVFoundation、Windows は Media Foundation で再生） | MIT |
 | [Geist、Geist Mono](https://github.com/vercel/geist-font)（Vercel、v1.8.2。ライセンスは [`app/assets/fonts/Geist-OFL.txt`](app/assets/fonts/Geist-OFL.txt)） | SIL OFL 1.1 |
 
 ### 参考文献

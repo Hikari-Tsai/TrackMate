@@ -9,6 +9,7 @@ import '../native_bridge.dart';
 import 'alert_dialog.dart';
 import 'apply_dialogs.dart';
 import 'models_dialog.dart';
+import 'player_bar.dart';
 import 'tempo_dialog.dart';
 import 'theme.dart';
 import 'track_table.dart';
@@ -286,6 +287,7 @@ class _Body extends StatelessWidget {
           ),
         ),
       ),
+      PlayerBar(state: state),
     ]);
   }
 }

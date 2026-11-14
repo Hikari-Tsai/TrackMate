@@ -93,6 +93,7 @@ Pro Tools 混音前，總要花時間整理分軌：檔名充滿錯字、縮寫�
 3. **檢查辨識結果：**
    - 先顯示依名稱辨識的結果；名稱看不出來的軌，接著會「聽聲音」再判斷（顯示 *Listening…*）。
    - 信心低的軌會用橘色底標出，標題列會顯示待確認的軌數。滑鼠停在信心欄上，可以看到這一軌是怎麼辨識的。
+   - **試聽：** 每一列最前面的 ▶ 會在清單下方的播放器播放這一軌，讓你在匯入前親耳確認有疑慮的分軌：可以暫停、拖曳進度條，或按另一列的 ▶ 切換。播放的是原始檔案（WAV、AIFF、FLAC、MP3、M4A、CAF，只要系統能解碼），按 ✕ 關閉播放器。
 4. **修正：**
    - **新名稱欄的下拉選單（Top-5）：** 可以選其他候選，或選 *Type a name…*（自己輸入）、*Search all instruments…*（搜尋全部樂器）、*Keep original name*（保留原名）。名稱欄也可以直接編輯。
    - **Category：** 改大類，顏色會跟著換成該大類的預設顏色。
@@ -112,6 +113,8 @@ Pro Tools 混音前，總要花時間整理分軌：檔名充滿錯字、縮寫�
 ![預覽：每個資料夾可以新建，或併入 session 既有的資料夾](docs/images/apply_preview.png)
 
 ![Category 選單](docs/images/category_menu.png)
+
+![匯入前試聽分軌](docs/images/player_bar.png)
 
 遇到問題時，App 會跳出提醒視窗並告訴你怎麼處理：
 
@@ -406,6 +409,7 @@ TrackMate 使用了下列開源軟體、模型、資料集和字型，感謝各�
 |---|---|
 | [Flutter](https://flutter.dev/)、[http](https://pub.dev/packages/http) | BSD-3-Clause |
 | [lucide_icons_flutter](https://pub.dev/packages/lucide_icons_flutter)（[Lucide](https://lucide.dev/) 圖示，ISC） | MIT |
+| [audioplayers](https://pub.dev/packages/audioplayers)（試聽：macOS 用 AVFoundation、Windows 用 Media Foundation 播放） | MIT |
 | [Geist、Geist Mono](https://github.com/vercel/geist-font)（Vercel，v1.8.2，授權檔見 [`app/assets/fonts/Geist-OFL.txt`](app/assets/fonts/Geist-OFL.txt)） | SIL OFL 1.1 |
 
 ### 引用文獻

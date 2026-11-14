@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../app_state.dart';
 import '../models.dart';
+import '../player.dart';
 import 'pickers.dart';
 import 'theme.dart';
 
@@ -44,6 +45,7 @@ const _stereoLabel = {
 };
 
 // Column widths shared by the header and the rows.
+const _wListen = 34.0;
 const _wCategory = 176.0;
 const _wColour = 52.0;
 const _wConfidence = 150.0;
@@ -59,8 +61,9 @@ class TrackHeader extends StatelessWidget {
         ? Expanded(flex: flex, child: Text(t, style: Type.columnHeader))
         : SizedBox(width: width, child: Text(t, style: Type.columnHeader));
     return Padding(
-      padding: const EdgeInsets.fromLTRB(28, 6, 28, 8),
+      padding: const EdgeInsets.fromLTRB(22, 6, 28, 8),
       child: Row(children: [
+        const SizedBox(width: _wListen),
         cell('Original file', flex: 3),
         cell('New name', flex: 3),
         const SizedBox(width: 12),
@@ -186,8 +189,10 @@ class _TrackRowViewState extends State<TrackRowView> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: review ? Palette.review.withValues(alpha: 0.35) : Palette.border),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 6, 6, 6),
+      padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
       child: Row(children: [
+        SizedBox(width: _wListen, child: _ListenButton(row: row, audition: state.audition)),
+        const SizedBox(width: 4),
         Expanded(
           flex: 3,
           child: Row(children: [
@@ -319,6 +324,32 @@ class _TrackRowViewState extends State<TrackRowView> {
         else
           Flexible(child: Text(stage, overflow: TextOverflow.ellipsis, style: Type.caption)),
       ]),
+    );
+  }
+}
+
+/// Plays the stem in the player bar under the list; on the track being heard it pauses and
+/// resumes. Listens to the audition itself so that only this icon redraws when playback changes.
+class _ListenButton extends StatelessWidget {
+  const _ListenButton({required this.row, required this.audition});
+  final TrackRow row;
+  final Audition audition;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: audition,
+      builder: (context, _) {
+        final here = audition.track == row;
+        final playing = audition.isPlaying(row);
+        return IconButton(
+          key: ValueKey('listen-${row.originalName}'),
+          tooltip: playing ? 'Pause' : 'Listen',
+          iconSize: 16,
+          icon: Icon(playing ? LucideIcons.pause : LucideIcons.play, color: here ? Palette.accent : Palette.muted),
+          onPressed: () => audition.listen(row),
+        );
+      },
     );
   }
 }

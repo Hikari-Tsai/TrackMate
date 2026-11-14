@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'alerts.dart';
 import 'engine/engine_api.dart';
 import 'models.dart';
+import 'player.dart';
 
 /// File name of a path with either separator (macOS '/', Windows '\\').
 String baseName(String path) => path.split(RegExp(r'[\\/]')).last;
@@ -17,7 +18,10 @@ enum EngineState { starting, ready, error }
 /// Everything the screen shows. Adding files runs /analyze twice: first with the text layers
 /// only (instant), then with the audio layer for the tracks the text could not settle.
 class AppState extends ChangeNotifier {
-  AppState();
+  AppState({StemPlayer? player}) : audition = Audition(player ?? SilentPlayer());
+
+  /// The stem being listened to (Listen button on a row, player bar under the list).
+  final Audition audition;
 
   EngineApi? api;
   EngineState engineState = EngineState.starting;
@@ -360,6 +364,7 @@ class AppState extends ChangeNotifier {
 
   void remove(TrackRow row) {
     tracks.remove(row);
+    unawaited(audition.forget(row));
     _forgetTempo();
     notifyListeners();
     if (tracks.isNotEmpty && !busy) unawaited(detectTempo());
@@ -368,6 +373,7 @@ class AppState extends ChangeNotifier {
   void clear() {
     tracks.clear();
     folderChoices.clear();
+    unawaited(audition.close());
     message = null;
     _forgetTempo();
     notifyListeners();
@@ -565,6 +571,7 @@ class AppState extends ChangeNotifier {
   void dispose() {
     _alerts.close();
     _modelTimer?.cancel();
+    audition.dispose();
     super.dispose();
   }
 }

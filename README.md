@@ -89,6 +89,7 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
 3. **Check the results:**
    - Name-based results appear first; tracks whose names say nothing are then recognised by listening (shown as *Listening…*).
    - Tracks with low confidence are highlighted in orange, and the header shows how many need review. Hover over the confidence column to see how a track was recognised.
+   - **Listen:** the ▶ button at the start of a row plays the stem in a player bar under the list, so you can check a doubtful track by ear before it is imported: pause, drag the slider, or press ▶ on another row to switch. The bar plays the file as it is (WAV, AIFF, FLAC, MP3, M4A, CAF: whatever the system decodes), and ✕ closes it.
 4. **Correct:**
    - **New name menu (top 5):** pick another candidate, or choose *Type a name…*, *Search all instruments…* or *Keep original name*. You can also edit the name field directly.
    - **Category:** changing it also switches the colour to that category's default.
@@ -108,6 +109,8 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
 ![Preview: each folder can be new or an existing folder of the session](docs/images/apply_preview.png)
 
 ![Category menu](docs/images/category_menu.png)
+
+![Listening to a stem before the import](docs/images/player_bar.png)
 
 When something goes wrong, the app explains what happened and what to do:
 
@@ -394,6 +397,7 @@ Research and model export also used [PyTorch](https://pytorch.org/) (BSD-3-Claus
 |---|---|
 | [Flutter](https://flutter.dev/), [http](https://pub.dev/packages/http) | BSD-3-Clause |
 | [lucide_icons_flutter](https://pub.dev/packages/lucide_icons_flutter) ([Lucide](https://lucide.dev/) icons, ISC) | MIT |
+| [audioplayers](https://pub.dev/packages/audioplayers) (plays the stems through AVFoundation on macOS and Media Foundation on Windows) | MIT |
 | [Geist, Geist Mono](https://github.com/vercel/geist-font) (Vercel, v1.8.2; licence in [`app/assets/fonts/Geist-OFL.txt`](app/assets/fonts/Geist-OFL.txt)) | SIL OFL 1.1 |
 
 ### References

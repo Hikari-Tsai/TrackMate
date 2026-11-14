@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'app_state.dart';
 import 'engine/engine_launcher.dart';
 import 'native_bridge.dart';
+import 'player.dart';
 import 'ui/home_page.dart';
 import 'ui/theme.dart';
 
@@ -22,7 +23,7 @@ class StemImportApp extends StatefulWidget {
 }
 
 class StemImportAppState extends State<StemImportApp> {
-  final state = AppState();
+  final state = AppState(player: AudioplayersPlayer());
   late final NativeBridge bridge;
   EngineConnection? _engine;
   late final AppLifecycleListener _lifecycle;

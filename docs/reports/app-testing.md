@@ -5,12 +5,13 @@ App 原始碼在 [`app/`](../../app)：介面用 Flutter，拖放和選檔視窗
 ## 自動化測試
 | 測試 | 數量 | 內容 |
 |---|---|---|
-| [`test/app_test.dart`](../../app/test/app_test.dart) | 30 | 兩階段辨識（先文字、後音訊）、Top-5 改選並送回 `/feedback`、手動輸入名稱、搜尋全部樂器、保留原名、大類與顏色連動、百分比顯示、Pro Tools 後綴的保留開關、重複名稱流水號、預覽與套用送出的內容、預覽裡每個資料夾可選新建或併入 session 既有的資料夾（改選後重新試算，套用時帶同樣的選擇，清除清單時一併忘記）、速度（自動偵測、匯入前選擇、和分軌一起匯入、取消後只重新匯入速度、保留原速度、找不到拍子）、模型視窗（缺模型時第一次啟動就打開、每列的 Ready 標記與大小、勾選一個下載、全部下載、每個模型各自的進度條、下載失敗的錯誤與重試、上次中斷的下載自動續傳、從標題列打開、Clear models 先確認並顯示釋放空間、下載中清除被引擎拒絕 409）、7 張截圖 |
+| [`test/app_test.dart`](../../app/test/app_test.dart) | 35 | 兩階段辨識（先文字、後音訊）、Top-5 改選並送回 `/feedback`、手動輸入名稱、搜尋全部樂器、保留原名、大類與顏色連動、百分比顯示、Pro Tools 後綴的保留開關、重複名稱流水號、預覽與套用送出的內容、預覽裡每個資料夾可選新建或併入 session 既有的資料夾（改選後重新試算，套用時帶同樣的選擇，清除清單時一併忘記）、速度（自動偵測、匯入前選擇、和分軌一起匯入、取消後只重新匯入速度、保留原速度、找不到拍子）、模型視窗（缺模型時第一次啟動就打開、每列的 Ready 標記與大小、勾選一個下載、全部下載、每個模型各自的進度條、下載失敗的錯誤與重試、上次中斷的下載自動續傳、從標題列打開、Clear models 先確認並顯示釋放空間、下載中清除被引擎拒絕 409）、試聽（列首的 ▶ 在下方播放器播放、暫停與繼續、換一列、進度條拖曳、播完後重頭、關閉；移除或清除該軌會停止；無法播放的檔案顯示原因）、8 張截圖 |
 | [`test/errors_test.dart`](../../app/test/errors_test.dart) | 10 | Pro Tools 沒開、沒有 session、沒有回應、套用中斷、檔案遺失、沒有音檔、引擎停止、引擎無法啟動，以及「Try again」的連續流程 |
 | [`integration_test/real_flow_test.dart`](../../app/integration_test/real_flow_test.dart) | 1 | 真實的 macOS App、真實的引擎子程序、真實的 Pro Tools |
 | [`integration_test/real_tempo_test.dart`](../../app/integration_test/real_tempo_test.dart) | 1 | 同上，自動偵測 85 BPM 分軌的速度，再用 Preview & apply 和分軌一起匯入固定速度與速度圖，兩次都讀回 Pro Tools 確認（[速度偵測報告](tempo-detection.md)） |
+| [`integration_test/real_listen_test.dart`](../../app/integration_test/real_listen_test.dart) | 1 | 真實的 macOS App 和系統播放器（不需要 Pro Tools）：24-bit WAV、立體聲 AIFF 和 FLAC 各播放一次並確認長度和進度；暫停、跳轉、播到結尾、關閉 |
 
-**假引擎的資料：** widget 測試使用假的引擎（[`test/fake_engine.dart`](../../app/test/fake_engine.dart)），資料來自真實引擎的輸出（[`test/fixtures/`](../../app/test/fixtures)），可以模擬各種故障；模型的狀態（缺少、下載中、失敗、就緒）和 `/models/download`、`DELETE /models` 也由它扮演。
+**假引擎的資料：** widget 測試使用假的引擎（[`test/fake_engine.dart`](../../app/test/fake_engine.dart)），資料來自真實引擎的輸出（[`test/fixtures/`](../../app/test/fixtures)），可以模擬各種故障；模型的狀態（缺少、下載中、失敗、就緒）和 `/models/download`、`DELETE /models` 也由它扮演。播放器也是假的（[`test/fake_player.dart`](../../app/test/fake_player.dart)）：記錄呼叫，並由測試送出長度、進度和播完的事件。
 
 **截圖測試：** 截圖比對（`golden` 標籤）會受到機器字型影響，所以 CI 不跑，只在本機執行。
 
