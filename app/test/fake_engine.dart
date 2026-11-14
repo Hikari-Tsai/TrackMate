@@ -159,13 +159,15 @@ class FakeEngine implements EngineApi {
     applied.add((tracks, dryRun));
     if (!dryRun) calls.add('apply');
     // Like the engine: one folder per requested name ('ALL' when none); `new_folder` makes a
-    // new one named after the category, `folder` joins a session folder when it has one.
+    // new one named after the category, `folder` joins a session folder when it has one,
+    // `no_folder` is the top-level group (folder null).
     final groups = <String, Map<String, dynamic>>{};
     for (final t in tracks) {
-      final wanted = t['new_folder'] == true ? (t['category'] as String).toUpperCase() : (t['folder'] as String?) ?? 'ALL';
+      final none = t['no_folder'] == true;
+      final wanted = none ? '' : t['new_folder'] == true ? (t['category'] as String).toUpperCase() : (t['folder'] as String?) ?? 'ALL';
       final g = groups.putIfAbsent(wanted, () => {
-        'folder': wanted, 'category': t['category'], 'color_index': t['color_index'] ?? 8,
-        'exists': t['new_folder'] != true && sessionFolders.contains(wanted), 'tracks': <Map<String, dynamic>>[],
+        'folder': none ? null : wanted, 'category': t['category'], 'color_index': t['color_index'] ?? 8,
+        'exists': none || (t['new_folder'] != true && sessionFolders.contains(wanted)), 'tracks': <Map<String, dynamic>>[],
       });
       (g['tracks'] as List).add({'final_name': t['name'], 'color_index': t['color_index'], 'mono': t['mono']});
     }

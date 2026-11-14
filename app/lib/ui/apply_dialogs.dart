@@ -134,8 +134,8 @@ class _PreviewDialogState extends State<_PreviewDialog> {
 
   Future<void> _choose(BuildContext anchor, String category) async {
     final existing = state.existingFolders;
-    final current = state.folderChoices.containsKey(category) ? state.folderChoices[category] ?? '' : null;
-    Widget item(String value, IconData icon, String label) => Row(children: [
+    final current = state.folderChoices[category];
+    Widget item(FolderChoice value, IconData icon, String label) => Row(children: [
           Icon(icon, size: 15, color: Palette.muted),
           const SizedBox(width: 10),
           Expanded(
@@ -145,22 +145,27 @@ class _PreviewDialogState extends State<_PreviewDialog> {
           ),
           if (value == current) const Icon(LucideIcons.check, size: 14, color: Palette.accent),
         ]);
-    final choice = await showMenuBelow<String>(anchor, maxWidth: 320, [
+    final choice = await showMenuBelow<FolderChoice>(anchor, maxWidth: 320, [
       PopupMenuItem(
           key: ValueKey('folder-item-$category-new'),
-          value: '',
+          value: const FolderChoice.newFolder(),
           height: 34,
-          child: item('', LucideIcons.folderPlus, 'New folder')),
+          child: item(const FolderChoice.newFolder(), LucideIcons.folderPlus, 'New folder')),
+      PopupMenuItem(
+          key: ValueKey('folder-item-$category-none'),
+          value: const FolderChoice.none(),
+          height: 34,
+          child: item(const FolderChoice.none(), LucideIcons.folderX, 'No folder (top level of the session)')),
       if (existing.isNotEmpty) const PopupMenuDivider(),
       for (final f in existing)
         PopupMenuItem(
             key: ValueKey('folder-item-$category-$f'),
-            value: f,
+            value: FolderChoice.into(f),
             height: 34,
-            child: item(f, LucideIcons.folderOpen, 'Into $f')),
+            child: item(FolderChoice.into(f), LucideIcons.folderOpen, 'Into $f')),
     ]);
     if (choice == null || !mounted) return;
-    state.setFolderChoice(category, choice.isEmpty ? null : choice);
+    state.setFolderChoice(category, choice);
     setState(() {
       loading = true;
       error = null;
@@ -182,7 +187,8 @@ class _PreviewDialogState extends State<_PreviewDialog> {
     final catalog = state.catalog!;
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final newFolders = folders.where((f) => f['exists'] != true).length;
-    final joined = folders.length - newFolders;
+    final joined = folders.where((f) => f['exists'] == true && f['folder'] != null).length;
+    final loose = [for (final f in folders) if (f['folder'] == null) (f['tracks'] as List).length].fold(0, (a, b) => a + b);
     final withTempo = state.tempoWillImport;
     final n = state.tracks.length;
     return AlertDialog(
@@ -193,9 +199,10 @@ class _PreviewDialogState extends State<_PreviewDialog> {
         child: ListView(children: [
           Text(
               '${newFolders == 0 ? 'Creates no folder' : 'Creates $newFolders new folder${newFolders == 1 ? '' : 's'}'}'
-              '${joined == 0 ? '' : ', puts tracks into $joined existing folder${joined == 1 ? '' : 's'}'}, '
+              '${joined == 0 ? '' : ', puts tracks into $joined existing folder${joined == 1 ? '' : 's'}'}'
+              '${loose == 0 ? '' : ', leaves $loose track${loose == 1 ? '' : 's'} in no folder'}, '
               'and imports $n track${n == 1 ? '' : 's'} (converted to the session rate, ${session['sample_rate']} Hz). '
-              'Each folder can be created new or be one the session already has.',
+              'Each folder can be created new, be one the session already has, or no folder at all.',
               key: const ValueKey('apply-folders-line')),
           const SizedBox(height: 8),
           Text(
@@ -213,9 +220,12 @@ class _PreviewDialogState extends State<_PreviewDialog> {
             ),
           for (final f in folders) ...[
             Row(children: [
-              Container(width: 14, height: 14, color: Color(catalog.color(f['color_index'] as int))),
+              if (f['folder'] == null)
+                Icon(LucideIcons.folderX, size: 14, color: muted)
+              else
+                Container(width: 14, height: 14, color: Color(catalog.color(f['color_index'] as int))),
               const SizedBox(width: 8),
-              Text(f['folder'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text((f['folder'] as String?) ?? 'No folder', style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(width: 8),
               Builder(
                 builder: (ctx) => InkWell(
@@ -225,9 +235,22 @@ class _PreviewDialogState extends State<_PreviewDialog> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(f['exists'] == true ? LucideIcons.folderOpen : LucideIcons.folderPlus, size: 14, color: muted),
+                      Icon(
+                          f['folder'] == null
+                              ? LucideIcons.folderX
+                              : f['exists'] == true
+                                  ? LucideIcons.folderOpen
+                                  : LucideIcons.folderPlus,
+                          size: 14,
+                          color: muted),
                       const SizedBox(width: 6),
-                      Text(f['exists'] == true ? 'existing folder' : 'new folder', style: TextStyle(color: muted)),
+                      Text(
+                          f['folder'] == null
+                              ? 'top level'
+                              : f['exists'] == true
+                                  ? 'existing folder'
+                                  : 'new folder',
+                          style: TextStyle(color: muted)),
                       const SizedBox(width: 4),
                       Icon(LucideIcons.chevronDown, size: 14, color: muted),
                     ]),

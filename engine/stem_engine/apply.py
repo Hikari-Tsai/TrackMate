@@ -1,7 +1,8 @@
 """POST /apply (milestone M3): put the confirmed tracks into the open Pro Tools session.
 
 For each category, in the order of categories.json: create a Basic Folder (or join one the
-request names, or one of the same name already in the session), then import the files one by
+request names, or one of the same name already in the session; or no folder at all, after the
+session's last top-level track), then import the files one by
 one, each after the previously placed track, so the folder keeps the order the front end sent. Every new track is found by its track ID and renamed right away to
 its final name; final names are made unique against the session beforehand, so a rename never
 hits a taken name. Colours are set per colour group, and at the end the track list is read
@@ -30,7 +31,7 @@ class PlannedTrack:
     file: str
     final_name: str
     category: str
-    folder: str
+    folder: str | None              # None: at the top level, in no folder
     color_index: int
     mono: bool                      # convert to mono before import
     stereo_action: str | None = None
@@ -40,10 +41,10 @@ class PlannedTrack:
 
 @dataclass
 class PlannedFolder:
-    name: str
+    name: str | None                # None: the tracks go to the top level, in no folder
     category: str
     color_index: int
-    exists: bool
+    exists: bool                    # nothing to create (an existing folder, or no folder)
     tracks: list[PlannedTrack] = field(default_factory=list)
 
 
@@ -66,31 +67,39 @@ def unique(name: str, taken: set[str]) -> str:
 
 
 def build_plan(requests: list[dict], categories: dict, existing: list[dict]) -> list[PlannedFolder]:
-    """requests: [{file, name, category, color_index?, folder?, new_folder?, mono?}] in display
-    order. existing: current session tracks [{name, type, folder}]. Pure function (no Pro Tools).
+    """requests: [{file, name, category, color_index?, folder?, new_folder?, no_folder?, mono?}]
+    in display order. existing: current session tracks [{name, type, folder}]. Pure function (no
+    Pro Tools).
 
     Where a track goes: `folder` names a Basic Folder instead of the category's one; a folder
     already in the session is joined, any other name is created. `new_folder` always creates one,
-    with a free name ('DRUMS 2') even when a folder of that name exists."""
+    with a free name ('DRUMS 2') even when a folder of that name exists. `no_folder` puts the
+    track at the top level of the session, in no folder (one group, name None, in the plan)."""
     taken = {t["name"] for t in existing}
     existing_folders = {t["name"] for t in existing if t["type"] == "BasicFolder"}
     order = list(categories)
     # One planned folder per (wanted name, new or not): every track that asks for the same thing
-    # lands in the same folder, whatever name it ended up with.
-    folders: dict[tuple[str, bool], PlannedFolder] = {}
+    # lands in the same folder, whatever name it ended up with. (None, False) is the top level.
+    folders: dict[tuple[str | None, bool], PlannedFolder] = {}
     for req in sorted(requests, key=lambda r: order.index(r["category"]) if r["category"] in order else len(order)):
         cat = req["category"] if req["category"] in categories else "other"
         spec = categories[cat]
-        wanted = clean_name(req.get("folder") or spec["folder"])
-        key = (wanted, bool(req.get("new_folder")))
-        folder = folders.get(key)
-        if folder is None:
-            exists = wanted in existing_folders and not key[1]
-            # A new folder gets a free name: not an existing folder's, nor any other track's.
-            fname = wanted if exists else unique(wanted, taken)
-            if not exists:
-                taken.add(fname)
-            folder = folders[key] = PlannedFolder(fname, cat, spec["color_index"], exists)
+        if req.get("no_folder"):
+            key: tuple[str | None, bool] = (None, False)
+            folder = folders.get(key)
+            if folder is None:
+                folder = folders[key] = PlannedFolder(None, cat, spec["color_index"], True)
+        else:
+            wanted = clean_name(req.get("folder") or spec["folder"])
+            key = (wanted, bool(req.get("new_folder")))
+            folder = folders.get(key)
+            if folder is None:
+                exists = wanted in existing_folders and not key[1]
+                # A new folder gets a free name: not an existing folder's, nor any other track's.
+                fname = wanted if exists else unique(wanted, taken)
+                if not exists:
+                    taken.add(fname)
+                folder = folders[key] = PlannedFolder(fname, cat, spec["color_index"], exists)
         final = unique(clean_name(req["name"]), taken)
         taken.add(final)
         folder.tracks.append(PlannedTrack(
@@ -138,7 +147,13 @@ def _apply(requests: list[dict], categories: dict, palette: list[str], staging_r
         try:
             for folder in plan:
                 tracks_now = pro.tracks()
-                if folder.exists:
+                if folder.name is None:
+                    # Top level: after the last track that is in no folder (a folder track itself
+                    # would take the new track inside). Nothing to go after: with nothing selected,
+                    # Pro Tools adds the track at the end of the session.
+                    loose = [t.name for t in tracks_now if t.folder is None and "Folder" not in t.type]
+                    anchor = loose[-1] if loose else None
+                elif folder.exists:
                     members = [t.name for t in tracks_now if t.folder == folder.name]
                     anchor = members[-1] if members else folder.name
                 else:
@@ -154,9 +169,12 @@ def _apply(requests: list[dict], categories: dict, palette: list[str], staging_r
                     res = t.result
                     res.update(file=t.file, final_name=t.final_name, folder=folder.name, errors=[])
                     try:
-                        t.source = _stage(t, staging / f"{folder.name}_{i}")
+                        t.source = _stage(t, staging / f"{folder.name or 'top'}_{i}")
                         ids_before = {x.id for x in pro.tracks()}
-                        pro.select([anchor])
+                        if anchor is None:
+                            pro.deselect()
+                        else:
+                            pro.select([anchor])
                         pro.import_audio(t.source, session["path"])
                         new = [x for x in pro.tracks() if x.id not in ids_before]
                         if len(new) != 1:

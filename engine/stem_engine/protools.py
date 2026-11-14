@@ -185,6 +185,10 @@ class ProTools:
     def select(self, names: list[str]) -> None:
         self.engine.select_tracks_by_name(names)
 
+    def deselect(self) -> None:
+        """No track selected: a new track then goes to the end of the session."""
+        self.engine.select_tracks_by_name([])
+
     def import_audio(self, path: str, session_path: str) -> None:
         pt = self.pt
         audio = pt.AudioData(

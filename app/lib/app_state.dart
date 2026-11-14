@@ -15,6 +15,32 @@ const audioExtensions = {'.wav', '.wave', '.aif', '.aiff', '.mp3', '.flac', '.m4
 
 enum EngineState { starting, ready, error }
 
+enum FolderKind { newFolder, existing, none }
+
+/// Where a category's tracks go in Pro Tools: a new Basic Folder (with a free name even when
+/// the session has one of that name), a Basic Folder the session already has, or no folder at
+/// all (the top level of the session).
+class FolderChoice {
+  const FolderChoice.newFolder() : kind = FolderKind.newFolder, name = null;
+  const FolderChoice.into(String folder) : kind = FolderKind.existing, name = folder;
+  const FolderChoice.none() : kind = FolderKind.none, name = null;
+
+  final FolderKind kind;
+  final String? name;
+
+  /// The /apply fields of one track.
+  Map<String, dynamic> get payload => switch (kind) {
+        FolderKind.newFolder => {'folder': null, 'new_folder': true},
+        FolderKind.existing => {'folder': name, 'new_folder': false},
+        FolderKind.none => {'folder': null, 'new_folder': false, 'no_folder': true},
+      };
+
+  @override
+  bool operator ==(Object other) => other is FolderChoice && other.kind == kind && other.name == name;
+  @override
+  int get hashCode => Object.hash(kind, name);
+}
+
 /// Everything the screen shows. Adding files runs /analyze twice: first with the text layers
 /// only (instant), then with the audio layer for the tracks the text could not settle.
 class AppState extends ChangeNotifier {
@@ -59,10 +85,9 @@ class AppState extends ChangeNotifier {
   /// Keep words nothing recognised and Pro Tools suffixes ("_04-01", "-TCEx_01") in names.
   /// Off by default: they are removed.
   bool keepUnknown = false;
-  /// Where a category's tracks go in Pro Tools, chosen in the preview: the name of a Basic
-  /// Folder the session already has, or null for a new folder. A category that is not in the
-  /// map takes its own folder, joining one of that name when the session has it.
-  final Map<String, String?> folderChoices = {};
+  /// Where a category's tracks go in Pro Tools, chosen in the preview. A category that is not
+  /// in the map takes its own folder, joining one of that name when the session has it.
+  final Map<String, FolderChoice> folderChoices = {};
   Timer? _modelTimer;
 
   Future<void> attach(EngineApi engine) async {
@@ -386,10 +411,8 @@ class AppState extends ChangeNotifier {
           if ((t as Map)['type'] == 'BasicFolder') t['name'] as String,
       ];
 
-  /// [existing] is a folder of the session for the category's tracks to join; null asks for a
-  /// new folder, even when the session has one of the category's name.
-  void setFolderChoice(String category, String? existing) {
-    folderChoices[category] = existing;
+  void setFolderChoice(String category, FolderChoice choice) {
+    folderChoices[category] = choice;
     notifyListeners();
   }
 
@@ -399,10 +422,7 @@ class AppState extends ChangeNotifier {
       for (final t in tracks)
         {
           'file': t.file, 'name': names[t], 'category': t.category, 'color_index': t.colorIndex, 'mono': t.mono,
-          if (folderChoices.containsKey(t.category)) ...{
-            'folder': folderChoices[t.category],
-            'new_folder': folderChoices[t.category] == null,
-          },
+          ...?folderChoices[t.category]?.payload,
         },
     ];
   }

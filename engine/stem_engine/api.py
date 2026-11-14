@@ -63,6 +63,7 @@ class ApplyTrack(BaseModel):
     color_index: int | None = Field(default=None, ge=1, le=69)
     folder: str | None = Field(default=None, max_length=64)  # a Basic Folder instead of the category's
     new_folder: bool = False                                  # create one even if that name exists
+    no_folder: bool = False                                   # at the top level, in no folder at all
     mono: bool = False
 
 

@@ -46,7 +46,7 @@ All endpoints except `/health` need `Authorization: Bearer <token>`.
 | `POST /feedback` | `{"name": "Gtr Fuzz", "instrument": "electric_guitar"}` → user alias |
 | `GET /instruments`, `GET /categories` | lists for the dropdown search and the settings page |
 | `GET /session` | Pro Tools session and tracks over PTSL |
-| `POST /apply` | `{"tracks": [{file, name, category, color_index?, folder?, new_folder?, mono}], "dry_run": false}` |
+| `POST /apply` | `{"tracks": [{file, name, category, color_index?, folder?, new_folder?, no_folder?, mono}], "dry_run": false}` |
 | `POST /tempo` | `{"tracks": [{file, category}]}` → `bpm`, `bpm_rounded`, `bpm_min`/`bpm_max` (per bar), `steady`, `suggested_mode`, `signature_beats`, `beats`, `downbeats`, `sources` |
 | `POST /tempo/apply` | `{beats, downbeats, duration, mode: "constant" \| "variable", bpm?, factor: 0.5 \| 1 \| 2, signature_beats?, folder?, import_to_pro_tools}` → `midi_path`, `imported`, `applied` |
 
@@ -55,9 +55,11 @@ the same name the session already has), imports each file after the previous tra
 (ConvertAudio; mono first when `mono` is true and the stereo analysis recommends it), renames
 each new track by ID to a name made unique beforehand, colours new folders and all tracks, then
 re-reads the session and reports `name_ok`, `folder_ok` and `color_ok` per track. Per track,
-`folder` names an existing Basic Folder to join instead of the category's, and `new_folder`
-always creates one with a free name (`DRUMS 2`); an existing folder keeps its colour. `dry_run`
-returns the plan for the preview without touching Pro Tools.
+`folder` names an existing Basic Folder to join instead of the category's, `new_folder`
+always creates one with a free name (`DRUMS 2`), and `no_folder` puts the track at the top level
+of the session (after its last track that is in no folder; the plan lists these under folder
+`null`); an existing folder keeps its colour. `dry_run` returns the plan for the preview without
+touching Pro Tools.
 
 `/tempo` mixes the drum and percussion stems (else bass, guitars, keys and synths, else all
 stems) to mono at 22.05 kHz, runs Beat This! and cleans the beats against the median beat gap

@@ -366,7 +366,7 @@ void main() {
     expect(state.tempoWillImport, isFalse);
   });
 
-  testWidgets('the preview lets a category join an existing folder or get a new one', (tester) async {
+  testWidgets('the preview lets a category join an existing folder, get a new one, or no folder', (tester) async {
     final (state, fake) = await pumpApp(tester);
     final cat = state.tracks.first.category;
     await next(tester, 'apply-button');
@@ -388,6 +388,15 @@ void main() {
     expect(find.text('MY BUS'), findsOneWidget);
     expect(find.text('existing folder'), findsOneWidget);
     expect(find.textContaining('puts tracks into 1 existing folder'), findsOneWidget);
+    // No folder: the tracks go to the top level of the session.
+    await next(tester, 'folder-choice-$cat');
+    await next(tester, 'folder-item-$cat-none');
+    sent = fake.applied.last.$1;
+    expect(sent.where((t) => t['category'] == cat).every((t) => t['folder'] == null && t['no_folder'] == true), isTrue);
+    expect(find.descendant(of: find.byType(AlertDialog), matching: find.text('No folder')), findsOneWidget);
+    expect(find.text('top level'), findsOneWidget);
+    expect(find.textContaining('leaves ${sent.where((t) => t['category'] == cat).length} track'), findsOneWidget);
+    expect(find.text('existing folder'), findsNothing);
     // Back to a new folder: the engine names it after the category.
     await next(tester, 'folder-choice-$cat');
     await next(tester, 'folder-item-$cat-new');
@@ -513,7 +522,8 @@ void main() {
     final (state, _) = await pumpApp(tester);
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pumpAndSettle();
-    state.setFolderChoice(state.tracks.first.category, 'MY BUS');
+    state.setFolderChoice(state.tracks.first.category, const FolderChoice.into('MY BUS'));
+    state.setFolderChoice(state.tracks[1].category, const FolderChoice.none());
     await next(tester, 'apply-button');
     await next(tester, 'tempo-continue');
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/apply_preview.png'));

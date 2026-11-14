@@ -100,13 +100,13 @@ TrackMate does not drive Pro Tools by simulating mouse clicks with AppleScript. 
 6. **Tempo (automatic):** while you check the names, TrackMate detects the BPM in the drum and percussion stems (or bass, guitars, keys and synths when there are none) and shows it in the top right corner. Nothing to press: it is detected again when you add or remove stems.
 7. **Press Preview & apply.** Every import goes through these steps:
    - **Tempo:** a window shows the BPM and asks how to set the session tempo. *Constant tempo* sets one BPM, the average rounded, which you can change with − and +. *Tempo map* sets one tempo per bar, so every bar line falls on the downbeat heard in the stems. *Keep session tempo* leaves it as it is. TrackMate suggests constant when every beat lies within 30 ms of one straight grid. If the song was heard in half or double time, pick *½× half time* or *2× double time*. When no beat is found, you can detect again or continue without tempo.
-   - **Preview:** which folders will be created, each track's final name, whether it is converted to mono, and the tempo. Each folder has a picker: *New folder* creates one (with a free name such as `DRUMS 2` when the session already has `DRUMS`), or *Into …* puts the tracks into a Basic Folder the session already has. A folder you join keeps its colour. Nothing is written to Pro Tools until you confirm.
+   - **Preview:** which folders will be created, each track's final name, whether it is converted to mono, and the tempo. Each folder has a picker: *New folder* creates one (with a free name such as `DRUMS 2` when the session already has `DRUMS`), *Into …* puts the tracks into a Basic Folder the session already has, and *No folder* leaves them at the top level of the session, after its last track that is in no folder. A folder you join keeps its colour. Nothing is written to Pro Tools until you confirm.
    - **Import:** first the tracks, then the tempo. Pro Tools shows its *MIDI Import Options* dialog; keep *Import tempo map from MIDI File* ticked and press **OK**. TrackMate then reads the session back and checks the tempo.
    - **Result:** every track shows its verification result, and the tempo whether it was set. If it was not (for example the dialog was cancelled), **Import tempo again** imports only the tempo. The tempo is also saved as a MIDI file next to the stems (`TrackMate Tempo 85 BPM.mid`), for other DAWs.
 
 ![Tempo step before the import](docs/images/tempo_dialog.png)
 
-![Preview: each folder can be new or an existing folder of the session](docs/images/apply_preview.png)
+![Preview: each folder can be new, an existing folder of the session, or no folder](docs/images/apply_preview.png)
 
 ![Category menu](docs/images/category_menu.png)
 
@@ -185,7 +185,7 @@ Details: [stereo report](docs/reports/stereo-analysis.md).
 ### 5. Import into Pro Tools (`/apply`)
 Code: [`engine/stem_engine/apply.py`](engine/stem_engine/apply.py), [`protools.py`](engine/stem_engine/protools.py)
 
-1. **Folders:** one Basic Folder per category, in category order; a folder of the same name already in the session is joined. The preview can change this per folder: `new_folder` always creates one, with a name free in the session (`DRUMS 2`), and `folder` names an existing Basic Folder to join, so several categories can share one.
+1. **Folders:** one Basic Folder per category, in category order; a folder of the same name already in the session is joined. The preview can change this per folder: `new_folder` always creates one, with a name free in the session (`DRUMS 2`), `folder` names an existing Basic Folder to join, so several categories can share one, and `no_folder` leaves the tracks at the top level of the session, imported after its last track that is in no folder (with nothing selected when there is none, so Pro Tools adds them at the end).
 2. **Import:** file by file (ConvertAudio, so everything is converted to the session's sample rate), each time after selecting the previous track, so the order inside the folder matches the list. Files to be converted to mono are converted to a temporary file first.
 3. **Rename:** the new track is found from the track IDs before and after the import and renamed at once, to a name already checked to be unique.
 4. **Colour:** new folders and all tracks are coloured in groups by colour; a folder that was already in the session keeps its colour.
