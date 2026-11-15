@@ -814,7 +814,7 @@ wheels = [
 
 [[package]]
 name = "stem-engine"
-version = "0.99.10"
+version = "0.99.11"
 source = { editable = "." }
 dependencies = [
     { name = "certifi" },
